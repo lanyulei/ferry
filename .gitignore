@@ -4,5 +4,4 @@ ferry
 temp/
 !temp
 vendor
-config/settings.dev.yml
 tmp/
