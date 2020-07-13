@@ -16,14 +16,10 @@ func AutoMigrate(db *gorm.DB) error {
 		new(models.Dept),
 		new(models.Menu),
 		new(models.LoginLog),
-		new(models.SysOperLog),
 		new(models.RoleMenu),
 		new(models.SysRoleDept),
 		new(models.SysUser),
 		new(models.SysRole),
 		new(models.Post),
-		new(models.DictData),
-		new(models.SysConfig),
-		new(models.DictType),
 	).Error
 }

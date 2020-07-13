@@ -1,6 +1,6 @@
 module ferry
 
-go 1.124
+go 1.14
 
 require (
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
