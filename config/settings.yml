@@ -1,0 +1,26 @@
+settings:
+  application:
+    mode: dev  # dev开发环境 test测试环境 prod线上环境
+    host: 0.0.0.0
+    name: testApp
+    port: 8000
+    readtimeout: 1
+    writertimeout: 2
+    domain: localhost:8000
+    ishttps: false
+  ssl:
+    key: keystring
+    pem: temp/pem.pem
+  log:
+    operdb: false
+    dir: temp/logs
+  jwt:
+    secret: ferry
+    timeout: 3600
+  database:
+    name: goadmindb
+    dbtype: mysql
+    host: 127.0.0.1
+    password: 123456
+    port: 3306
+    username: root

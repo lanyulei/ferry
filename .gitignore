@@ -1,0 +1,8 @@
+.idea
+static/uploadfile
+ferry
+temp/
+!temp
+vendor
+config/settings.dev.yml
+tmp/
