@@ -18,7 +18,7 @@ settings:
     secret: ferry
     timeout: 3600
   database:
-    name: goadmindb
+    name: ferry_admin
     dbtype: mysql
     host: 127.0.0.1
     password: 123456
