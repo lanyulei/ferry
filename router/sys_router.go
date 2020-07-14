@@ -4,7 +4,6 @@ import (
 	log2 "ferry/apis/log"
 	"ferry/apis/monitor"
 	"ferry/apis/system"
-	. "ferry/apis/tools"
 	_ "ferry/docs"
 	"ferry/handler"
 	"ferry/middleware"
@@ -51,35 +50,7 @@ func sysNoCheckRoleRouter(r *gin.RouterGroup) {
 
 	v1.GET("/monitor/server", monitor.ServerInfo)
 	v1.GET("/getCaptcha", system.GenerateCaptchaHandler)
-	v1.GET("/gen/preview/:tableId", Preview)
 	v1.GET("/menuTreeselect", system.GetMenuTreeelect)
-
-	registerDBRouter(v1)
-
-	registerSysTableRouter(v1)
-
-}
-
-func registerDBRouter(api *gin.RouterGroup) {
-	db := api.Group("/db")
-	{
-		db.GET("/tables/page", GetDBTableList)
-		db.GET("/columns/page", GetDBColumnList)
-	}
-}
-
-func registerSysTableRouter(v1 *gin.RouterGroup) {
-	systables := v1.Group("/sys/tables")
-	{
-		systables.GET("/page", GetSysTableList)
-		tablesinfo := systables.Group("/info")
-		{
-			tablesinfo.POST("", InsertSysTable)
-			tablesinfo.PUT("", UpdateSysTable)
-			tablesinfo.DELETE("/:tableId", DeleteSysTables)
-			tablesinfo.GET("/:tableId", GetSysTables)
-		}
-	}
 }
 
 func sysCheckRoleRouterInit(r *gin.RouterGroup, authMiddleware *jwtauth.GinJWTMiddleware) {

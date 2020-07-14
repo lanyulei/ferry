@@ -1,8 +1,9 @@
-package models
+package system
 
 import (
 	"errors"
 	"ferry/global/orm"
+	"ferry/models/base"
 	"ferry/tools"
 )
 
@@ -30,7 +31,7 @@ type Menu struct {
 	RoleId     int    `gorm:"-"`
 	Children   []Menu `json:"children" gorm:"-"`
 	IsSelect   bool   `json:"is_select" gorm:"-"`
-	BaseModel
+	base.Model
 }
 
 func (Menu) TableName() string {
@@ -65,7 +66,7 @@ type Menus struct {
 	UpdateBy  string `json:"updateBy" gorm:"column:update_by"`
 	DataScope string `json:"dataScope" gorm:"-"`
 	Params    string `json:"params" gorm:"-"`
-	BaseModel
+	base.Model
 }
 
 func (Menus) TableName() string {

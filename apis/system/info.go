@@ -1,7 +1,7 @@
 package system
 
 import (
-	"ferry/models"
+	"ferry/models/system"
 	"ferry/tools"
 	"ferry/tools/app"
 
@@ -19,7 +19,7 @@ func GetInfo(c *gin.Context) {
 	var buttons = make([]string, 1)
 	buttons[0] = "*:*:*"
 
-	RoleMenu := models.RoleMenu{}
+	RoleMenu := system.RoleMenu{}
 	RoleMenu.RoleId = tools.GetRoleId(c)
 
 	var mp = make(map[string]interface{})
@@ -33,7 +33,7 @@ func GetInfo(c *gin.Context) {
 		mp["buttons"] = list
 	}
 
-	sysuser := models.SysUser{}
+	sysuser := system.SysUser{}
 	sysuser.UserId = tools.GetUserId(c)
 	user, err := sysuser.Get()
 	tools.HasError(err, "", 500)

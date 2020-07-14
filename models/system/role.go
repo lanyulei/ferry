@@ -1,7 +1,8 @@
-package models
+package system
 
 import (
 	"ferry/global/orm"
+	"ferry/models/base"
 	"ferry/tools"
 
 	"github.com/pkg/errors"
@@ -22,7 +23,7 @@ type SysRole struct {
 	Params    string `json:"params" gorm:"-"`
 	MenuIds   []int  `json:"menuIds" gorm:"-"`
 	DeptIds   []int  `json:"deptIds" gorm:"-"`
-	BaseModel
+	base.Model
 }
 
 func (SysRole) TableName() string {
@@ -62,7 +63,7 @@ func (e *SysRole) GetPage(pageSize int, pageIndex int) ([]SysRole, int, error) {
 	if err := table.Order("role_sort").Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&doc).Error; err != nil {
 		return nil, 0, err
 	}
-	table.Where("`deleted_at` IS NULL").Count(&count)
+	table.Where("`delete_time` IS NULL").Count(&count)
 	return doc, count, nil
 }
 

@@ -1,7 +1,7 @@
 package system
 
 import (
-	"ferry/models"
+	"ferry/models/system"
 	"ferry/tools"
 	"ferry/tools/app"
 
@@ -18,7 +18,7 @@ import (
 // @Router /api/v1/menulist [get]
 // @Security Bearer
 func GetMenuList(c *gin.Context) {
-	var Menu models.Menu
+	var Menu system.Menu
 	Menu.MenuName = c.Request.FormValue("menuName")
 	Menu.Visible = c.Request.FormValue("visible")
 	Menu.Title = c.Request.FormValue("title")
@@ -38,7 +38,7 @@ func GetMenuList(c *gin.Context) {
 // @Router /api/v1/menu [get]
 // @Security Bearer
 func GetMenu(c *gin.Context) {
-	var data models.Menu
+	var data system.Menu
 	id, err := tools.StringToInt(c.Param("id"))
 	data.MenuId = id
 	result, err := data.GetByMenuId()
@@ -47,8 +47,8 @@ func GetMenu(c *gin.Context) {
 }
 
 func GetMenuTreeRoleselect(c *gin.Context) {
-	var Menu models.Menu
-	var SysRole models.SysRole
+	var Menu system.Menu
+	var SysRole system.SysRole
 	id, err := tools.StringToInt(c.Param("roleId"))
 	SysRole.RoleId = id
 	result, err := Menu.SetMenuLable()
@@ -75,7 +75,7 @@ func GetMenuTreeRoleselect(c *gin.Context) {
 // @Router /api/v1/menuTreeselect [get]
 // @Security Bearer
 func GetMenuTreeelect(c *gin.Context) {
-	var data models.Menu
+	var data system.Menu
 	result, err := data.SetMenuLable()
 	tools.HasError(err, "抱歉未找到相关信息", -1)
 	app.OK(c, result, "")
@@ -97,7 +97,7 @@ func GetMenuTreeelect(c *gin.Context) {
 // @Router /api/v1/menu [post]
 // @Security Bearer
 func InsertMenu(c *gin.Context) {
-	var data models.Menu
+	var data system.Menu
 	err := c.BindWith(&data, binding.JSON)
 	tools.HasError(err, "抱歉未找到相关信息", -1)
 	data.CreateBy = tools.GetUserIdStr(c)
@@ -118,7 +118,7 @@ func InsertMenu(c *gin.Context) {
 // @Router /api/v1/menu/{id} [put]
 // @Security Bearer
 func UpdateMenu(c *gin.Context) {
-	var data models.Menu
+	var data system.Menu
 	err2 := c.BindWith(&data, binding.JSON)
 	data.UpdateBy = tools.GetUserIdStr(c)
 	tools.HasError(err2, "修改失败", -1)
@@ -136,7 +136,7 @@ func UpdateMenu(c *gin.Context) {
 // @Success 200 {string} string	"{"code": -1, "message": "删除失败"}"
 // @Router /api/v1/menu/{id} [delete]
 func DeleteMenu(c *gin.Context) {
-	var data models.Menu
+	var data system.Menu
 	id, err := tools.StringToInt(c.Param("id"))
 	data.UpdateBy = tools.GetUserIdStr(c)
 	_, err = data.Delete(id)
@@ -153,7 +153,7 @@ func DeleteMenu(c *gin.Context) {
 // @Router /api/v1/menurole [get]
 // @Security Bearer
 func GetMenuRole(c *gin.Context) {
-	var Menu models.Menu
+	var Menu system.Menu
 	result, err := Menu.SetMenuRole(tools.GetRoleName(c))
 	tools.HasError(err, "获取失败", 500)
 	app.OK(c, result, "")
@@ -168,7 +168,7 @@ func GetMenuRole(c *gin.Context) {
 // @Router /api/v1/menuids/{id} [get]
 // @Security Bearer
 func GetMenuIDS(c *gin.Context) {
-	var data models.RoleMenu
+	var data system.RoleMenu
 	data.RoleName = c.GetString("role")
 	data.UpdateBy = tools.GetUserIdStr(c)
 	result, err := data.GetIDS()

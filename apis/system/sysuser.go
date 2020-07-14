@@ -1,7 +1,7 @@
 package system
 
 import (
-	"ferry/models"
+	"ferry/models/system"
 	"ferry/tools"
 	"ferry/tools/app"
 
@@ -20,7 +20,7 @@ import (
 // @Router /api/v1/sysUserList [get]
 // @Security Bearer
 func GetSysUserList(c *gin.Context) {
-	var data models.SysUser
+	var data system.SysUser
 	var err error
 	var pageSize = 10
 	var pageIndex = 1
@@ -60,12 +60,12 @@ func GetSysUserList(c *gin.Context) {
 // @Router /api/v1/sysUser/{userId} [get]
 // @Security
 func GetSysUser(c *gin.Context) {
-	var SysUser models.SysUser
+	var SysUser system.SysUser
 	SysUser.UserId, _ = tools.StringToInt(c.Param("userId"))
 	result, err := SysUser.Get()
 	tools.HasError(err, "抱歉未找到相关信息", -1)
-	var SysRole models.SysRole
-	var Post models.Post
+	var SysRole system.SysRole
+	var Post system.Post
 	roles, err := SysRole.GetList()
 	posts, err := Post.GetList()
 
@@ -91,14 +91,14 @@ func GetSysUser(c *gin.Context) {
 // @Router /api/v1/user/profile [get]
 // @Security
 func GetSysUserProfile(c *gin.Context) {
-	var SysUser models.SysUser
+	var SysUser system.SysUser
 	userId := tools.GetUserIdStr(c)
 	SysUser.UserId, _ = tools.StringToInt(userId)
 	result, err := SysUser.Get()
 	tools.HasError(err, "抱歉未找到相关信息", -1)
-	var SysRole models.SysRole
-	var Post models.Post
-	var Dept models.Dept
+	var SysRole system.SysRole
+	var Post system.Post
+	var Dept system.Dept
 	//获取角色列表
 	roles, err := SysRole.GetList()
 	//获取职位列表
@@ -131,8 +131,8 @@ func GetSysUserProfile(c *gin.Context) {
 // @Router /api/v1/sysUser [get]
 // @Security
 func GetSysUserInit(c *gin.Context) {
-	var SysRole models.SysRole
-	var Post models.Post
+	var SysRole system.SysRole
+	var Post system.Post
 	roles, err := SysRole.GetList()
 	posts, err := Post.GetList()
 	tools.HasError(err, "抱歉未找到相关信息", -1)
@@ -152,7 +152,7 @@ func GetSysUserInit(c *gin.Context) {
 // @Success 200 {string} string	"{"code": -1, "message": "添加失败"}"
 // @Router /api/v1/sysUser [post]
 func InsertSysUser(c *gin.Context) {
-	var sysuser models.SysUser
+	var sysuser system.SysUser
 	err := c.BindWith(&sysuser, binding.JSON)
 	tools.HasError(err, "非法数据格式", 500)
 
@@ -172,7 +172,7 @@ func InsertSysUser(c *gin.Context) {
 // @Success 200 {string} string	"{"code": -1, "message": "修改失败"}"
 // @Router /api/v1/sysuser/{userId} [put]
 func UpdateSysUser(c *gin.Context) {
-	var data models.SysUser
+	var data system.SysUser
 	err := c.Bind(&data)
 	tools.HasError(err, "数据解析失败", -1)
 	data.UpdateBy = tools.GetUserIdStr(c)
@@ -189,7 +189,7 @@ func UpdateSysUser(c *gin.Context) {
 // @Success 200 {string} string	"{"code": -1, "message": "删除失败"}"
 // @Router /api/v1/sysuser/{userId} [delete]
 func DeleteSysUser(c *gin.Context) {
-	var data models.SysUser
+	var data system.SysUser
 	data.UpdateBy = tools.GetUserIdStr(c)
 	IDS := tools.IdsStrToIdsIntGroup("userId", c)
 	result, err := data.BatchDelete(IDS)
@@ -215,7 +215,7 @@ func InsetSysUserAvatar(c *gin.Context) {
 		// 上传文件至指定目录
 		_ = c.SaveUploadedFile(file, filPath)
 	}
-	sysuser := models.SysUser{}
+	sysuser := system.SysUser{}
 	sysuser.UserId = tools.GetUserId(c)
 	sysuser.Avatar = "/" + filPath
 	sysuser.UpdateBy = tools.GetUserIdStr(c)
@@ -224,10 +224,10 @@ func InsetSysUserAvatar(c *gin.Context) {
 }
 
 func SysUserUpdatePwd(c *gin.Context) {
-	var pwd models.SysUserPwd
+	var pwd system.SysUserPwd
 	err := c.Bind(&pwd)
 	tools.HasError(err, "数据解析失败", 500)
-	sysuser := models.SysUser{}
+	sysuser := system.SysUser{}
 	sysuser.UserId = tools.GetUserId(c)
 	sysuser.SetPwd(pwd)
 	app.OK(c, "", "密码修改成功")

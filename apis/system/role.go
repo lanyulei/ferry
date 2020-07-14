@@ -1,7 +1,7 @@
 package system
 
 import (
-	"ferry/models"
+	"ferry/models/system"
 	"ferry/tools"
 	"ferry/tools/app"
 
@@ -21,7 +21,7 @@ import (
 // @Router /api/v1/rolelist [get]
 // @Security
 func GetRoleList(c *gin.Context) {
-	var data models.SysRole
+	var data system.SysRole
 	var err error
 	var pageSize = 10
 	var pageIndex = 1
@@ -53,7 +53,7 @@ func GetRoleList(c *gin.Context) {
 // @Router /api/v1/role [get]
 // @Security Bearer
 func GetRole(c *gin.Context) {
-	var Role models.SysRole
+	var Role system.SysRole
 	Role.RoleId, _ = tools.StringToInt(c.Param("roleId"))
 	result, err := Role.Get()
 	menuIds := make([]int, 0)
@@ -74,14 +74,14 @@ func GetRole(c *gin.Context) {
 // @Success 200 {string} string	"{"code": -1, "message": "添加失败"}"
 // @Router /api/v1/role [post]
 func InsertRole(c *gin.Context) {
-	var data models.SysRole
+	var data system.SysRole
 	data.CreateBy = tools.GetUserIdStr(c)
 	err := c.BindWith(&data, binding.JSON)
 	tools.HasError(err, "", 500)
 	id, err := data.Insert()
 	data.RoleId = id
 	tools.HasError(err, "", -1)
-	var t models.RoleMenu
+	var t system.RoleMenu
 	_, err = t.Insert(id, data.MenuIds)
 	tools.HasError(err, "", -1)
 	app.OK(c, data, "添加成功")
@@ -97,13 +97,13 @@ func InsertRole(c *gin.Context) {
 // @Success 200 {string} string	"{"code": -1, "message": "修改失败"}"
 // @Router /api/v1/role [put]
 func UpdateRole(c *gin.Context) {
-	var data models.SysRole
+	var data system.SysRole
 	data.UpdateBy = tools.GetUserIdStr(c)
 	err := c.Bind(&data)
 	tools.HasError(err, "数据解析失败", -1)
 	result, err := data.Update(data.RoleId)
 	tools.HasError(err, "", -1)
-	var t models.RoleMenu
+	var t system.RoleMenu
 	_, err = t.DeleteRoleMenu(data.RoleId)
 	tools.HasError(err, "添加失败1", -1)
 	_, err2 := t.Insert(data.RoleId, data.MenuIds)
@@ -113,13 +113,13 @@ func UpdateRole(c *gin.Context) {
 }
 
 func UpdateRoleDataScope(c *gin.Context) {
-	var data models.SysRole
+	var data system.SysRole
 	data.UpdateBy = tools.GetUserIdStr(c)
 	err := c.Bind(&data)
 	tools.HasError(err, "数据解析失败", -1)
 	result, err := data.Update(data.RoleId)
 
-	var t models.SysRoleDept
+	var t system.SysRoleDept
 	_, err = t.DeleteRoleDept(data.RoleId)
 	tools.HasError(err, "添加失败1", -1)
 	if data.DataScope == "2" {
@@ -137,13 +137,13 @@ func UpdateRoleDataScope(c *gin.Context) {
 // @Success 200 {string} string	"{"code": -1, "message": "删除失败"}"
 // @Router /api/v1/role/{roleId} [delete]
 func DeleteRole(c *gin.Context) {
-	var Role models.SysRole
+	var Role system.SysRole
 	Role.UpdateBy = tools.GetUserIdStr(c)
 
 	IDS := tools.IdsStrToIdsIntGroup("roleId", c)
 	_, err := Role.BatchDelete(IDS)
 	tools.HasError(err, "删除失败1", -1)
-	var t models.RoleMenu
+	var t system.RoleMenu
 	_, err = t.BatchDeleteRoleMenu(IDS)
 	tools.HasError(err, "删除失败1", -1)
 	app.OK(c, "", "删除成功")

@@ -1,4 +1,6 @@
-package models
+package system
+
+import "ferry/models/base"
 
 //casbin_rule
 type CasbinRule struct {
@@ -9,6 +11,7 @@ type CasbinRule struct {
 	V3    string `json:"v3" gorm:"type:varchar(100);"`
 	V4    string `json:"v4" gorm:"type:varchar(100);"`
 	V5    string `json:"v5" gorm:"type:varchar(100);"`
+	base.Model
 }
 
 func (CasbinRule) TableName() string {

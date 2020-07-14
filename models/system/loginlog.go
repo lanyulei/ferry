@@ -1,7 +1,8 @@
-package models
+package system
 
 import (
 	"ferry/global/orm"
+	"ferry/models/base"
 	"time"
 )
 
@@ -21,7 +22,7 @@ type LoginLog struct {
 	Params        string    `json:"params" gorm:"-"`                          //
 	Remark        string    `json:"remark" gorm:"type:varchar(255);"`         //备注
 	Msg           string    `json:"msg" gorm:"type:varchar(255);"`
-	BaseModel
+	base.Model
 }
 
 func (LoginLog) TableName() string {
@@ -64,7 +65,7 @@ func (e *LoginLog) GetPage(pageSize int, pageIndex int) ([]LoginLog, int, error)
 	if err := table.Order("info_id desc").Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&doc).Error; err != nil {
 		return nil, 0, err
 	}
-	table.Where("`deleted_at` IS NULL").Count(&count)
+	table.Where("`delete_time` IS NULL").Count(&count)
 	return doc, count, nil
 }
 

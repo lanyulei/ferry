@@ -1,8 +1,9 @@
-package models
+package system
 
 import (
 	"errors"
 	"ferry/global/orm"
+	"ferry/models/base"
 	"ferry/tools"
 	"strings"
 
@@ -56,8 +57,7 @@ type SysUserB struct {
 	Status    string `gorm:"type:int(1);" json:"status"`
 	DataScope string `gorm:"-" json:"dataScope"`
 	Params    string `gorm:"-" json:"params"`
-
-	BaseModel
+	base.Model
 }
 
 type SysUser struct {
@@ -226,7 +226,7 @@ func (e *SysUser) GetPage(pageSize int, pageIndex int) ([]SysUserPage, int, erro
 	if err := table.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&doc).Error; err != nil {
 		return nil, 0, err
 	}
-	table.Where("sys_user.deleted_at IS NULL").Count(&count)
+	table.Where("sys_user.delete_time IS NULL").Count(&count)
 	return doc, count, nil
 }
 

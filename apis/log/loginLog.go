@@ -1,7 +1,7 @@
 package log
 
 import (
-	"ferry/models"
+	"ferry/models/system"
 	"ferry/tools"
 	"ferry/tools/app"
 	"net/http"
@@ -22,7 +22,7 @@ import (
 // @Router /api/v1/loginloglist [get]
 // @Security
 func GetLoginLogList(c *gin.Context) {
-	var data models.LoginLog
+	var data system.LoginLog
 	var err error
 	var pageSize = 10
 	var pageIndex = 1
@@ -62,7 +62,7 @@ func GetLoginLogList(c *gin.Context) {
 // @Router /api/v1/loginlog/{infoId} [get]
 // @Security
 func GetLoginLog(c *gin.Context) {
-	var LoginLog models.LoginLog
+	var LoginLog system.LoginLog
 	LoginLog.InfoId, _ = tools.StringToInt(c.Param("infoId"))
 	result, err := LoginLog.Get()
 	tools.HasError(err, "抱歉未找到相关信息", -1)
@@ -83,7 +83,7 @@ func GetLoginLog(c *gin.Context) {
 // @Router /api/v1/loginlog [post]
 // @Security Bearer
 func InsertLoginLog(c *gin.Context) {
-	var data models.LoginLog
+	var data system.LoginLog
 	err := c.BindWith(&data, binding.JSON)
 	tools.HasError(err, "", 500)
 	result, err := data.Create()
@@ -104,7 +104,7 @@ func InsertLoginLog(c *gin.Context) {
 // @Router /api/v1/loginlog [put]
 // @Security Bearer
 func UpdateLoginLog(c *gin.Context) {
-	var data models.LoginLog
+	var data system.LoginLog
 	err := c.BindWith(&data, binding.JSON)
 	tools.HasError(err, "", -1)
 	result, err := data.Update(data.InfoId)
@@ -122,7 +122,7 @@ func UpdateLoginLog(c *gin.Context) {
 // @Success 200 {string} string	"{"code": -1, "message": "删除失败"}"
 // @Router /api/v1/loginlog/{infoId} [delete]
 func DeleteLoginLog(c *gin.Context) {
-	var data models.LoginLog
+	var data system.LoginLog
 	data.UpdateBy = tools.GetUserIdStr(c)
 	IDS := tools.IdsStrToIdsIntGroup("infoId", c)
 	_, err := data.BatchDelete(IDS)

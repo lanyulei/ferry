@@ -1,7 +1,8 @@
-package models
+package system
 
 import (
 	"ferry/global/orm"
+	"ferry/models/base"
 	"ferry/tools"
 )
 
@@ -16,7 +17,7 @@ type Post struct {
 	UpdateBy  string `gorm:"type:varchar(128);" json:"updateBy"`
 	DataScope string `gorm:"-" json:"dataScope"`
 	Params    string `gorm:"-" json:"params"`
-	BaseModel
+	base.Model
 }
 
 func (Post) TableName() string {
@@ -109,7 +110,7 @@ func (e *Post) GetPage(pageSize int, pageIndex int) ([]Post, int, error) {
 	if err := table.Order("sort").Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&doc).Error; err != nil {
 		return nil, 0, err
 	}
-	table.Where("`deleted_at` IS NULL").Count(&count)
+	table.Where("`delete_time` IS NULL").Count(&count)
 	return doc, count, nil
 }
 
