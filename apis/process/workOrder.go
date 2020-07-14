@@ -1,0 +1,400 @@
+package process
+
+//import (
+//	"encoding/json"
+//	"errors"
+//	"ferry/models/user"
+//	"ferry/models/workOrder"
+//	"ferry/pkg/connection"
+//	"ferry/pkg/response/code"
+//	. "ferry/pkg/response/response"
+//	"ferry/pkg/service"
+//	"fmt"
+//	"strconv"
+//
+//	"github.com/gin-gonic/gin"
+//)
+//
+///*
+//  @Author : lanyulei
+//*/
+//
+//// 流程结构包括节点，流转和模版
+//func ProcessStructure(c *gin.Context) {
+//	processId := c.DefaultQuery("processId", "")
+//	if processId == "" {
+//		Response(c, code.InternalServerError, nil, "参数不正确，请确定参数processId是否传递")
+//		return
+//	}
+//	workOrderId := c.DefaultQuery("workOrderId", "0")
+//	if processId == "" {
+//		Response(c, code.InternalServerError, nil, "参数不正确，请确定参数processId是否传递")
+//		return
+//	}
+//	workOrderIdInt, _ := strconv.Atoi(workOrderId)
+//	processIdInt, _ := strconv.Atoi(processId)
+//	result, err := service.ProcessStructure(c, processIdInt, workOrderIdInt)
+//	if err != nil {
+//		Response(c, code.SelectError, nil, err.Error())
+//		return
+//	}
+//
+//	if workOrderIdInt != 0 {
+//		currentState := result["workOrder"].(service.WorkOrderData).CurrentState
+//		userAuthority, err := service.JudgeUserAuthority(c, workOrderIdInt, currentState)
+//		if err != nil {
+//			Response(c, code.InternalServerError, nil, fmt.Sprintf("判断用户是否有权限失败，%v", err.Error()))
+//			return
+//		}
+//		result["userAuthority"] = userAuthority
+//	}
+//
+//	Response(c, nil, result, "")
+//}
+//
+//// 新建工单
+//func CreateWorkOrder(c *gin.Context) {
+//	var workOrderValue struct {
+//		workOrder.Info
+//		Tpls        map[string][]interface{} `json:"tpls"`
+//		SourceState string                   `json:"source_state"`
+//		Tasks       json.RawMessage          `json:"tasks"`
+//		Source      string                   `json:"source"`
+//	}
+//
+//	err := c.ShouldBind(&workOrderValue)
+//	if err != nil {
+//		Response(c, code.BindError, nil, err.Error())
+//		return
+//	}
+//
+//	relatedPerson, err := json.Marshal([]int{c.GetInt("userId")})
+//	if err != nil {
+//		Response(c, code.BindError, nil, err.Error())
+//		return
+//	}
+//
+//	// 创建工单数据
+//	tx := connection.DB.Self.Begin()
+//	var workOrderInfo = workOrder.Info{
+//		Title:         workOrderValue.Title,
+//		Process:       workOrderValue.Process,
+//		Classify:      workOrderValue.Classify,
+//		State:         workOrderValue.State,
+//		RelatedPerson: relatedPerson,
+//		Creator:       c.GetInt("userId"),
+//	}
+//	err = tx.Create(&workOrderInfo).Error
+//	if err != nil {
+//		tx.Rollback()
+//		Response(c, code.CreateError, nil, fmt.Sprintf("创建工单失败，%v", err.Error()))
+//		return
+//	}
+//
+//	// 创建工单模版关联数据
+//	for i := 0; i < len(workOrderValue.Tpls["form_structure"]); i++ {
+//		formDataJson, err := json.Marshal(workOrderValue.Tpls["form_data"][i])
+//		if err != nil {
+//			tx.Rollback()
+//			Response(c, code.InternalServerError, nil, fmt.Sprintf("生成json字符串错误，%v", err.Error()))
+//			return
+//		}
+//		formStructureJson, err := json.Marshal(workOrderValue.Tpls["form_structure"][i])
+//		if err != nil {
+//			tx.Rollback()
+//			Response(c, code.InternalServerError, nil, fmt.Sprintf("生成json字符串错误，%v", err.Error()))
+//			return
+//		}
+//
+//		formData := workOrder.TplData{
+//			WorkOrder:     workOrderInfo.Id,
+//			FormStructure: formStructureJson,
+//			FormData:      formDataJson,
+//		}
+//
+//		err = tx.Create(&formData).Error
+//		if err != nil {
+//			tx.Rollback()
+//			Response(c, code.CreateError, nil, fmt.Sprintf("创建工单模版关联数据失败，%v", err.Error()))
+//			return
+//		}
+//	}
+//
+//	// 获取当前用户信息
+//	var userInfo user.Info
+//	err = tx.Model(&user.Info{}).Where("id = ?", c.GetInt("userId")).Find(&userInfo).Error
+//	if err != nil {
+//		tx.Rollback()
+//		Response(c, code.SelectError, nil, fmt.Sprintf("查询用户信息失败，%v", err.Error()))
+//		return
+//	}
+//
+//	nameValue := userInfo.Nickname
+//	if nameValue == "" {
+//		nameValue = userInfo.Username
+//	}
+//
+//	// 创建历史记录
+//	var stateList []map[string]interface{}
+//	err = json.Unmarshal(workOrderInfo.State, &stateList)
+//	if err != nil {
+//		tx.Rollback()
+//		Response(c, code.InternalServerError, nil, fmt.Sprintf("Json序列化失败，%v", err.Error()))
+//		return
+//	}
+//	err = tx.Create(&workOrder.CirculationHistory{
+//		Title:       workOrderValue.Title,
+//		WorkOrder:   workOrderInfo.Id,
+//		State:       workOrderValue.SourceState,
+//		Source:      workOrderValue.Source,
+//		Target:      stateList[0]["id"].(string),
+//		Circulation: "新建",
+//		Processor:   nameValue,
+//		ProcessorId: userInfo.Id,
+//	}).Error
+//	if err != nil {
+//		tx.Rollback()
+//		err = fmt.Errorf("新建历史记录失败，%v", err.Error())
+//		return
+//	}
+//
+//	tx.Commit()
+//
+//	// 执行任务
+//	var taskList []string
+//	err = json.Unmarshal(workOrderValue.Tasks, &taskList)
+//	if err != nil {
+//		Response(c, code.InternalServerError, nil, err.Error())
+//		return
+//	}
+//	go service.ExecTask(taskList)
+//
+//	Response(c, nil, nil, "")
+//}
+//
+//// 工单列表
+//func WorkOrderList(c *gin.Context) {
+//	/*
+//		1. 待办工单
+//		2. 我创建的
+//		3. 我相关的
+//		4. 所有工单
+//	*/
+//
+//	var (
+//		result      interface{}
+//		err         error
+//		classifyInt int
+//	)
+//
+//	classify := c.DefaultQuery("classify", "0")
+//	if classify == "" {
+//		Response(c, code.ParamError, nil, "参数错误，请确认classify是否传递")
+//		return
+//	}
+//
+//	classifyInt, _ = strconv.Atoi(classify)
+//	result, err = service.WorkOrderList(c, classifyInt)
+//	if err != nil {
+//		Response(c, code.SelectError, nil, fmt.Sprintf("查询工单数据失败，%v", err.Error()))
+//		return
+//	}
+//
+//	Response(c, nil, result, "")
+//}
+//
+//// 处理工单
+//func ProcessWorkOrder(c *gin.Context) {
+//	var (
+//		err           error
+//		userAuthority bool
+//		handle        service.Handle
+//		params        struct {
+//			Tasks          []string
+//			TargetState    string `json:"target_state"`    // 目标状态
+//			SourceState    string `json:"source_state"`    // 源状态
+//			WorkOrderId    int    `json:"work_order_id"`   // 工单ID
+//			Circulation    string `json:"circulation"`     // 流转ID
+//			FlowProperties int    `json:"flow_properties"` // 流转类型 0 拒绝，1 同意，2 其他
+//		}
+//	)
+//
+//	err = c.ShouldBind(&params)
+//	if err != nil {
+//		Response(c, code.BindError, nil, err.Error())
+//		return
+//	}
+//
+//	// 处理工单
+//	userAuthority, err = service.JudgeUserAuthority(c, params.WorkOrderId, params.SourceState)
+//	if err != nil {
+//		Response(c, code.InternalServerError, nil, fmt.Sprintf("判断用户是否有权限失败，%v", err.Error()))
+//		return
+//	}
+//	if !userAuthority {
+//		err = errors.New("当前用户没有权限进行此操作")
+//		return
+//	}
+//
+//	err = handle.HandleWorkOrder(
+//		c,
+//		params.WorkOrderId,    // 工单ID
+//		params.Tasks,          // 任务列表
+//		params.TargetState,    // 目标节点
+//		params.SourceState,    // 源节点
+//		params.Circulation,    // 流转标题
+//		params.FlowProperties, // 流转属性
+//	)
+//	if err != nil {
+//		Response(c, code.InternalServerError, nil, fmt.Sprintf("处理工单失败，%v", err.Error()))
+//		return
+//	}
+//
+//	Response(c, nil, nil, "")
+//}
+//
+//// 结束工单
+//func UnityWorkOrder(c *gin.Context) {
+//	var (
+//		err           error
+//		workOrderId   string
+//		workOrderInfo workOrder.Info
+//	)
+//
+//	workOrderId = c.DefaultQuery("work_oroder_id", "")
+//	if workOrderId == "" {
+//		Response(c, code.InternalServerError, nil, "参数不正确，work_oroder_id")
+//		return
+//	}
+//
+//	tx := connection.DB.Self.Begin()
+//
+//	// 查询工单信息
+//	err = connection.DB.Self.Model(&workOrderInfo).
+//		Where("id = ?", workOrderId).
+//		Find(&workOrderInfo).Error
+//	if err != nil {
+//		Response(c, code.SelectError, nil, fmt.Sprintf("查询工单失败，%v", err.Error()))
+//		return
+//	}
+//	if workOrderInfo.IsEnd == 1 {
+//		Response(c, code.UpdateError, nil, "工单已结束")
+//		return
+//	}
+//
+//	// 更新工单状态
+//	err = tx.Model(&workOrder.Info{}).
+//		Where("id = ?", workOrderId).
+//		Update("is_end", 1).
+//		Error
+//	if err != nil {
+//		tx.Rollback()
+//		Response(c, code.UpdateError, nil, fmt.Sprintf("结束工单失败，%v", err.Error()))
+//		return
+//	}
+//
+//	// 写入历史
+//	tx.Create(&workOrder.CirculationHistory{
+//		Title:       workOrderInfo.Title,
+//		WorkOrder:   workOrderInfo.Id,
+//		State:       "结束工单",
+//		Circulation: "结束",
+//		Processor:   c.GetString("nickname"),
+//		ProcessorId: c.GetInt("userId"),
+//		Remarks:     "手动结束工单。",
+//	})
+//
+//	tx.Commit()
+//
+//	Response(c, nil, nil, "")
+//}
+//
+//// 转交工单
+//func InversionWorkOrder(c *gin.Context) {
+//	var (
+//		err           error
+//		workOrderInfo workOrder.Info
+//		stateList     []map[string]interface{}
+//		stateValue    []byte
+//		currentState  map[string]interface{}
+//		userInfo      user.Info
+//		params        struct {
+//			WorkOrderId int    `json:"work_order_id"`
+//			NodeId      string `json:"node_id"`
+//			UserId      int    `json:"user_id"`
+//			Remarks     string `json:"remarks"`
+//		}
+//	)
+//
+//	err = c.ShouldBind(&params)
+//	if err != nil {
+//		Response(c, code.BindError, nil, err.Error())
+//		return
+//	}
+//
+//	// 查询工单信息
+//	err = connection.DB.Self.Model(&workOrderInfo).
+//		Where("id = ?", params.WorkOrderId).
+//		Find(&workOrderInfo).Error
+//	if err != nil {
+//		Response(c, code.SelectError, nil, fmt.Sprintf("查询工单信息失败，%v", err.Error()))
+//		return
+//	}
+//
+//	// 序列化节点数据
+//	err = json.Unmarshal(workOrderInfo.State, &stateList)
+//	if err != nil {
+//		Response(c, code.InternalServerError, nil, fmt.Sprintf("节点数据反序列化失败，%v", err.Error()))
+//		return
+//	}
+//
+//	for _, s := range stateList {
+//		if s["id"].(string) == params.NodeId {
+//			s["processor"] = []interface{}{params.UserId}
+//			s["process_method"] = "person"
+//			currentState = s
+//			break
+//		}
+//	}
+//
+//	stateValue, err = json.Marshal(stateList)
+//	if err != nil {
+//		Response(c, code.InternalServerError, nil, fmt.Sprintf("节点数据序列化失败，%v", err.Error()))
+//		return
+//	}
+//
+//	tx := connection.DB.Self.Begin()
+//
+//	// 更新数据
+//	err = tx.Model(&workOrder.Info{}).
+//		Where("id = ?", params.WorkOrderId).
+//		Update("state", stateValue).Error
+//	if err != nil {
+//		Response(c, code.UpdateError, nil, fmt.Sprintf("更新节点信息失败，%v", err.Error()))
+//		return
+//	}
+//
+//	// 查询用户信息
+//	err = connection.DB.Self.Model(&user.Info{}).
+//		Where("id = ?", params.UserId).
+//		Find(&userInfo).Error
+//	if err != nil {
+//		Response(c, code.SelectError, nil, fmt.Sprintf("查询用户信息失败，%v", err.Error()))
+//		return
+//	}
+//
+//	// 添加转交历史
+//	tx.Create(&workOrder.CirculationHistory{
+//		Title:       workOrderInfo.Title,
+//		WorkOrder:   workOrderInfo.Id,
+//		State:       currentState["label"].(string),
+//		Circulation: "转交",
+//		Processor:   c.GetString("nickname"),
+//		ProcessorId: c.GetInt("userId"),
+//		Remarks:     fmt.Sprintf("此阶段负责人已转交给《%v》", userInfo.Nickname),
+//	})
+//
+//	tx.Commit()
+//
+//	Response(c, nil, nil, "")
+//}

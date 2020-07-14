@@ -1,4 +1,4 @@
-package task
+package process
 
 import (
 	"ferry/models/base"
@@ -9,7 +9,7 @@ import (
 */
 
 // 任务
-type Info struct {
+type TaskInfo struct {
 	base.Model
 	Name     string `gorm:"column:name; type: varchar(256)" json:"name" form:"name"`               // 任务名称
 	TaskType string `gorm:"column:task_type; type: varchar(45)" json:"task_type" form:"task_type"` // 任务类型
@@ -18,6 +18,6 @@ type Info struct {
 	Remarks  string `gorm:"column:remarks; type: longtext" json:"remarks" form:"remarks"`          // 备注
 }
 
-func (Info) TableName() string {
+func (TaskInfo) TableName() string {
 	return "task_info"
 }

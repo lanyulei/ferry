@@ -1,4 +1,4 @@
-package workOrder
+package process
 
 import (
 	"encoding/json"
@@ -10,7 +10,7 @@ import (
 */
 
 // 工单
-type Info struct {
+type WorkOrderInfo struct {
 	base.Model
 	Title         string          `gorm:"column:title; type:varchar(128)" json:"title" form:"title"`                    // 工单标题
 	Process       int             `gorm:"column:process; type:int(11)" json:"process" form:"process"`                   // 流程ID
@@ -21,6 +21,6 @@ type Info struct {
 	Creator       int             `gorm:"column:creator; type:int(11)" json:"creator" form:"creator"`                   // 创建人
 }
 
-func (Info) TableName() string {
+func (WorkOrderInfo) TableName() string {
 	return "work_order_info"
 }

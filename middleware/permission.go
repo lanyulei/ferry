@@ -20,7 +20,7 @@ func AuthCheckRole() gin.HandlerFunc {
 		tools.HasError(err, "", 500)
 		//检查权限
 		res, err := e.Enforce(v["rolekey"], c.Request.URL.Path, c.Request.Method)
-		log.Println("----------------", v["rolekey"], c.Request.URL.Path, c.Request.Method)
+		log.Println(v["rolekey"], c.Request.URL.Path, c.Request.Method)
 
 		tools.HasError(err, "", 500)
 

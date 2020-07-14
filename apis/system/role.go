@@ -4,7 +4,6 @@ import (
 	"ferry/models/system"
 	"ferry/tools"
 	"ferry/tools/app"
-	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -100,9 +99,6 @@ func UpdateRole(c *gin.Context) {
 	var data system.SysRole
 	data.UpdateBy = tools.GetUserIdStr(c)
 	err := c.Bind(&data)
-	fmt.Println("--------------------------")
-	fmt.Println(err)
-	fmt.Println("--------------------------")
 	tools.HasError(err, "数据解析失败", -1)
 	result, err := data.Update(data.RoleId)
 	tools.HasError(err, "", -1)

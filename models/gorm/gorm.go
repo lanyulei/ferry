@@ -1,6 +1,7 @@
 package gorm
 
 import (
+	"ferry/models/process"
 	"ferry/models/system"
 
 	"github.com/jinzhu/gorm"
@@ -21,5 +22,6 @@ func AutoMigrate(db *gorm.DB) error {
 		new(system.Post),
 
 		// 流程中心
+		new(process.Classify),
 	).Error
 }

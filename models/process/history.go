@@ -1,4 +1,4 @@
-package task
+package process
 
 import (
 	"ferry/models/base"

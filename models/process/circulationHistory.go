@@ -1,4 +1,4 @@
-package workOrder
+package process
 
 import (
 	"ferry/models/base"
