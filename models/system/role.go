@@ -2,7 +2,6 @@ package system
 
 import (
 	"ferry/global/orm"
-	"ferry/models/base"
 	"ferry/tools"
 
 	"github.com/pkg/errors"
@@ -23,7 +22,7 @@ type SysRole struct {
 	Params    string `json:"params" gorm:"-"`
 	MenuIds   []int  `json:"menuIds" gorm:"-"`
 	DeptIds   []int  `json:"deptIds" gorm:"-"`
-	base.Model
+	BaseModel
 }
 
 func (SysRole) TableName() string {

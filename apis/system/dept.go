@@ -107,8 +107,8 @@ func UpdateDept(c *gin.Context) {
 // @Router /api/v1/dept/{id} [delete]
 func DeleteDept(c *gin.Context) {
 	var data system.Dept
-	id, err := tools.StringToInt(c.Param("id"))
-	_, err = data.Delete(id)
+	id, _ := tools.StringToInt(c.Param("id"))
+	_, err := data.Delete(id)
 	tools.HasError(err, "删除失败", 500)
 	app.OK(c, "", msg.DeletedSuccess)
 }
@@ -116,7 +116,7 @@ func DeleteDept(c *gin.Context) {
 func GetDeptTreeRoleselect(c *gin.Context) {
 	var Dept system.Dept
 	var SysRole system.SysRole
-	id, err := tools.StringToInt(c.Param("roleId"))
+	id, _ := tools.StringToInt(c.Param("roleId"))
 	SysRole.RoleId = id
 	result, err := Dept.SetDeptLable()
 	tools.HasError(err, msg.NotFound, -1)

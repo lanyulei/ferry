@@ -39,7 +39,7 @@ func GetMenuList(c *gin.Context) {
 // @Security Bearer
 func GetMenu(c *gin.Context) {
 	var data system.Menu
-	id, err := tools.StringToInt(c.Param("id"))
+	id, _ := tools.StringToInt(c.Param("id"))
 	data.MenuId = id
 	result, err := data.GetByMenuId()
 	tools.HasError(err, "抱歉未找到相关信息", -1)
@@ -49,7 +49,7 @@ func GetMenu(c *gin.Context) {
 func GetMenuTreeRoleselect(c *gin.Context) {
 	var Menu system.Menu
 	var SysRole system.SysRole
-	id, err := tools.StringToInt(c.Param("roleId"))
+	id, _ := tools.StringToInt(c.Param("roleId"))
 	SysRole.RoleId = id
 	result, err := Menu.SetMenuLable()
 	tools.HasError(err, "抱歉未找到相关信息", -1)
@@ -137,9 +137,9 @@ func UpdateMenu(c *gin.Context) {
 // @Router /api/v1/menu/{id} [delete]
 func DeleteMenu(c *gin.Context) {
 	var data system.Menu
-	id, err := tools.StringToInt(c.Param("id"))
+	id, _ := tools.StringToInt(c.Param("id"))
 	data.UpdateBy = tools.GetUserIdStr(c)
-	_, err = data.Delete(id)
+	_, err := data.Delete(id)
 	tools.HasError(err, "删除失败", 500)
 	app.OK(c, "", "删除成功")
 }

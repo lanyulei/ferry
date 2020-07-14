@@ -2,7 +2,6 @@ package system
 
 import (
 	"ferry/global/orm"
-	"ferry/models/base"
 	"time"
 )
 
@@ -22,7 +21,7 @@ type LoginLog struct {
 	Params        string    `json:"params" gorm:"-"`                          //
 	Remark        string    `json:"remark" gorm:"type:varchar(255);"`         //备注
 	Msg           string    `json:"msg" gorm:"type:varchar(255);"`
-	base.Model
+	BaseModel
 }
 
 func (LoginLog) TableName() string {

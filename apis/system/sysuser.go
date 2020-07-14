@@ -66,8 +66,8 @@ func GetSysUser(c *gin.Context) {
 	tools.HasError(err, "抱歉未找到相关信息", -1)
 	var SysRole system.SysRole
 	var Post system.Post
-	roles, err := SysRole.GetList()
-	posts, err := Post.GetList()
+	roles, _ := SysRole.GetList()
+	posts, _ := Post.GetList()
 
 	postIds := make([]int, 0)
 	postIds = append(postIds, result.PostId)
@@ -100,12 +100,12 @@ func GetSysUserProfile(c *gin.Context) {
 	var Post system.Post
 	var Dept system.Dept
 	//获取角色列表
-	roles, err := SysRole.GetList()
+	roles, _ := SysRole.GetList()
 	//获取职位列表
-	posts, err := Post.GetList()
+	posts, _ := Post.GetList()
 	//获取部门列表
 	Dept.DeptId = result.DeptId
-	dept, err := Dept.Get()
+	dept, _ := Dept.Get()
 
 	postIds := make([]int, 0)
 	postIds = append(postIds, result.PostId)
@@ -134,6 +134,7 @@ func GetSysUserInit(c *gin.Context) {
 	var SysRole system.SysRole
 	var Post system.Post
 	roles, err := SysRole.GetList()
+	tools.HasError(err, "抱歉未找到相关信息", -1)
 	posts, err := Post.GetList()
 	tools.HasError(err, "抱歉未找到相关信息", -1)
 	mp := make(map[string]interface{}, 2)
@@ -219,7 +220,7 @@ func InsetSysUserAvatar(c *gin.Context) {
 	sysuser.UserId = tools.GetUserId(c)
 	sysuser.Avatar = "/" + filPath
 	sysuser.UpdateBy = tools.GetUserIdStr(c)
-	sysuser.Update(sysuser.UserId)
+	_, _ = sysuser.Update(sysuser.UserId)
 	app.OK(c, filPath, "修改成功")
 }
 
@@ -229,6 +230,6 @@ func SysUserUpdatePwd(c *gin.Context) {
 	tools.HasError(err, "数据解析失败", 500)
 	sysuser := system.SysUser{}
 	sysuser.UserId = tools.GetUserId(c)
-	sysuser.SetPwd(pwd)
+	_, _ = sysuser.SetPwd(pwd)
 	app.OK(c, "", "密码修改成功")
 }

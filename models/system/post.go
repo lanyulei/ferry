@@ -2,7 +2,6 @@ package system
 
 import (
 	"ferry/global/orm"
-	"ferry/models/base"
 	"ferry/tools"
 )
 
@@ -17,7 +16,7 @@ type Post struct {
 	UpdateBy  string `gorm:"type:varchar(128);" json:"updateBy"`
 	DataScope string `gorm:"-" json:"dataScope"`
 	Params    string `gorm:"-" json:"params"`
-	base.Model
+	BaseModel
 }
 
 func (Post) TableName() string {

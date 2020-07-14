@@ -4,6 +4,7 @@ import (
 	"ferry/models/system"
 	"ferry/tools"
 	"ferry/tools/app"
+	"fmt"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -55,9 +56,8 @@ func GetRoleList(c *gin.Context) {
 func GetRole(c *gin.Context) {
 	var Role system.SysRole
 	Role.RoleId, _ = tools.StringToInt(c.Param("roleId"))
-	result, err := Role.Get()
-	menuIds := make([]int, 0)
-	menuIds, err = Role.GetRoleMeunId()
+	result, _ := Role.Get()
+	menuIds, err := Role.GetRoleMeunId()
 	tools.HasError(err, "抱歉未找到相关信息", -1)
 	result.MenuIds = menuIds
 	app.OK(c, result, "")
@@ -100,6 +100,9 @@ func UpdateRole(c *gin.Context) {
 	var data system.SysRole
 	data.UpdateBy = tools.GetUserIdStr(c)
 	err := c.Bind(&data)
+	fmt.Println("--------------------------")
+	fmt.Println(err)
+	fmt.Println("--------------------------")
 	tools.HasError(err, "数据解析失败", -1)
 	result, err := data.Update(data.RoleId)
 	tools.HasError(err, "", -1)
@@ -117,7 +120,7 @@ func UpdateRoleDataScope(c *gin.Context) {
 	data.UpdateBy = tools.GetUserIdStr(c)
 	err := c.Bind(&data)
 	tools.HasError(err, "数据解析失败", -1)
-	result, err := data.Update(data.RoleId)
+	result, _ := data.Update(data.RoleId)
 
 	var t system.SysRoleDept
 	_, err = t.DeleteRoleDept(data.RoleId)

@@ -3,7 +3,6 @@ package system
 import (
 	"errors"
 	"ferry/global/orm"
-	"ferry/models/base"
 	"ferry/tools"
 	"strings"
 
@@ -57,7 +56,7 @@ type SysUserB struct {
 	Status    string `gorm:"type:int(1);" json:"status"`
 	DataScope string `gorm:"-" json:"dataScope"`
 	Params    string `gorm:"-" json:"params"`
-	base.Model
+	BaseModel
 }
 
 type SysUser struct {

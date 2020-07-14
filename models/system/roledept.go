@@ -9,6 +9,7 @@ import (
 type SysRoleDept struct {
 	RoleId int `gorm:"type:int(11)"`
 	DeptId int `gorm:"type:int(11)"`
+	Id     int `gorm:"primary_key;AUTO_INCREMENT;column:id" json:"id" form:"id"`
 }
 
 func (SysRoleDept) TableName() string {

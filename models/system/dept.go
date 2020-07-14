@@ -3,7 +3,6 @@ package system
 import (
 	"errors"
 	"ferry/global/orm"
-	"ferry/models/base"
 	"ferry/tools"
 	_ "time"
 )
@@ -23,7 +22,7 @@ type Dept struct {
 	DataScope string `json:"dataScope" gorm:"-"`
 	Params    string `json:"params" gorm:"-"`
 	Children  []Dept `json:"children" gorm:"-"`
-	base.Model
+	BaseModel
 }
 
 func (Dept) TableName() string {

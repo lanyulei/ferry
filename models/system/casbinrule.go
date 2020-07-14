@@ -1,7 +1,5 @@
 package system
 
-import "ferry/models/base"
-
 //casbin_rule
 type CasbinRule struct {
 	PType string `json:"p_type" gorm:"type:varchar(100);"`
@@ -11,7 +9,8 @@ type CasbinRule struct {
 	V3    string `json:"v3" gorm:"type:varchar(100);"`
 	V4    string `json:"v4" gorm:"type:varchar(100);"`
 	V5    string `json:"v5" gorm:"type:varchar(100);"`
-	base.Model
+	Id    int    `gorm:"primary_key;AUTO_INCREMENT;column:id" json:"id" form:"id"`
+	BaseModel
 }
 
 func (CasbinRule) TableName() string {

@@ -2,7 +2,6 @@ package system
 
 import (
 	"ferry/global/orm"
-	"ferry/models/base"
 	"ferry/tools"
 	"fmt"
 )
@@ -13,7 +12,7 @@ type RoleMenu struct {
 	RoleName string `gorm:"type:varchar(128)"`
 	CreateBy string `gorm:"type:varchar(128)"`
 	UpdateBy string `gorm:"type:varchar(128)"`
-	base.Model
+	Id       int    `gorm:"primary_key;AUTO_INCREMENT;column:id" json:"id" form:"id"`
 }
 
 func (RoleMenu) TableName() string {

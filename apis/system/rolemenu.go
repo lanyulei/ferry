@@ -19,7 +19,7 @@ import (
 // @Security Bearer
 func GetRoleMenu(c *gin.Context) {
 	var Rm system.RoleMenu
-	err := c.ShouldBind(&Rm)
+	_ = c.ShouldBind(&Rm)
 	result, err := Rm.Get()
 	var res app.Response
 	if err != nil {
@@ -41,8 +41,6 @@ func InsertRoleMenu(c *gin.Context) {
 	var res app.Response
 	res.Msg = "添加成功"
 	c.JSON(http.StatusOK, res.ReturnOK())
-	return
-
 }
 
 // @Summary 删除用户菜单数据
@@ -68,5 +66,4 @@ func DeleteRoleMenu(c *gin.Context) {
 	var res app.Response
 	res.Msg = "删除成功"
 	c.JSON(http.StatusOK, res.ReturnOK())
-	return
 }
