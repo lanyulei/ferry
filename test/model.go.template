@@ -61,13 +61,6 @@ func (e *{{.ClassName}}) GetPage(pageSize int, pageIndex int) ([]{{.ClassName}},
     {{ end }}
     {{- end -}}
 
-	// 数据权限控制
-	dataPermission := new(DataPermission)
-	dataPermission.UserId, _ = utils.StringToInt(e.DataScope)
-	table,err := dataPermission.GetDataScope("{{.TableName}}", table)
-	if err != nil {
-		return nil, 0, err
-	}
 	var count int32
     table = table.Offset((pageIndex - 1) * pageSize).Limit(pageSize)
 	if err := table.Find(&doc).Error; err != nil {

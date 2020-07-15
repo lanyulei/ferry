@@ -2,26 +2,24 @@ package system
 
 import (
 	"ferry/global/orm"
-	"ferry/tools"
 
 	"github.com/pkg/errors"
 )
 
 type SysRole struct {
-	RoleId    int    `json:"roleId" gorm:"primary_key;AUTO_INCREMENT"` // 角色编码
-	RoleName  string `json:"roleName" gorm:"type:varchar(128);"`       // 角色名称
-	Status    string `json:"status" gorm:"type:int(1);"`               //
-	RoleKey   string `json:"roleKey" gorm:"type:varchar(128);"`        //角色代码
-	RoleSort  int    `json:"roleSort" gorm:"type:int(4);"`             //角色排序
-	Flag      string `json:"flag" gorm:"type:varchar(128);"`           //
-	CreateBy  string `json:"createBy" gorm:"type:varchar(128);"`       //
-	UpdateBy  string `json:"updateBy" gorm:"type:varchar(128);"`       //
-	Remark    string `json:"remark" gorm:"type:varchar(255);"`         //备注
-	Admin     bool   `json:"admin" gorm:"type:char(1);"`
-	DataScope string `json:"dataScope" gorm:"type:varchar(128);"`
-	Params    string `json:"params" gorm:"-"`
-	MenuIds   []int  `json:"menuIds" gorm:"-"`
-	DeptIds   []int  `json:"deptIds" gorm:"-"`
+	RoleId   int    `json:"roleId" gorm:"primary_key;AUTO_INCREMENT"` // 角色编码
+	RoleName string `json:"roleName" gorm:"type:varchar(128);"`       // 角色名称
+	Status   string `json:"status" gorm:"type:int(1);"`               //
+	RoleKey  string `json:"roleKey" gorm:"type:varchar(128);"`        //角色代码
+	RoleSort int    `json:"roleSort" gorm:"type:int(4);"`             //角色排序
+	Flag     string `json:"flag" gorm:"type:varchar(128);"`           //
+	CreateBy string `json:"createBy" gorm:"type:varchar(128);"`       //
+	UpdateBy string `json:"updateBy" gorm:"type:varchar(128);"`       //
+	Remark   string `json:"remark" gorm:"type:varchar(255);"`         //备注
+	Admin    bool   `json:"admin" gorm:"type:char(1);"`
+	Params   string `json:"params" gorm:"-"`
+	MenuIds  []int  `json:"menuIds" gorm:"-"`
+	DeptIds  []int  `json:"deptIds" gorm:"-"`
 	BaseModel
 }
 
@@ -34,7 +32,10 @@ type MenuIdList struct {
 }
 
 func (e *SysRole) GetPage(pageSize int, pageIndex int) ([]SysRole, int, error) {
-	var doc []SysRole
+	var (
+		doc   []SysRole
+		count int
+	)
 
 	table := orm.Eloquent.Select("*").Table("sys_role")
 	if e.RoleId != 0 {
@@ -49,15 +50,6 @@ func (e *SysRole) GetPage(pageSize int, pageIndex int) ([]SysRole, int, error) {
 	if e.RoleKey != "" {
 		table = table.Where("role_key = ?", e.RoleKey)
 	}
-
-	// 数据权限控制
-	dataPermission := new(DataPermission)
-	dataPermission.UserId, _ = tools.StringToInt(e.DataScope)
-	table, err := dataPermission.GetDataScope("sys_role", table)
-	if err != nil {
-		return nil, 0, err
-	}
-	var count int
 
 	if err := table.Order("role_sort").Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&doc).Error; err != nil {
 		return nil, 0, err

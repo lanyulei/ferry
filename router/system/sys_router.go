@@ -16,7 +16,6 @@ func RegisterBaseRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddlewar
 	{
 		v1auth.GET("/getinfo", system.GetInfo)
 		v1auth.GET("/menurole", system.GetMenuRole)
-		v1auth.PUT("/roledatascope", system.UpdateRoleDataScope)
 		v1auth.GET("/roleMenuTreeselect/:roleId", system.GetMenuTreeRoleselect)
 		v1auth.GET("/roleDeptTreeselect/:roleId", system.GetDeptTreeRoleselect)
 

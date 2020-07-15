@@ -138,7 +138,6 @@ INSERT INTO `casbin_rule` VALUES ('p', 'Tester', '/api/v1/role', 'POST', NULL, N
 INSERT INTO `casbin_rule` VALUES ('p', 'Tester', '/api/v1/role', 'PUT', NULL, NULL, NULL);
 INSERT INTO `casbin_rule` VALUES ('p', 'Tester', '/api/v1/role/:id', 'DELETE', NULL, NULL, NULL);
 INSERT INTO `casbin_rule` VALUES ('p', 'Tester', '/api/v1/role/:id', 'GET', NULL, NULL, NULL);
-INSERT INTO `casbin_rule` VALUES ('p', 'Tester', '/api/v1/roledatascope', 'PUT', NULL, NULL, NULL);
 INSERT INTO `casbin_rule` VALUES ('p', 'Tester', '/api/v1/roleDeptTreeselect/:id', 'GET', NULL, NULL, NULL);
 INSERT INTO `casbin_rule` VALUES ('p', 'Tester', '/api/v1/rolelist', 'GET', NULL, NULL, NULL);
 INSERT INTO `casbin_rule` VALUES ('p', 'Tester', '/api/v1/rolemenu', 'GET', NULL, NULL, NULL);
@@ -226,7 +225,6 @@ INSERT INTO `casbin_rule` VALUES ('p', 'admin', '/api/v1/loginloglist', 'GET', N
 INSERT INTO `casbin_rule` VALUES ('p', 'admin', '/api/v1/loginlog/:id', 'DELETE', NULL, NULL, NULL);
 INSERT INTO `casbin_rule` VALUES ('p', 'admin', '/api/v1/operloglist', 'GET', NULL, NULL, NULL);
 INSERT INTO `casbin_rule` VALUES ('p', 'admin', '/api/v1/getinfo', 'GET', NULL, NULL, NULL);
-INSERT INTO `casbin_rule` VALUES ('p', 'admin', '/api/v1/roledatascope', 'PUT', NULL, NULL, NULL);
 INSERT INTO `casbin_rule` VALUES ('p', 'admin', '/api/v1/roleDeptTreeselect/:id', 'GET', NULL, NULL, NULL);
 INSERT INTO `casbin_rule` VALUES ('p', 'admin', '/api/v1/deptTree', 'GET', NULL, NULL, NULL);
 INSERT INTO `casbin_rule` VALUES ('p', 'admin', '/api/v1/configKey/:id', 'GET', NULL, NULL, NULL);
@@ -462,7 +460,6 @@ INSERT INTO `sys_menu` VALUES (249, '', '删除登录日志', '', '', '/0/2/211/
 INSERT INTO `sys_menu` VALUES (250, '', '查询操作日志', '', '', '/0/2/211/216/250', 'F', '', 'system:sysoperlog:query', 216, '0', '', '', 0, '0', '1', '1', 0, '2020-04-11 15:52:48', NULL, NULL);
 INSERT INTO `sys_menu` VALUES (251, '', '删除操作日志', '', '', '/0/2/211/216/251', 'F', '', 'system:sysoperlog:remove', 216, '0', '', '', 0, '0', '1', '1', 0, '2020-04-11 15:52:48', NULL, NULL);
 INSERT INTO `sys_menu` VALUES (252, '', '获取登录用户信息', '', '/api/v1/getinfo', '/0/63/256/252', 'A', 'GET', '', 256, '0', '', '', 0, '1', '1', '1', 0, '2020-04-11 15:52:48', NULL, NULL);
-INSERT INTO `sys_menu` VALUES (253, '', '角色数据权限', '', '/api/v1/roledatascope', '/0/63/201/253', 'A', 'PUT', '', 201, '0', '', '', 0, '1', '1', '1', 0, '2020-04-11 15:52:48', NULL, NULL);
 INSERT INTO `sys_menu` VALUES (254, '', '部门树接口【数据权限】', '', '/api/v1/roleDeptTreeselect/:id', '/0/63/256/254', 'A', 'GET', '', 256, '0', '', '', 0, '1', '1', '1', 0, '2020-04-11 15:52:48', NULL, NULL);
 INSERT INTO `sys_menu` VALUES (255, '', '部门树【用户列表】', '', '/api/v1/deptTree', '/0/63/256/255', 'A', 'GET', '', 256, '0', '', '', 0, '1', '1', '1', 0, '2020-04-11 15:52:48', NULL, NULL);
 INSERT INTO `sys_menu` VALUES (256, '', '必开接口', '', '', '/0/63/256', 'M', 'GET', '', 63, '0', '', '', 0, '1', '1', '', 0, '2020-04-11 15:52:48', NULL, NULL);

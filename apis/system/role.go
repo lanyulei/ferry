@@ -37,7 +37,6 @@ func GetRoleList(c *gin.Context) {
 	data.RoleKey = c.Request.FormValue("roleKey")
 	data.RoleName = c.Request.FormValue("roleName")
 	data.Status = c.Request.FormValue("status")
-	data.DataScope = tools.GetUserIdStr(c)
 	result, count, err := data.GetPage(pageSize, pageIndex)
 	tools.HasError(err, "", -1)
 
@@ -108,23 +107,6 @@ func UpdateRole(c *gin.Context) {
 	_, err2 := t.Insert(data.RoleId, data.MenuIds)
 	tools.HasError(err2, "添加失败2", -1)
 
-	app.OK(c, result, "修改成功")
-}
-
-func UpdateRoleDataScope(c *gin.Context) {
-	var data system.SysRole
-	data.UpdateBy = tools.GetUserIdStr(c)
-	err := c.Bind(&data)
-	tools.HasError(err, "数据解析失败", -1)
-	result, _ := data.Update(data.RoleId)
-
-	var t system.SysRoleDept
-	_, err = t.DeleteRoleDept(data.RoleId)
-	tools.HasError(err, "添加失败1", -1)
-	if data.DataScope == "2" {
-		_, err2 := t.Insert(data.RoleId, data.DeptIds)
-		tools.HasError(err2, "添加失败2", -1)
-	}
 	app.OK(c, result, "修改成功")
 }
 

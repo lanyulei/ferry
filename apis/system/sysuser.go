@@ -45,7 +45,6 @@ func GetSysUserList(c *gin.Context) {
 	deptId := c.Request.FormValue("deptId")
 	data.DeptId, _ = tools.StringToInt(deptId)
 
-	data.DataScope = tools.GetUserIdStr(c)
 	result, count, err := data.GetPage(pageSize, pageIndex)
 	tools.HasError(err, "", -1)
 

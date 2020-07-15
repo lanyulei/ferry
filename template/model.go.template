@@ -17,7 +17,6 @@ type {{.ClassName}} struct {
     {{- else }}
     {{.GoField}} {{.GoType}} `json:"{{.JsonField}}" gorm:"type:{{.ColumnType}};"` // {{.ColumnComment}}{{end -}}
     {{- end }}
-    DataScope   string `json:"dataScope" gorm:"-"`
     Params      string `json:"params"  gorm:"-"`
     BaseModel
 }
@@ -64,8 +63,10 @@ var doc {{.ClassName}}
 
 // 获取{{.ClassName}}带分页
 func (e *{{.ClassName}}) GetPage(pageSize int, pageIndex int) ([]{{.ClassName}}, int, error) {
-    var doc []{{.ClassName}}
-
+    var (
+        count int
+        doc []{{.ClassName}}
+    )
     table := orm.Eloquent.Select("*").Table(e.TableName())
     {{ range .Columns }}
     {{- if .IsQuery }}
@@ -75,14 +76,7 @@ func (e *{{.ClassName}}) GetPage(pageSize int, pageIndex int) ([]{{.ClassName}},
     {{ end -}}
     {{- end }}
 
-    // 数据权限控制(如果不需要数据权限请将此处去掉)
-    dataPermission := new(DataPermission)
-    dataPermission.UserId, _ = tools.StringToInt(e.DataScope)
-    table,err := dataPermission.GetDataScope(e.TableName(), table)
-    if err != nil {
-    return nil, 0, err
-    }
-    var count int
+    var
 
     if err := table.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&doc).Error; err != nil {
         return nil, 0, err

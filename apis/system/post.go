@@ -39,7 +39,6 @@ func GetPostList(c *gin.Context) {
 	data.PostName = c.Request.FormValue("postName")
 	data.Status = c.Request.FormValue("status")
 
-	data.DataScope = tools.GetUserIdStr(c)
 	result, count, err := data.GetPage(pageSize, pageIndex)
 	tools.HasError(err, "", -1)
 	app.PageOK(c, result, count, pageIndex, pageSize, "")

@@ -2,20 +2,18 @@ package system
 
 import (
 	"ferry/global/orm"
-	"ferry/tools"
 )
 
 type Post struct {
-	PostId    int    `gorm:"primary_key;AUTO_INCREMENT" json:"postId"` //岗位编号
-	PostName  string `gorm:"type:varchar(128);" json:"postName"`       //岗位名称
-	PostCode  string `gorm:"type:varchar(128);" json:"postCode"`       //岗位代码
-	Sort      int    `gorm:"type:int(4);" json:"sort"`                 //岗位排序
-	Status    string `gorm:"type:int(1);" json:"status"`               //状态
-	Remark    string `gorm:"type:varchar(255);" json:"remark"`         //描述
-	CreateBy  string `gorm:"type:varchar(128);" json:"createBy"`
-	UpdateBy  string `gorm:"type:varchar(128);" json:"updateBy"`
-	DataScope string `gorm:"-" json:"dataScope"`
-	Params    string `gorm:"-" json:"params"`
+	PostId   int    `gorm:"primary_key;AUTO_INCREMENT" json:"postId"` //岗位编号
+	PostName string `gorm:"type:varchar(128);" json:"postName"`       //岗位名称
+	PostCode string `gorm:"type:varchar(128);" json:"postCode"`       //岗位代码
+	Sort     int    `gorm:"type:int(4);" json:"sort"`                 //岗位排序
+	Status   string `gorm:"type:int(1);" json:"status"`               //状态
+	Remark   string `gorm:"type:varchar(255);" json:"remark"`         //描述
+	CreateBy string `gorm:"type:varchar(128);" json:"createBy"`
+	UpdateBy string `gorm:"type:varchar(128);" json:"updateBy"`
+	Params   string `gorm:"-" json:"params"`
 	BaseModel
 }
 
@@ -81,7 +79,10 @@ func (e *Post) GetList() ([]Post, error) {
 }
 
 func (e *Post) GetPage(pageSize int, pageIndex int) ([]Post, int, error) {
-	var doc []Post
+	var (
+		count int
+		doc   []Post
+	)
 
 	table := orm.Eloquent.Select("*").Table(e.TableName())
 	if e.PostId != 0 {
@@ -96,15 +97,6 @@ func (e *Post) GetPage(pageSize int, pageIndex int) ([]Post, int, error) {
 	if e.Status != "" {
 		table = table.Where("status = ?", e.Status)
 	}
-
-	// 数据权限控制
-	dataPermission := new(DataPermission)
-	dataPermission.UserId, _ = tools.StringToInt(e.DataScope)
-	table, err := dataPermission.GetDataScope("sys_post", table)
-	if err != nil {
-		return nil, 0, err
-	}
-	var count int
 
 	if err := table.Order("sort").Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&doc).Error; err != nil {
 		return nil, 0, err

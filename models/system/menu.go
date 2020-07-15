@@ -25,7 +25,6 @@ type Menu struct {
 	CreateBy   string `json:"createBy" gorm:"type:varchar(128);"`
 	UpdateBy   string `json:"updateBy" gorm:"type:varchar(128);"`
 	IsFrame    string `json:"isFrame" gorm:"type:int(1);DEFAULT:0;"`
-	DataScope  string `json:"dataScope" gorm:"-"`
 	Params     string `json:"params" gorm:"-"`
 	RoleId     int    `gorm:"-"`
 	Children   []Menu `json:"children" gorm:"-"`
@@ -61,10 +60,9 @@ type Menus struct {
 	Visible  string `json:"visible" gorm:"column:visible"`
 	Children []Menu `json:"children" gorm:"-"`
 
-	CreateBy  string `json:"createBy" gorm:"column:create_by"`
-	UpdateBy  string `json:"updateBy" gorm:"column:update_by"`
-	DataScope string `json:"dataScope" gorm:"-"`
-	Params    string `json:"params" gorm:"-"`
+	CreateBy string `json:"createBy" gorm:"column:create_by"`
+	UpdateBy string `json:"updateBy" gorm:"column:update_by"`
+	Params   string `json:"params" gorm:"-"`
 	BaseModel
 }
 
@@ -258,13 +256,6 @@ func (e *Menu) GetPage() (Menus []Menu, err error) {
 		table = table.Where("menu_type = ?", e.MenuType)
 	}
 
-	// 数据权限控制
-	dataPermission := new(DataPermission)
-	dataPermission.UserId, _ = tools.StringToInt(e.DataScope)
-	table, err = dataPermission.GetDataScope("sys_menu", table)
-	if err != nil {
-		return nil, err
-	}
 	if err = table.Order("sort").Find(&Menus).Error; err != nil {
 		return
 	}

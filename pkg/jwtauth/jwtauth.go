@@ -76,8 +76,6 @@ type GinJWTMiddleware struct {
 	// username
 	NiceKey string
 
-	DataScopeKey string
-
 	// rolekey
 	RKey string
 
@@ -206,8 +204,6 @@ var (
 	IdentityKey = "identity"
 
 	NiceKey = "nice"
-
-	DataScopeKey = "datascope"
 
 	RKey      = "r"
 	RoleIdKey = "roleid"

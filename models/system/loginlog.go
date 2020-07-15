@@ -17,7 +17,6 @@ type LoginLog struct {
 	LoginTime     time.Time `json:"loginTime" gorm:"type:timestamp;"`         //登录时间
 	CreateBy      string    `json:"createBy" gorm:"type:varchar(128);"`       //创建人
 	UpdateBy      string    `json:"updateBy" gorm:"type:varchar(128);"`       //更新者
-	DataScope     string    `json:"dataScope" gorm:"-"`                       //数据
 	Params        string    `json:"params" gorm:"-"`                          //
 	Remark        string    `json:"remark" gorm:"type:varchar(255);"`         //备注
 	Msg           string    `json:"msg" gorm:"type:varchar(255);"`

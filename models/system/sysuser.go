@@ -41,21 +41,20 @@ type SysUserId struct {
 }
 
 type SysUserB struct {
-	NickName  string `gorm:"type:varchar(128)" json:"nickName"` // 昵称
-	Phone     string `gorm:"type:varchar(11)" json:"phone"`     // 手机号
-	RoleId    int    `gorm:"type:int(11)" json:"roleId"`        // 角色编码
-	Salt      string `gorm:"type:varchar(255)" json:"salt"`     //盐
-	Avatar    string `gorm:"type:varchar(255)" json:"avatar"`   //头像
-	Sex       string `gorm:"type:varchar(255)" json:"sex"`      //性别
-	Email     string `gorm:"type:varchar(128)" json:"email"`    //邮箱
-	DeptId    int    `gorm:"type:int(11)" json:"deptId"`        //部门编码
-	PostId    int    `gorm:"type:int(11)" json:"postId"`        //职位编码
-	CreateBy  string `gorm:"type:varchar(128)" json:"createBy"` //
-	UpdateBy  string `gorm:"type:varchar(128)" json:"updateBy"` //
-	Remark    string `gorm:"type:varchar(255)" json:"remark"`   //备注
-	Status    string `gorm:"type:int(1);" json:"status"`
-	DataScope string `gorm:"-" json:"dataScope"`
-	Params    string `gorm:"-" json:"params"`
+	NickName string `gorm:"type:varchar(128)" json:"nickName"` // 昵称
+	Phone    string `gorm:"type:varchar(11)" json:"phone"`     // 手机号
+	RoleId   int    `gorm:"type:int(11)" json:"roleId"`        // 角色编码
+	Salt     string `gorm:"type:varchar(255)" json:"salt"`     //盐
+	Avatar   string `gorm:"type:varchar(255)" json:"avatar"`   //头像
+	Sex      string `gorm:"type:varchar(255)" json:"sex"`      //性别
+	Email    string `gorm:"type:varchar(128)" json:"email"`    //邮箱
+	DeptId   int    `gorm:"type:int(11)" json:"deptId"`        //部门编码
+	PostId   int    `gorm:"type:int(11)" json:"postId"`        //职位编码
+	CreateBy string `gorm:"type:varchar(128)" json:"createBy"` //
+	UpdateBy string `gorm:"type:varchar(128)" json:"updateBy"` //
+	Remark   string `gorm:"type:varchar(255)" json:"remark"`   //备注
+	Status   string `gorm:"type:int(1);" json:"status"`
+	Params   string `gorm:"-" json:"params"`
 	BaseModel
 }
 
@@ -194,7 +193,10 @@ func (e *SysUser) GetList() (SysUserView []SysUserView, err error) {
 }
 
 func (e *SysUser) GetPage(pageSize int, pageIndex int) ([]SysUserPage, int, error) {
-	var doc []SysUserPage
+	var (
+		doc   []SysUserPage
+		count int
+	)
 	table := orm.Eloquent.Select("sys_user.*,sys_dept.dept_name").Table(e.TableName())
 	table = table.Joins("left join sys_dept on sys_dept.dept_id = sys_user.dept_id")
 
@@ -212,15 +214,6 @@ func (e *SysUser) GetPage(pageSize int, pageIndex int) ([]SysUserPage, int, erro
 	if e.DeptId != 0 {
 		table = table.Where("sys_user.dept_id in (select dept_id from sys_dept where dept_path like ? )", "%"+tools.IntToString(e.DeptId)+"%")
 	}
-
-	// 数据权限控制
-	dataPermission := new(DataPermission)
-	dataPermission.UserId, _ = tools.StringToInt(e.DataScope)
-	table, err := dataPermission.GetDataScope("sys_user", table)
-	if err != nil {
-		return nil, 0, err
-	}
-	var count int
 
 	if err := table.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&doc).Error; err != nil {
 		return nil, 0, err

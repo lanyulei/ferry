@@ -41,7 +41,6 @@ func Get{{.ClassName}}List(c *gin.Context) {
 	{{ end }}
 	{{- end -}}
 
-	data.DataScope = utils.GetUserIdStr(c)
 	result, count, err := data.GetPage(pageSize, pageIndex)
 	pkg.HasError(err, "", -1)
 

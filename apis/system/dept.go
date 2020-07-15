@@ -24,7 +24,6 @@ func GetDeptList(c *gin.Context) {
 	Dept.DeptName = c.Request.FormValue("deptName")
 	Dept.Status = c.Request.FormValue("status")
 	Dept.DeptId, _ = tools.StringToInt(c.Request.FormValue("deptId"))
-	Dept.DataScope = tools.GetUserIdStr(c)
 	result, err := Dept.SetDept(true)
 	tools.HasError(err, "抱歉未找到相关信息", -1)
 	app.OK(c, result, "")
@@ -51,7 +50,6 @@ func GetDeptTree(c *gin.Context) {
 func GetDept(c *gin.Context) {
 	var Dept system.Dept
 	Dept.DeptId, _ = tools.StringToInt(c.Param("deptId"))
-	Dept.DataScope = tools.GetUserIdStr(c)
 	result, err := Dept.Get()
 	tools.HasError(err, msg.NotFound, 404)
 	app.OK(c, result, msg.GetSuccess)

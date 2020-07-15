@@ -4,6 +4,7 @@ import (
 	"ferry/database"
 	"ferry/global/orm"
 	"ferry/models/gorm"
+	"ferry/models/system"
 	"ferry/tools"
 	config2 "ferry/tools/config"
 	"fmt"
@@ -43,9 +44,9 @@ func run() {
 	_ = migrateModel()
 	log.Println("数据库结构初始化成功！")
 	//5. 数据初始化完成
-	//if err := system.InitDb(); err != nil {
-	//	log.Fatal("数据库基础数据初始化失败！")
-	//}
+	if err := system.InitDb(); err != nil {
+		log.Fatal("数据库基础数据初始化失败！")
+	}
 
 	usage = `数据库基础数据初始化成功`
 	fmt.Println(usage)

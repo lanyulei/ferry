@@ -19,12 +19,11 @@ func PayloadFunc(data interface{}) jwt.MapClaims {
 		u, _ := v["user"].(system.SysUser)
 		r, _ := v["role"].(system.SysRole)
 		return jwt.MapClaims{
-			jwt.IdentityKey:  u.UserId,
-			jwt.RoleIdKey:    r.RoleId,
-			jwt.RoleKey:      r.RoleKey,
-			jwt.NiceKey:      u.Username,
-			jwt.DataScopeKey: r.DataScope,
-			jwt.RoleNameKey:  r.RoleName,
+			jwt.IdentityKey: u.UserId,
+			jwt.RoleIdKey:   r.RoleId,
+			jwt.RoleKey:     r.RoleKey,
+			jwt.NiceKey:     u.Username,
+			jwt.RoleNameKey: r.RoleName,
 		}
 	}
 	return jwt.MapClaims{}
@@ -38,7 +37,6 @@ func IdentityHandler(c *gin.Context) interface{} {
 		"RoleKey":     claims["rolekey"],
 		"UserId":      claims["identity"],
 		"RoleIds":     claims["roleid"],
-		"DataScope":   claims["datascope"],
 	}
 }
 
@@ -139,7 +137,6 @@ func Authorizator(data interface{}, c *gin.Context) bool {
 		c.Set("roleIds", r.RoleId)
 		c.Set("userId", u.UserId)
 		c.Set("userName", u.UserName)
-		c.Set("dataScope", r.DataScope)
 
 		return true
 	}

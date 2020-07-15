@@ -22,7 +22,6 @@ func GetMenuList(c *gin.Context) {
 	Menu.MenuName = c.Request.FormValue("menuName")
 	Menu.Visible = c.Request.FormValue("visible")
 	Menu.Title = c.Request.FormValue("title")
-	Menu.DataScope = tools.GetUserIdStr(c)
 	result, err := Menu.SetMenu()
 	tools.HasError(err, "抱歉未找到相关信息", -1)
 
