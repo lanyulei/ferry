@@ -23,7 +23,10 @@ func GetMenuList(c *gin.Context) {
 	Menu.Visible = c.Request.FormValue("visible")
 	Menu.Title = c.Request.FormValue("title")
 	result, err := Menu.SetMenu()
-	tools.HasError(err, "抱歉未找到相关信息", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 
 	app.OK(c, result, "")
 }
@@ -41,7 +44,10 @@ func GetMenu(c *gin.Context) {
 	id, _ := tools.StringToInt(c.Param("id"))
 	data.MenuId = id
 	result, err := data.GetByMenuId()
-	tools.HasError(err, "抱歉未找到相关信息", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, result, "")
 }
 
@@ -51,11 +57,17 @@ func GetMenuTreeRoleselect(c *gin.Context) {
 	id, _ := tools.StringToInt(c.Param("roleId"))
 	SysRole.RoleId = id
 	result, err := Menu.SetMenuLable()
-	tools.HasError(err, "抱歉未找到相关信息", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	menuIds := make([]int, 0)
 	if id != 0 {
 		menuIds, err = SysRole.GetRoleMeunId()
-		tools.HasError(err, "抱歉未找到相关信息", -1)
+		if err != nil {
+			app.Error(c, -1, err, "")
+			return
+		}
 	}
 	app.Custum(c, gin.H{
 		"code":        200,
@@ -76,7 +88,10 @@ func GetMenuTreeRoleselect(c *gin.Context) {
 func GetMenuTreeelect(c *gin.Context) {
 	var data system.Menu
 	result, err := data.SetMenuLable()
-	tools.HasError(err, "抱歉未找到相关信息", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, result, "")
 }
 
@@ -98,10 +113,16 @@ func GetMenuTreeelect(c *gin.Context) {
 func InsertMenu(c *gin.Context) {
 	var data system.Menu
 	err := c.BindWith(&data, binding.JSON)
-	tools.HasError(err, "抱歉未找到相关信息", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	data.CreateBy = tools.GetUserIdStr(c)
 	result, err := data.Create()
-	tools.HasError(err, "抱歉未找到相关信息", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, result, "")
 }
 
@@ -118,11 +139,17 @@ func InsertMenu(c *gin.Context) {
 // @Security Bearer
 func UpdateMenu(c *gin.Context) {
 	var data system.Menu
-	err2 := c.BindWith(&data, binding.JSON)
+	err := c.BindWith(&data, binding.JSON)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	data.UpdateBy = tools.GetUserIdStr(c)
-	tools.HasError(err2, "修改失败", -1)
-	_, err := data.Update(data.MenuId)
-	tools.HasError(err, "", 501)
+	_, err = data.Update(data.MenuId)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, "", "修改成功")
 
 }
@@ -137,9 +164,13 @@ func UpdateMenu(c *gin.Context) {
 func DeleteMenu(c *gin.Context) {
 	var data system.Menu
 	id, _ := tools.StringToInt(c.Param("id"))
+
 	data.UpdateBy = tools.GetUserIdStr(c)
 	_, err := data.Delete(id)
-	tools.HasError(err, "删除失败", 500)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, "", "删除成功")
 }
 
@@ -154,7 +185,10 @@ func DeleteMenu(c *gin.Context) {
 func GetMenuRole(c *gin.Context) {
 	var Menu system.Menu
 	result, err := Menu.SetMenuRole(tools.GetRoleName(c))
-	tools.HasError(err, "获取失败", 500)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, result, "")
 }
 
@@ -171,6 +205,9 @@ func GetMenuIDS(c *gin.Context) {
 	data.RoleName = c.GetString("role")
 	data.UpdateBy = tools.GetUserIdStr(c)
 	result, err := data.GetIDS()
-	tools.HasError(err, "获取失败", 500)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, result, "")
 }

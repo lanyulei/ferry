@@ -1,125 +1,123 @@
 package process
 
-//import (
-//	process2 "ferry/models/process"
-//	"ferry/pkg/connection"
-//	"ferry/pkg/pagination"
-//	"ferry/pkg/response/code"
-//	"fmt"
-//
-//	"github.com/gin-gonic/gin"
-//)
-//
-///*
-//  @Author : lanyulei
-//*/
-//
-//// 流程列表
-//func ProcessList(c *gin.Context) {
-//	type processValue struct {
-//		process2.Info
-//		CreateUser   string `json:"create_user"`
-//		CreateName   string `json:"create_name"`
-//		ClassifyName string `json:"classify_name"`
-//	}
-//
-//	var (
-//		err         error
-//		processList []*processValue
-//	)
-//
-//	SearchParams := map[string]map[string]interface{}{
-//		"like": pagination.RequestParams(c),
-//	}
-//
-//	db := connection.DB.Self.
-//		Model(&process2.Info{}).
-//		Joins("left join user_info on user_info.id = p_process_info.creator").
-//		Joins("left join p_process_classify on p_process_classify.id = p_process_info.classify").
-//		Select("p_process_info.id, p_process_info.create_time, p_process_info.update_time, p_process_info.name, p_process_info.creator, p_process_classify.name as classify_name, user_info.username as create_user, user_info.nickname as create_name").
-//		Where("p_process_info.`delete_time` IS NULL")
-//
-//	result, err := pagination.Paging(&pagination.Param{
-//		C:  c,
-//		DB: db,
-//	}, &processList, SearchParams, "p_process_info")
-//
-//	if err != nil {
-//		Response(c, code.SelectError, nil, fmt.Sprintf("查询流程列表失败，%v", err.Error()))
-//		return
-//	}
-//	Response(c, nil, result, "")
-//}
-//
-//// 创建流程
-//func CreateProcess(c *gin.Context) {
-//	var (
-//		err          error
-//		processValue process2.Info
-//		processCount int
-//	)
-//
-//	err = c.ShouldBind(&processValue)
-//	if err != nil {
-//		Response(c, code.BindError, nil, err.Error())
-//		return
-//	}
-//
-//	// 确定修改的分类是否存在
-//	err = connection.DB.Self.Model(&processValue).
-//		Where("name = ?", processValue.Name).
-//		Count(&processCount).Error
-//	if err != nil {
-//		Response(c, code.SelectError, nil, fmt.Sprintf("查询流程数量失败，%v", err.Error()))
-//		return
-//	}
-//	if processCount > 0 {
-//		Response(c, code.InternalServerError, nil, "流程名称出现重复，请换一个名称")
-//		return
-//	}
-//
-//	processValue.Creator = c.GetInt("userId")
-//
-//	err = connection.DB.Self.Create(&processValue).Error
-//	if err != nil {
-//		Response(c, code.CreateError, nil, fmt.Sprintf("创建流程失败，%v", err.Error()))
-//		return
-//	}
-//
-//	Response(c, nil, nil, "")
-//}
-//
-//// 更新流程
-//func UpdateProcess(c *gin.Context) {
-//	var (
-//		err          error
-//		processValue process2.Info
-//	)
-//
-//	err = c.ShouldBind(&processValue)
-//	if err != nil {
-//		Response(c, code.BindError, nil, err.Error())
-//		return
-//	}
-//
-//	err = connection.DB.Self.Model(&process2.Info{}).
-//		Where("id = ?", processValue.Id).
-//		Updates(map[string]interface{}{
-//			"name":      processValue.Name,
-//			"structure": processValue.Structure,
-//			"tpls":      processValue.Tpls,
-//			"classify":  processValue.Classify,
-//			"task":      processValue.Task,
-//		}).Error
-//	if err != nil {
-//		Response(c, code.UpdateError, nil, fmt.Sprintf("更新流程信息失败，%v", err.Error()))
-//		return
-//	}
-//
-//	Response(c, nil, nil, "")
-//}
-//
-//// 删除流程
+import (
+	"errors"
+	"ferry/global/orm"
+	process2 "ferry/models/process"
+	"ferry/pkg/pagination"
+	"ferry/tools"
+	"ferry/tools/app"
+	"fmt"
+
+	"github.com/gin-gonic/gin"
+)
+
+/*
+ @Author : lanyulei
+*/
+
+// 流程列表
+func ProcessList(c *gin.Context) {
+	var (
+		err         error
+		processList []*struct {
+			process2.Info
+			CreateUser   string `json:"create_user"`
+			CreateName   string `json:"create_name"`
+			ClassifyName string `json:"classify_name"`
+		}
+	)
+
+	SearchParams := map[string]map[string]interface{}{
+		"like": pagination.RequestParams(c),
+	}
+
+	db := orm.Eloquent.Model(&process2.Info{}).
+		Joins("left join sys_user on sys_user.user_id = p_process_info.creator").
+		Joins("left join p_process_classify on p_process_classify.id = p_process_info.classify").
+		Select("p_process_info.id, p_process_info.create_time, p_process_info.update_time, p_process_info.name, p_process_info.creator, p_process_classify.name as classify_name, sys_user.username as create_user, sys_user.nick_name as create_name")
+
+	result, err := pagination.Paging(&pagination.Param{
+		C:  c,
+		DB: db,
+	}, &processList, SearchParams, "p_process_info")
+
+	if err != nil {
+		app.Error(c, -1, err, fmt.Sprintf("查询流程模版失败，%v", err.Error()))
+		return
+	}
+	app.OK(c, result, "查询流程列表成功")
+}
+
+// 创建流程
+func CreateProcess(c *gin.Context) {
+	var (
+		err          error
+		processValue process2.Info
+		processCount int
+	)
+
+	err = c.ShouldBind(&processValue)
+	if err != nil {
+		app.Error(c, -1, err, fmt.Sprintf("参数绑定失败，%v", err.Error()))
+		return
+	}
+
+	// 确定流程名称是否重复
+	err = orm.Eloquent.Model(&processValue).
+		Where("name = ?", processValue.Name).
+		Count(&processCount).Error
+	if err != nil {
+		app.Error(c, -1, err, fmt.Sprintf("流程信息查询失败，%v", err.Error()))
+		return
+	}
+	if processCount > 0 {
+		app.Error(c, -1, errors.New("流程名称重复"), "")
+		return
+	}
+
+	processValue.Creator = tools.GetUserId(c)
+
+	err = orm.Eloquent.Create(&processValue).Error
+	if err != nil {
+		app.Error(c, -1, err, fmt.Sprintf("创建流程失败，%v", err.Error()))
+		return
+	}
+
+	app.OK(c, processValue, "流程创建成功")
+}
+
+// 更新流程
+func UpdateProcess(c *gin.Context) {
+	var (
+		err          error
+		processValue process2.Info
+	)
+
+	err = c.ShouldBind(&processValue)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
+
+	err = orm.Eloquent.Model(&process2.Info{}).
+		Where("id = ?", processValue.Id).
+		Updates(map[string]interface{}{
+			"name":      processValue.Name,
+			"structure": processValue.Structure,
+			"tpls":      processValue.Tpls,
+			"classify":  processValue.Classify,
+			"task":      processValue.Task,
+		}).Error
+	if err != nil {
+		app.Error(c, -1, err, fmt.Sprintf("更新流程信息失败，%v", err.Error()))
+		return
+	}
+
+	app.OK(c, processValue, "更新流程信息成功")
+}
+
+// 删除流程
 //func DeleteProcess(c *gin.Context) {
 //	processId := c.DefaultQuery("processId", "")
 //	if processId == "" {
@@ -134,28 +132,28 @@ package process
 //	}
 //	Response(c, nil, nil, "")
 //}
-//
-//// 流程详情
-//func ProcessDetails(c *gin.Context) {
-//	processId := c.DefaultQuery("processId", "")
-//	if processId == "" {
-//		Response(c, code.InternalServerError, nil, "参数不正确，请确定参数processId是否传递")
-//		return
-//	}
-//
-//	var processValue process2.Info
-//	err := connection.DB.Self.Model(&processValue).
-//		Where("id = ?", processId).
-//		Find(&processValue).Error
-//	if err != nil {
-//		Response(c, code.SelectError, nil, fmt.Sprintf("查询流程详情失败, %v", err.Error()))
-//		return
-//	}
-//
-//	Response(c, nil, processValue, "")
-//}
-//
-//// 分类流程列表
+
+// 流程详情
+func ProcessDetails(c *gin.Context) {
+	processId := c.DefaultQuery("processId", "")
+	if processId == "" {
+		app.Error(c, -1, errors.New("参数不正确，请确定参数processId是否传递"), "")
+		return
+	}
+
+	var processValue process2.Info
+	err := orm.Eloquent.Model(&processValue).
+		Where("id = ?", processId).
+		Find(&processValue).Error
+	if err != nil {
+		app.Error(c, -1, err, fmt.Sprintf("查询流程详情失败, %v", err.Error()))
+		return
+	}
+
+	app.OK(c, processValue, "查询流程详情成功")
+}
+
+// 分类流程列表
 //func ClassifyProcessList(c *gin.Context) {
 //	type classifyProcess struct {
 //		process2.Classify

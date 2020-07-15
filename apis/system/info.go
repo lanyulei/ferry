@@ -36,7 +36,10 @@ func GetInfo(c *gin.Context) {
 	sysuser := system.SysUser{}
 	sysuser.UserId = tools.GetUserId(c)
 	user, err := sysuser.Get()
-	tools.HasError(err, "", 500)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 
 	mp["introduction"] = " am a super administrator"
 

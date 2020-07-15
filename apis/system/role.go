@@ -21,10 +21,12 @@ import (
 // @Router /api/v1/rolelist [get]
 // @Security
 func GetRoleList(c *gin.Context) {
-	var data system.SysRole
-	var err error
-	var pageSize = 10
-	var pageIndex = 1
+	var (
+		err       error
+		pageSize  = 10
+		pageIndex = 1
+		data      system.SysRole
+	)
 
 	if size := c.Request.FormValue("pageSize"); size != "" {
 		pageSize = tools.StrToInt(err, size)
@@ -38,7 +40,10 @@ func GetRoleList(c *gin.Context) {
 	data.RoleName = c.Request.FormValue("roleName")
 	data.Status = c.Request.FormValue("status")
 	result, count, err := data.GetPage(pageSize, pageIndex)
-	tools.HasError(err, "", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 
 	app.PageOK(c, result, count, pageIndex, pageSize, "")
 }
@@ -52,11 +57,22 @@ func GetRoleList(c *gin.Context) {
 // @Router /api/v1/role [get]
 // @Security Bearer
 func GetRole(c *gin.Context) {
-	var Role system.SysRole
+	var (
+		err  error
+		Role system.SysRole
+	)
 	Role.RoleId, _ = tools.StringToInt(c.Param("roleId"))
-	result, _ := Role.Get()
+
+	result, err := Role.Get()
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	menuIds, err := Role.GetRoleMeunId()
-	tools.HasError(err, "抱歉未找到相关信息", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	result.MenuIds = menuIds
 	app.OK(c, result, "")
 
@@ -75,13 +91,22 @@ func InsertRole(c *gin.Context) {
 	var data system.SysRole
 	data.CreateBy = tools.GetUserIdStr(c)
 	err := c.BindWith(&data, binding.JSON)
-	tools.HasError(err, "", 500)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	id, err := data.Insert()
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	data.RoleId = id
-	tools.HasError(err, "", -1)
 	var t system.RoleMenu
 	_, err = t.Insert(id, data.MenuIds)
-	tools.HasError(err, "", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, data, "添加成功")
 }
 
@@ -95,17 +120,32 @@ func InsertRole(c *gin.Context) {
 // @Success 200 {string} string	"{"code": -1, "message": "修改失败"}"
 // @Router /api/v1/role [put]
 func UpdateRole(c *gin.Context) {
-	var data system.SysRole
+	var (
+		data system.SysRole
+		t    system.RoleMenu
+		err  error
+	)
 	data.UpdateBy = tools.GetUserIdStr(c)
-	err := c.Bind(&data)
-	tools.HasError(err, "数据解析失败", -1)
+	err = c.Bind(&data)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	result, err := data.Update(data.RoleId)
-	tools.HasError(err, "", -1)
-	var t system.RoleMenu
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	_, err = t.DeleteRoleMenu(data.RoleId)
-	tools.HasError(err, "添加失败1", -1)
-	_, err2 := t.Insert(data.RoleId, data.MenuIds)
-	tools.HasError(err2, "添加失败2", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
+	_, err = t.Insert(data.RoleId, data.MenuIds)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 
 	app.OK(c, result, "修改成功")
 }
@@ -123,9 +163,15 @@ func DeleteRole(c *gin.Context) {
 
 	IDS := tools.IdsStrToIdsIntGroup("roleId", c)
 	_, err := Role.BatchDelete(IDS)
-	tools.HasError(err, "删除失败1", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	var t system.RoleMenu
 	_, err = t.BatchDeleteRoleMenu(IDS)
-	tools.HasError(err, "删除失败1", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, "", "删除成功")
 }

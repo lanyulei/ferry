@@ -25,7 +25,8 @@ func CreateClassify(c *gin.Context) {
 
 	err = c.ShouldBind(&classifyValue)
 	if err != nil {
-		tools.HasError(err, "", -1)
+		app.Error(c, -1, err, "")
+		return
 	}
 
 	// 判断创建的分类是否存在
@@ -33,17 +34,20 @@ func CreateClassify(c *gin.Context) {
 		Where("name = ?", classifyValue.Name).
 		Count(&classifyCount).Error
 	if err != nil {
-		tools.HasError(err, "创建的分类名称已经存在，请修改", -1)
+		app.Error(c, -1, err, "")
+		return
 	}
 	if classifyCount > 0 {
-		tools.HasError(err, "", -1)
+		app.Error(c, -1, errors.New("创建的分类名称已经存在"), "")
+		return
 	}
 
 	classifyValue.Creator = tools.GetUserId(c)
 
 	err = orm.Eloquent.Table("p_process_classify").Create(&classifyValue).Error
 	if err != nil {
-		tools.HasError(err, "", -1)
+		app.Error(c, -1, err, "")
+		return
 	}
 
 	app.OK(c, "", "创建流程分类成功")
@@ -76,7 +80,8 @@ func ClassifyList(c *gin.Context) {
 	}, &classifyList, SearchParams, "p_process_classify")
 
 	if err != nil {
-		tools.HasError(err, "", -1)
+		app.Error(c, -1, err, "")
+		return
 	}
 	app.OK(c, result, "获取分类列表成功")
 }
@@ -90,7 +95,8 @@ func UpdateClassify(c *gin.Context) {
 
 	err = c.ShouldBind(&classifyValue)
 	if err != nil {
-		tools.HasError(err, "", -1)
+		app.Error(c, -1, err, "")
+		return
 	}
 
 	// 更新
@@ -98,7 +104,8 @@ func UpdateClassify(c *gin.Context) {
 		Where("id = ?", classifyValue.Id).
 		Update("name", classifyValue.Name).Error
 	if err != nil {
-		tools.HasError(err, "", -1)
+		app.Error(c, -1, err, "")
+		return
 	}
 
 	app.OK(c, classifyValue, "流程分类更新成功")
@@ -108,12 +115,14 @@ func UpdateClassify(c *gin.Context) {
 func DeleteClassify(c *gin.Context) {
 	classifyId := c.DefaultQuery("classifyId", "")
 	if classifyId == "" {
-		tools.HasError(errors.New("参数传递失败，请确认classifyId是否传递"), "", -1)
+		app.Error(c, -1, errors.New("参数传递失败，请确认classifyId是否传递"), "")
+		return
 	}
 
 	err := orm.Eloquent.Delete(process2.Classify{}, "id = ?", classifyId).Error
 	if err != nil {
-		tools.HasError(err, "", -1)
+		app.Error(c, -1, err, "")
+		return
 	}
 
 	app.OK(c, "", "流程分类删除成功")

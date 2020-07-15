@@ -3,7 +3,6 @@ package system
 import (
 	"ferry/models/system"
 	"ferry/tools/app"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,13 +17,14 @@ import (
 // @Router /api/v1/rolemenu [get]
 // @Security Bearer
 func GetRoleMenu(c *gin.Context) {
-	var Rm system.RoleMenu
+	var (
+		res app.Response
+		Rm  system.RoleMenu
+	)
 	_ = c.ShouldBind(&Rm)
 	result, err := Rm.Get()
-	var res app.Response
 	if err != nil {
-		res.Msg = "抱歉未找到相关信息"
-		c.JSON(http.StatusOK, res.ReturnError(200))
+		app.Error(c, -1, err, "")
 		return
 	}
 	res.Data = result
@@ -55,12 +55,9 @@ func DeleteRoleMenu(c *gin.Context) {
 	var t system.RoleMenu
 	id := c.Param("id")
 	menuId := c.Request.FormValue("menu_id")
-	fmt.Println(menuId)
 	_, err := t.Delete(id, menuId)
 	if err != nil {
-		var res app.Response
-		res.Msg = "删除失败"
-		c.JSON(http.StatusOK, res.ReturnError(200))
+		app.Error(c, -1, err, "")
 		return
 	}
 	var res app.Response

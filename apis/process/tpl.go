@@ -17,15 +17,13 @@ import (
 
 // 模板列表
 func TemplateList(c *gin.Context) {
-	type templateUserValue struct {
-		process.TplInfo
-		CreateUser string `json:"create_user"`
-		CreateName string `json:"create_name"`
-	}
-
 	var (
 		err          error
-		templateList []*templateUserValue
+		templateList []*struct {
+			process.TplInfo
+			CreateUser string `json:"create_user"`
+			CreateName string `json:"create_name"`
+		}
 	)
 
 	SearchParams := map[string]map[string]interface{}{
@@ -41,7 +39,8 @@ func TemplateList(c *gin.Context) {
 	}, &templateList, SearchParams, "p_tpl_info")
 
 	if err != nil {
-		tools.HasError(err, "")
+		app.Error(c, -1, err, "")
+		return
 	}
 
 	app.OK(c, result, "获取模版列表成功")
@@ -57,7 +56,8 @@ func CreateTemplate(c *gin.Context) {
 
 	err = c.ShouldBind(&templateValue)
 	if err != nil {
-		tools.HasError(err, "")
+		app.Error(c, -1, err, "")
+		return
 	}
 
 	// 确认模版名称是否存在
@@ -65,16 +65,19 @@ func CreateTemplate(c *gin.Context) {
 		Where("name = ?", templateValue.Name).
 		Count(&templateCount).Error
 	if err != nil {
-		tools.HasError(err, "")
+		app.Error(c, -1, err, "")
+		return
 	}
 	if templateCount > 0 {
-		tools.HasError(errors.New("模版名称已存在"), "")
+		app.Error(c, -1, errors.New("模版名称已存在"), "")
+		return
 	}
 
 	templateValue.Creator = tools.GetUserId(c) // 当前登陆用户ID
 	err = orm.Eloquent.Create(&templateValue).Error
 	if err != nil {
-		tools.HasError(err, "")
+		app.Error(c, -1, err, "")
+		return
 	}
 
 	app.OK(c, "", "创建模版成功")
@@ -89,14 +92,16 @@ func TemplateDetails(c *gin.Context) {
 
 	templateId := c.DefaultQuery("template_id", "")
 	if templateId == "" {
-		tools.HasError(err, "")
+		app.Error(c, -1, err, "")
+		return
 	}
 
 	err = orm.Eloquent.Model(&templateDetailsValue).
 		Where("id = ?", templateId).
 		Find(&templateDetailsValue).Error
 	if err != nil {
-		tools.HasError(err, "")
+		app.Error(c, -1, err, "")
+		return
 	}
 
 	app.OK(c, templateDetailsValue, "")
@@ -110,7 +115,8 @@ func UpdateTemplate(c *gin.Context) {
 	)
 	err = c.ShouldBind(&templateValue)
 	if err != nil {
-		tools.HasError(err, "")
+		app.Error(c, -1, err, "")
+		return
 	}
 
 	err = orm.Eloquent.Model(&templateValue).
@@ -121,7 +127,8 @@ func UpdateTemplate(c *gin.Context) {
 			"form_structure": templateValue.FormStructure,
 		}).Error
 	if err != nil {
-		tools.HasError(err, "")
+		app.Error(c, -1, err, "")
+		return
 	}
 
 	app.OK(c, templateValue, "")
@@ -135,12 +142,14 @@ func DeleteTemplate(c *gin.Context) {
 
 	templateId := c.DefaultQuery("templateId", "")
 	if templateId == "" {
-		tools.HasError(errors.New("参数不正确，请确认templateId是否传递"), "")
+		app.Error(c, -1, errors.New("参数不正确，请确认templateId是否传递"), "")
+		return
 	}
 
 	err = orm.Eloquent.Delete(process.TplInfo{}, "id = ?", templateId).Error
 	if err != nil {
-		tools.HasError(err, "")
+		app.Error(c, -1, err, "")
+		return
 	}
 
 	app.OK(c, "", "删除模版成功")

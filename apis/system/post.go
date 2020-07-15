@@ -19,10 +19,12 @@ import (
 // @Router /api/v1/post [get]
 // @Security
 func GetPostList(c *gin.Context) {
-	var data system.Post
-	var err error
-	var pageSize = 10
-	var pageIndex = 1
+	var (
+		data      system.Post
+		err       error
+		pageSize  = 10
+		pageIndex = 1
+	)
 
 	if size := c.Request.FormValue("pageSize"); size != "" {
 		pageSize = tools.StrToInt(err, size)
@@ -32,15 +34,17 @@ func GetPostList(c *gin.Context) {
 		pageIndex = tools.StrToInt(err, index)
 	}
 
-	id := c.Request.FormValue("postId")
-	data.PostId, _ = tools.StringToInt(id)
+	data.PostId, _ = tools.StringToInt(c.Request.FormValue("postId"))
 
 	data.PostCode = c.Request.FormValue("postCode")
 	data.PostName = c.Request.FormValue("postName")
 	data.Status = c.Request.FormValue("status")
 
 	result, count, err := data.GetPage(pageSize, pageIndex)
-	tools.HasError(err, "", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.PageOK(c, result, count, pageIndex, pageSize, "")
 }
 
@@ -52,10 +56,17 @@ func GetPostList(c *gin.Context) {
 // @Router /api/v1/post/{postId} [get]
 // @Security
 func GetPost(c *gin.Context) {
-	var Post system.Post
-	Post.PostId, _ = tools.StringToInt(c.Param("postId"))
+	var (
+		err  error
+		Post system.Post
+	)
+	Post.PostId, err = tools.StringToInt(c.Param("postId"))
+
 	result, err := Post.Get()
-	tools.HasError(err, "抱歉未找到相关信息", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, result, "")
 }
 
@@ -72,10 +83,16 @@ func GetPost(c *gin.Context) {
 func InsertPost(c *gin.Context) {
 	var data system.Post
 	err := c.Bind(&data)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	data.CreateBy = tools.GetUserIdStr(c)
-	tools.HasError(err, "", 500)
 	result, err := data.Create()
-	tools.HasError(err, "", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, result, "")
 }
 
@@ -93,10 +110,16 @@ func UpdatePost(c *gin.Context) {
 	var data system.Post
 
 	err := c.Bind(&data)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	data.UpdateBy = tools.GetUserIdStr(c)
-	tools.HasError(err, "", -1)
 	result, err := data.Update(data.PostId)
-	tools.HasError(err, "", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, result, "修改成功")
 }
 
@@ -112,6 +135,9 @@ func DeletePost(c *gin.Context) {
 	data.UpdateBy = tools.GetUserIdStr(c)
 	IDS := tools.IdsStrToIdsIntGroup("postId", c)
 	result, err := data.BatchDelete(IDS)
-	tools.HasError(err, "删除失败", 500)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, result, "删除成功")
 }

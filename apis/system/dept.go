@@ -20,22 +20,36 @@ import (
 // @Router /api/v1/deptList [get]
 // @Security
 func GetDeptList(c *gin.Context) {
-	var Dept system.Dept
+	var (
+		Dept system.Dept
+		err  error
+	)
 	Dept.DeptName = c.Request.FormValue("deptName")
 	Dept.Status = c.Request.FormValue("status")
 	Dept.DeptId, _ = tools.StringToInt(c.Request.FormValue("deptId"))
+
 	result, err := Dept.SetDept(true)
-	tools.HasError(err, "抱歉未找到相关信息", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, result, "")
 }
 
 func GetDeptTree(c *gin.Context) {
-	var Dept system.Dept
+	var (
+		Dept system.Dept
+		err  error
+	)
 	Dept.DeptName = c.Request.FormValue("deptName")
 	Dept.Status = c.Request.FormValue("status")
 	Dept.DeptId, _ = tools.StringToInt(c.Request.FormValue("deptId"))
+
 	result, err := Dept.SetDept(false)
-	tools.HasError(err, "抱歉未找到相关信息", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, result, "")
 }
 
@@ -48,10 +62,17 @@ func GetDeptTree(c *gin.Context) {
 // @Router /api/v1/dept/{deptId} [get]
 // @Security
 func GetDept(c *gin.Context) {
-	var Dept system.Dept
+	var (
+		err  error
+		Dept system.Dept
+	)
 	Dept.DeptId, _ = tools.StringToInt(c.Param("deptId"))
+
 	result, err := Dept.Get()
-	tools.HasError(err, msg.NotFound, 404)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, result, msg.GetSuccess)
 }
 
@@ -68,10 +89,16 @@ func GetDept(c *gin.Context) {
 func InsertDept(c *gin.Context) {
 	var data system.Dept
 	err := c.BindWith(&data, binding.JSON)
-	tools.HasError(err, "", 500)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	data.CreateBy = tools.GetUserIdStr(c)
 	result, err := data.Create()
-	tools.HasError(err, "", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, result, msg.CreatedSuccess)
 }
 
@@ -89,10 +116,16 @@ func InsertDept(c *gin.Context) {
 func UpdateDept(c *gin.Context) {
 	var data system.Dept
 	err := c.BindJSON(&data)
-	tools.HasError(err, "", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	data.UpdateBy = tools.GetUserIdStr(c)
 	result, err := data.Update(data.DeptId)
-	tools.HasError(err, "", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, result, msg.UpdatedSuccess)
 }
 
@@ -106,8 +139,12 @@ func UpdateDept(c *gin.Context) {
 func DeleteDept(c *gin.Context) {
 	var data system.Dept
 	id, _ := tools.StringToInt(c.Param("id"))
+
 	_, err := data.Delete(id)
-	tools.HasError(err, "删除失败", 500)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, "", msg.DeletedSuccess)
 }
 
@@ -115,13 +152,20 @@ func GetDeptTreeRoleselect(c *gin.Context) {
 	var Dept system.Dept
 	var SysRole system.SysRole
 	id, _ := tools.StringToInt(c.Param("roleId"))
+
 	SysRole.RoleId = id
 	result, err := Dept.SetDeptLable()
-	tools.HasError(err, msg.NotFound, -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	menuIds := make([]int, 0)
 	if id != 0 {
 		menuIds, err = SysRole.GetRoleDeptId()
-		tools.HasError(err, "抱歉未找到相关信息", -1)
+		if err != nil {
+			app.Error(c, -1, err, "")
+			return
+		}
 	}
 	app.Custum(c, gin.H{
 		"code":        200,

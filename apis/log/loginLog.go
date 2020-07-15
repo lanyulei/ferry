@@ -22,10 +22,12 @@ import (
 // @Router /api/v1/loginloglist [get]
 // @Security
 func GetLoginLogList(c *gin.Context) {
-	var data system.LoginLog
-	var err error
-	var pageSize = 10
-	var pageIndex = 1
+	var (
+		err       error
+		pageSize  = 10
+		pageIndex = 1
+		data      system.LoginLog
+	)
 
 	size := c.Request.FormValue("pageSize")
 	if size != "" {
@@ -41,7 +43,10 @@ func GetLoginLogList(c *gin.Context) {
 	data.Status = c.Request.FormValue("status")
 	data.Ipaddr = c.Request.FormValue("ipaddr")
 	result, count, err := data.GetPage(pageSize, pageIndex)
-	tools.HasError(err, "", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 
 	var mp = make(map[string]interface{}, 3)
 	mp["list"] = result
@@ -62,12 +67,17 @@ func GetLoginLogList(c *gin.Context) {
 // @Router /api/v1/loginlog/{infoId} [get]
 // @Security
 func GetLoginLog(c *gin.Context) {
-	var LoginLog system.LoginLog
+	var (
+		res      app.Response
+		LoginLog system.LoginLog
+	)
 	LoginLog.InfoId, _ = tools.StringToInt(c.Param("infoId"))
 	result, err := LoginLog.Get()
-	tools.HasError(err, "抱歉未找到相关信息", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 
-	var res app.Response
 	res.Data = result
 	c.JSON(http.StatusOK, res.ReturnOK())
 }
@@ -85,9 +95,15 @@ func GetLoginLog(c *gin.Context) {
 func InsertLoginLog(c *gin.Context) {
 	var data system.LoginLog
 	err := c.BindWith(&data, binding.JSON)
-	tools.HasError(err, "", 500)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	result, err := data.Create()
-	tools.HasError(err, "", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	var res app.Response
 	res.Data = result
 	c.JSON(http.StatusOK, res.ReturnOK())
@@ -104,12 +120,20 @@ func InsertLoginLog(c *gin.Context) {
 // @Router /api/v1/loginlog [put]
 // @Security Bearer
 func UpdateLoginLog(c *gin.Context) {
-	var data system.LoginLog
+	var (
+		res  app.Response
+		data system.LoginLog
+	)
 	err := c.BindWith(&data, binding.JSON)
-	tools.HasError(err, "", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	result, err := data.Update(data.InfoId)
-	tools.HasError(err, "", -1)
-	var res app.Response
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	res.Data = result
 	c.JSON(http.StatusOK, res.ReturnOK())
 }
@@ -122,12 +146,17 @@ func UpdateLoginLog(c *gin.Context) {
 // @Success 200 {string} string	"{"code": -1, "message": "删除失败"}"
 // @Router /api/v1/loginlog/{infoId} [delete]
 func DeleteLoginLog(c *gin.Context) {
-	var data system.LoginLog
+	var (
+		res  app.Response
+		data system.LoginLog
+	)
 	data.UpdateBy = tools.GetUserIdStr(c)
 	IDS := tools.IdsStrToIdsIntGroup("infoId", c)
 	_, err := data.BatchDelete(IDS)
-	tools.HasError(err, "修改失败", 500)
-	var res app.Response
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	res.Msg = "删除成功"
 	c.JSON(http.StatusOK, res.ReturnOK())
 }

@@ -20,10 +20,12 @@ import (
 // @Router /api/v1/sysUserList [get]
 // @Security Bearer
 func GetSysUserList(c *gin.Context) {
-	var data system.SysUser
-	var err error
-	var pageSize = 10
-	var pageIndex = 1
+	var (
+		pageIndex = 1
+		pageSize  = 10
+		err       error
+		data      system.SysUser
+	)
 
 	size := c.Request.FormValue("pageSize")
 	if size != "" {
@@ -46,7 +48,10 @@ func GetSysUserList(c *gin.Context) {
 	data.DeptId, _ = tools.StringToInt(deptId)
 
 	result, count, err := data.GetPage(pageSize, pageIndex)
-	tools.HasError(err, "", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 
 	app.PageOK(c, result, count, pageIndex, pageSize, "")
 }
@@ -62,7 +67,10 @@ func GetSysUser(c *gin.Context) {
 	var SysUser system.SysUser
 	SysUser.UserId, _ = tools.StringToInt(c.Param("userId"))
 	result, err := SysUser.Get()
-	tools.HasError(err, "抱歉未找到相关信息", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	var SysRole system.SysRole
 	var Post system.Post
 	roles, _ := SysRole.GetList()
@@ -90,21 +98,38 @@ func GetSysUser(c *gin.Context) {
 // @Router /api/v1/user/profile [get]
 // @Security
 func GetSysUserProfile(c *gin.Context) {
-	var SysUser system.SysUser
+	var (
+		Dept    system.Dept
+		Post    system.Post
+		SysRole system.SysRole
+		SysUser system.SysUser
+	)
 	userId := tools.GetUserIdStr(c)
 	SysUser.UserId, _ = tools.StringToInt(userId)
 	result, err := SysUser.Get()
-	tools.HasError(err, "抱歉未找到相关信息", -1)
-	var SysRole system.SysRole
-	var Post system.Post
-	var Dept system.Dept
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	//获取角色列表
-	roles, _ := SysRole.GetList()
+	roles, err := SysRole.GetList()
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	//获取职位列表
-	posts, _ := Post.GetList()
+	posts, err := Post.GetList()
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	//获取部门列表
 	Dept.DeptId = result.DeptId
-	dept, _ := Dept.Get()
+	dept, err := Dept.Get()
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 
 	postIds := make([]int, 0)
 	postIds = append(postIds, result.PostId)
@@ -133,9 +158,15 @@ func GetSysUserInit(c *gin.Context) {
 	var SysRole system.SysRole
 	var Post system.Post
 	roles, err := SysRole.GetList()
-	tools.HasError(err, "抱歉未找到相关信息", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	posts, err := Post.GetList()
-	tools.HasError(err, "抱歉未找到相关信息", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	mp := make(map[string]interface{}, 2)
 	mp["roles"] = roles
 	mp["posts"] = posts
@@ -154,11 +185,17 @@ func GetSysUserInit(c *gin.Context) {
 func InsertSysUser(c *gin.Context) {
 	var sysuser system.SysUser
 	err := c.BindWith(&sysuser, binding.JSON)
-	tools.HasError(err, "非法数据格式", 500)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 
 	sysuser.CreateBy = tools.GetUserIdStr(c)
 	id, err := sysuser.Insert()
-	tools.HasError(err, "添加失败", 500)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, id, "添加成功")
 }
 
@@ -174,10 +211,16 @@ func InsertSysUser(c *gin.Context) {
 func UpdateSysUser(c *gin.Context) {
 	var data system.SysUser
 	err := c.Bind(&data)
-	tools.HasError(err, "数据解析失败", -1)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	data.UpdateBy = tools.GetUserIdStr(c)
 	result, err := data.Update(data.UserId)
-	tools.HasError(err, "修改失败", 500)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, result, "修改成功")
 }
 
@@ -193,7 +236,10 @@ func DeleteSysUser(c *gin.Context) {
 	data.UpdateBy = tools.GetUserIdStr(c)
 	IDS := tools.IdsStrToIdsIntGroup("userId", c)
 	result, err := data.BatchDelete(IDS)
-	tools.HasError(err, "删除失败", 500)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, result, "删除成功")
 }
 
@@ -206,14 +252,22 @@ func DeleteSysUser(c *gin.Context) {
 // @Success 200 {string} string	"{"code": -1, "message": "添加失败"}"
 // @Router /api/v1/user/profileAvatar [post]
 func InsetSysUserAvatar(c *gin.Context) {
-	form, _ := c.MultipartForm()
+	form, err := c.MultipartForm()
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	files := form.File["upload[]"]
 	guid := uuid.New().String()
 	filPath := "static/uploadfile/" + guid + ".jpg"
 	for _, file := range files {
 		log.Println(file.Filename)
 		// 上传文件至指定目录
-		_ = c.SaveUploadedFile(file, filPath)
+		err = c.SaveUploadedFile(file, filPath)
+		if err != nil {
+			app.Error(c, -1, err, "")
+			return
+		}
 	}
 	sysuser := system.SysUser{}
 	sysuser.UserId = tools.GetUserId(c)
@@ -226,9 +280,16 @@ func InsetSysUserAvatar(c *gin.Context) {
 func SysUserUpdatePwd(c *gin.Context) {
 	var pwd system.SysUserPwd
 	err := c.Bind(&pwd)
-	tools.HasError(err, "数据解析失败", 500)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	sysuser := system.SysUser{}
 	sysuser.UserId = tools.GetUserId(c)
-	_, _ = sysuser.SetPwd(pwd)
+	_, err = sysuser.SetPwd(pwd)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
 	app.OK(c, "", "密码修改成功")
 }
