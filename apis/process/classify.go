@@ -29,7 +29,7 @@ func CreateClassify(c *gin.Context) {
 	}
 
 	// 判断创建的分类是否存在
-	err = orm.Eloquent.Table("process_classify").
+	err = orm.Eloquent.Table("p_process_classify").
 		Where("name = ?", classifyValue.Name).
 		Count(&classifyCount).Error
 	if err != nil {
@@ -41,7 +41,7 @@ func CreateClassify(c *gin.Context) {
 
 	classifyValue.Creator = tools.GetUserId(c)
 
-	err = orm.Eloquent.Table("process_classify").Create(&classifyValue).Error
+	err = orm.Eloquent.Table("p_process_classify").Create(&classifyValue).Error
 	if err != nil {
 		tools.HasError(err, "", -1)
 	}
@@ -66,14 +66,14 @@ func ClassifyList(c *gin.Context) {
 		"like": pagination.RequestParams(c),
 	}
 
-	db := orm.Eloquent.Model(&process2.Classify{}).Joins("left join sys_user on sys_user.user_id = process_classify.creator").
-		Select("process_classify.*, sys_user.username as create_user, sys_user.nick_name as create_name").
-		Where("process_classify.`delete_time` IS NULL")
+	db := orm.Eloquent.Model(&process2.Classify{}).Joins("left join sys_user on sys_user.user_id = p_process_classify.creator").
+		Select("p_process_classify.*, sys_user.username as create_user, sys_user.nick_name as create_name").
+		Where("p_process_classify.`delete_time` IS NULL")
 
 	result, err := pagination.Paging(&pagination.Param{
 		C:  c,
 		DB: db,
-	}, &classifyList, SearchParams, "process_classify")
+	}, &classifyList, SearchParams, "p_process_classify")
 
 	if err != nil {
 		tools.HasError(err, "", -1)

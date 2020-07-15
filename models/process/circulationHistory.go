@@ -24,5 +24,5 @@ type CirculationHistory struct {
 }
 
 func (CirculationHistory) TableName() string {
-	return "work_order_circulation_history"
+	return "p_work_order_circulation_history"
 }

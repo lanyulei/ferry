@@ -19,5 +19,5 @@ type TaskInfo struct {
 }
 
 func (TaskInfo) TableName() string {
-	return "task_info"
+	return "p_task_info"
 }

@@ -18,5 +18,5 @@ type TplData struct {
 }
 
 func (TplData) TableName() string {
-	return "work_order_tpl_data"
+	return "p_work_order_tpl_data"
 }

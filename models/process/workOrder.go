@@ -22,5 +22,5 @@ type WorkOrderInfo struct {
 }
 
 func (WorkOrderInfo) TableName() string {
-	return "work_order_info"
+	return "p_work_order_info"
 }

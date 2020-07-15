@@ -23,5 +23,12 @@ func AutoMigrate(db *gorm.DB) error {
 
 		// 流程中心
 		new(process.Classify),
+		new(process.TplInfo),
+		new(process.TplData),
+		new(process.WorkOrderInfo),
+		new(process.TaskInfo),
+		new(process.Info),
+		new(process.History),
+		new(process.CirculationHistory),
 	).Error
 }

@@ -16,5 +16,5 @@ type Classify struct {
 }
 
 func (Classify) TableName() string {
-	return "process_classify"
+	return "p_process_classify"
 }

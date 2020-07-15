@@ -34,15 +34,15 @@ package process
 //
 //	db := connection.DB.Self.
 //		Model(&process2.Info{}).
-//		Joins("left join user_info on user_info.id = process_info.creator").
-//		Joins("left join process_classify on process_classify.id = process_info.classify").
-//		Select("process_info.id, process_info.create_time, process_info.update_time, process_info.name, process_info.creator, process_classify.name as classify_name, user_info.username as create_user, user_info.nickname as create_name").
-//		Where("process_info.`delete_time` IS NULL")
+//		Joins("left join user_info on user_info.id = p_process_info.creator").
+//		Joins("left join p_process_classify on p_process_classify.id = p_process_info.classify").
+//		Select("p_process_info.id, p_process_info.create_time, p_process_info.update_time, p_process_info.name, p_process_info.creator, p_process_classify.name as classify_name, user_info.username as create_user, user_info.nickname as create_name").
+//		Where("p_process_info.`delete_time` IS NULL")
 //
 //	result, err := pagination.Paging(&pagination.Param{
 //		C:  c,
 //		DB: db,
-//	}, &processList, SearchParams, "process_info")
+//	}, &processList, SearchParams, "p_process_info")
 //
 //	if err != nil {
 //		Response(c, code.SelectError, nil, fmt.Sprintf("查询流程列表失败，%v", err.Error()))

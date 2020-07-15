@@ -19,5 +19,5 @@ type History struct {
 }
 
 func (History) TableName() string {
-	return "task_history"
+	return "p_task_history"
 }

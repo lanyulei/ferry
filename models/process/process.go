@@ -21,5 +21,5 @@ type Info struct {
 }
 
 func (Info) TableName() string {
-	return "process_info"
+	return "p_process_info"
 }

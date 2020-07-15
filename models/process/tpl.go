@@ -19,5 +19,5 @@ type TplInfo struct {
 }
 
 func (TplInfo) TableName() string {
-	return "tpl_info"
+	return "p_tpl_info"
 }
