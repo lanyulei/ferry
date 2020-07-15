@@ -19,7 +19,7 @@ func RegisterProcessRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddle
 		processRouter.GET("", process.ProcessList)
 		processRouter.POST("", process.CreateProcess)
 		processRouter.PUT("", process.UpdateProcess)
-		//processRouter.DELETE("", process.DeleteProcess)
+		processRouter.DELETE("", process.DeleteProcess)
 		processRouter.GET("/details", process.ProcessDetails)
 	}
 }

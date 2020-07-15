@@ -118,20 +118,20 @@ func UpdateProcess(c *gin.Context) {
 }
 
 // 删除流程
-//func DeleteProcess(c *gin.Context) {
-//	processId := c.DefaultQuery("processId", "")
-//	if processId == "" {
-//		Response(c, code.InternalServerError, nil, "参数不正确，请确定参数processId是否传递")
-//		return
-//	}
-//
-//	err := connection.DB.Self.Delete(process2.Info{}, "id = ?", processId).Error
-//	if err != nil {
-//		Response(c, code.DeleteError, nil, fmt.Sprintf("删除流程失败, %v", err.Error()))
-//		return
-//	}
-//	Response(c, nil, nil, "")
-//}
+func DeleteProcess(c *gin.Context) {
+	processId := c.DefaultQuery("processId", "")
+	if processId == "" {
+		app.Error(c, -1, errors.New("参数不正确，请确定参数processId是否传递"), "")
+		return
+	}
+
+	err := orm.Eloquent.Delete(process2.Info{}, "id = ?", processId).Error
+	if err != nil {
+		app.Error(c, -1, err, fmt.Sprintf("删除流程失败, %v", err.Error()))
+		return
+	}
+	app.OK(c, "", "删除流程成功")
+}
 
 // 流程详情
 func ProcessDetails(c *gin.Context) {
