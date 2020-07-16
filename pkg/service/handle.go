@@ -3,10 +3,10 @@ package service
 import (
 	"encoding/json"
 	"errors"
+	"ferry/global/orm"
 	"ferry/models/base"
 	"ferry/models/process"
-	"ferry/models/workOrder"
-	"ferry/pkg/connection"
+	"ferry/tools"
 	"fmt"
 	"reflect"
 	"time"
@@ -37,13 +37,13 @@ import (
 */
 
 type Handle struct {
-	cirHistoryList   []workOrder.CirculationHistory
+	cirHistoryList   []process.CirculationHistory
 	workOrderId      int
 	updateValue      map[string]interface{}
 	stateValue       map[string]interface{}
 	targetStateValue map[string]interface{}
 	workOrderData    [][]byte
-	workOrderDetails workOrder.Info
+	workOrderDetails process.WorkOrderInfo
 	endHistory       bool
 	flowProperties   int
 	circulationValue string
@@ -86,7 +86,7 @@ func (h *Handle) Countersign(c *gin.Context) (err error) {
 			break
 		}
 		for _, processor := range currentState["processor"].([]interface{}) {
-			if cirHistoryValue.ProcessorId != c.GetInt("userId") &&
+			if cirHistoryValue.ProcessorId != tools.GetUserId(c) &&
 				cirHistoryValue.Source == currentState["id"].(string) &&
 				cirHistoryValue.ProcessorId == int(processor.(float64)) {
 				cirHistoryCount += 1
@@ -114,7 +114,7 @@ func (h *Handle) circulation() (err error) {
 		return
 	}
 
-	err = h.tx.Model(&workOrder.Info{}).
+	err = h.tx.Model(&process.WorkOrderInfo{}).
 		Where("id = ?", h.workOrderId).
 		Updates(map[string]interface{}{
 			"state":          stateValue,
@@ -321,8 +321,8 @@ func (h *Handle) HandleWorkOrder(
 	var (
 		execTasks          []string
 		relatedPersonList  []int
-		cirHistoryValue    []workOrder.CirculationHistory
-		cirHistoryData     workOrder.CirculationHistory
+		cirHistoryValue    []process.CirculationHistory
+		cirHistoryData     process.CirculationHistory
 		costDurationValue  string
 		sourceEdges        []map[string]interface{}
 		targetEdges        []map[string]interface{}
@@ -347,13 +347,13 @@ func (h *Handle) HandleWorkOrder(
 	}()
 
 	// 获取工单信息
-	err = connection.DB.Self.Model(&workOrder.Info{}).Where("id = ?", workOrderId).Find(&h.workOrderDetails).Error
+	err = orm.Eloquent.Model(&process.WorkOrderInfo{}).Where("id = ?", workOrderId).Find(&h.workOrderDetails).Error
 	if err != nil {
 		return
 	}
 
 	// 获取流程信息
-	err = connection.DB.Self.Model(&process.Info{}).Where("id = ?", h.workOrderDetails.Process).Find(&processInfo).Error
+	err = orm.Eloquent.Model(&process.Info{}).Where("id = ?", h.workOrderDetails.Process).Find(&processInfo).Error
 	if err != nil {
 		return
 	}
@@ -375,7 +375,7 @@ func (h *Handle) HandleWorkOrder(
 	}
 
 	// 获取工单数据
-	err = connection.DB.Self.Model(&workOrder.TplData{}).
+	err = orm.Eloquent.Model(&process.TplData{}).
 		Where("work_order = ?", workOrderId).
 		Pluck("form_data", &h.workOrderData).Error
 	if err != nil {
@@ -383,7 +383,7 @@ func (h *Handle) HandleWorkOrder(
 	}
 
 	// 根据处理人查询出需要会签的条数
-	err = connection.DB.Self.Model(&workOrder.CirculationHistory{}).
+	err = orm.Eloquent.Model(&process.CirculationHistory{}).
 		Where("work_order = ?", workOrderId).
 		Order("id desc").
 		Find(&h.cirHistoryList).Error
@@ -397,13 +397,13 @@ func (h *Handle) HandleWorkOrder(
 	}
 	relatedPersonStatus := false
 	for _, r := range relatedPersonList {
-		if r == c.GetInt("userId") {
+		if r == tools.GetUserId(c) {
 			relatedPersonStatus = true
 			break
 		}
 	}
 	if !relatedPersonStatus {
-		relatedPersonList = append(relatedPersonList, c.GetInt("userId"))
+		relatedPersonList = append(relatedPersonList, tools.GetUserId(c))
 	}
 
 	relatedPersonValue, err = json.Marshal(relatedPersonList)
@@ -416,7 +416,7 @@ func (h *Handle) HandleWorkOrder(
 	}
 
 	// 开启事务
-	h.tx = connection.DB.Self.Begin()
+	h.tx = orm.Eloquent.Begin()
 
 	stateValue := map[string]interface{}{
 		"label": h.targetStateValue["label"].(string),
@@ -591,7 +591,7 @@ func (h *Handle) HandleWorkOrder(
 			h.tx.Rollback()
 			return
 		}
-		err = h.tx.Model(&workOrder.Info{}).
+		err = h.tx.Model(&process.WorkOrderInfo{}).
 			Where("id = ?", h.workOrderId).
 			Update("is_end", 1).Error
 		if err != nil {
@@ -601,7 +601,7 @@ func (h *Handle) HandleWorkOrder(
 	}
 
 	// 流转历史写入
-	err = connection.DB.Self.Model(&cirHistoryValue).
+	err = orm.Eloquent.Model(&cirHistoryValue).
 		Where("work_order = ?", workOrderId).
 		Find(&cirHistoryValue).
 		Order("create_time desc").Error
@@ -616,7 +616,7 @@ func (h *Handle) HandleWorkOrder(
 		}
 	}
 
-	cirHistoryData = workOrder.CirculationHistory{
+	cirHistoryData = process.CirculationHistory{
 		Model:        base.Model{},
 		Title:        h.workOrderDetails.Title,
 		WorkOrder:    h.workOrderDetails.Id,
@@ -625,7 +625,7 @@ func (h *Handle) HandleWorkOrder(
 		Target:       h.targetStateValue["id"].(string),
 		Circulation:  circulationValue,
 		Processor:    c.GetString("nickname"),
-		ProcessorId:  c.GetInt("userId"),
+		ProcessorId:  tools.GetUserId(c),
 		CostDuration: costDurationValue,
 	}
 
@@ -637,14 +637,14 @@ func (h *Handle) HandleWorkOrder(
 
 	// 判断目标是否是结束节点
 	if h.targetStateValue["clazz"] == "end" && h.endHistory == true {
-		err = h.tx.Create(&workOrder.CirculationHistory{
+		err = h.tx.Create(&process.CirculationHistory{
 			Model:       base.Model{},
 			Title:       h.workOrderDetails.Title,
 			WorkOrder:   h.workOrderDetails.Id,
 			State:       h.targetStateValue["label"].(string),
 			Source:      h.targetStateValue["id"].(string),
 			Processor:   c.GetString("nickname"),
-			ProcessorId: c.GetInt("userId"),
+			ProcessorId: tools.GetUserId(c),
 			Circulation: "结束",
 		}).Error
 		if err != nil {

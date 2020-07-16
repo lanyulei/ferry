@@ -1,8 +1,8 @@
 package service
 
 import (
-	"ferry/models/user"
-	"ferry/pkg/connection"
+	"ferry/global/orm"
+	"ferry/models/system"
 	"strings"
 )
 
@@ -20,22 +20,17 @@ func GetPrincipal(processor []int, processMethod string) (principals string, err
 	var principalList []string
 	switch processMethod {
 	case "person":
-		err = connection.DB.Self.Model(&user.Info{}).
+		err = orm.Eloquent.Model(&system.SysUser{}).
 			Where("id in (?)", processor).
 			Pluck("nickname", &principalList).Error
 		if err != nil {
 			return
 		}
-	case "persongroup":
-		err = connection.DB.Self.Model(&user.Group{}).Where("id in (?)", processor).Pluck("nickname", &principalList).Error
-		if err != nil {
-			return
-		}
-	case "department":
-		err = connection.DB.Self.Model(&user.Dept{}).Where("id in (?)", processor).Pluck("nickname", &principalList).Error
-		if err != nil {
-			return
-		}
+	//case "department":
+	//	err = orm.Eloquent.Model(&user.Dept{}).Where("id in (?)", processor).Pluck("nickname", &principalList).Error
+	//	if err != nil {
+	//		return
+	//	}
 	case "variable":
 		for _, p := range processor {
 			switch p {

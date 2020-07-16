@@ -2,12 +2,12 @@ package service
 
 import (
 	"encoding/json"
-	"ferry/models/user"
-	"ferry/models/workOrder"
-	"ferry/pkg/connection"
+	"ferry/global/orm"
+	"ferry/models/process"
+	"ferry/models/system"
 	"ferry/pkg/pagination"
+	"ferry/tools"
 	"fmt"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,21 +18,21 @@ import (
 
 func WorkOrderList(c *gin.Context, classify int) (result interface{}, err error) {
 	type workOrderInfo struct {
-		workOrder.Info
+		process.WorkOrderInfo
 		Principals   string `json:"principals"`
 		DataClassify int    `json:"data_classify"`
 	}
 	var (
 		workOrderInfoList []workOrderInfo
 		principals        string
-		userInfo          user.Info
+		userInfo          system.SysUser
 		StateList         []map[string]interface{}
 	)
 
 	title := c.DefaultQuery("title", "")
-	db := connection.DB.Self.Model(&workOrder.Info{}).Where("title like ?", fmt.Sprintf("%%%v%%", title))
+	db := orm.Eloquent.Model(&process.WorkOrderInfo{}).Where("title like ?", fmt.Sprintf("%%%v%%", title))
 
-	err = connection.DB.Self.Model(&user.Info{}).Where("id = ?", c.GetInt("userId")).Find(&userInfo).Error
+	err = orm.Eloquent.Model(&system.SysUser{}).Where("id = ?", tools.GetUserId(c)).Find(&userInfo).Error
 	if err != nil {
 		return
 	}
@@ -42,47 +42,51 @@ func WorkOrderList(c *gin.Context, classify int) (result interface{}, err error)
 	case 1:
 		// 待办工单
 		// 1. 个人
-		personSelect := fmt.Sprintf("(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'person')))", c.GetInt("userId"))
+		personSelect := fmt.Sprintf("(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'person')))", tools.GetUserId(c))
 
 		// 2. 小组
-		groupList := make([]int, 0)
-		err = connection.DB.Self.Model(&user.UserGroup{}).
-			Where("user = ?", c.GetInt("userId")).
-			Pluck("`group`", &groupList).Error
-		if err != nil {
-			return
-		}
-		groupSqlList := make([]string, 0)
-		if len(groupList) > 0 {
-			for _, group := range groupList {
-				groupSqlList = append(groupSqlList, fmt.Sprintf("JSON_CONTAINS(state, JSON_OBJECT('processor', %v))", group))
-			}
-		} else {
-			groupSqlList = append(groupSqlList, fmt.Sprintf("JSON_CONTAINS(state, JSON_OBJECT('processor', 0))"))
-		}
-
-		personGroupSelect := fmt.Sprintf(
-			"((%v) and %v)",
-			strings.Join(groupSqlList, " or "),
-			"JSON_CONTAINS(state, JSON_OBJECT('process_method', 'persongroup'))",
-		)
+		//groupList := make([]int, 0)
+		//err = orm.Eloquent.Model(&user.UserGroup{}).
+		//	Where("user = ?", tools.GetUserId(c)).
+		//	Pluck("`group`", &groupList).Error
+		//if err != nil {
+		//	return
+		//}
+		//groupSqlList := make([]string, 0)
+		//if len(groupList) > 0 {
+		//	for _, group := range groupList {
+		//		groupSqlList = append(groupSqlList, fmt.Sprintf("JSON_CONTAINS(state, JSON_OBJECT('processor', %v))", group))
+		//	}
+		//} else {
+		//	groupSqlList = append(groupSqlList, fmt.Sprintf("JSON_CONTAINS(state, JSON_OBJECT('processor', 0))"))
+		//}
+		//
+		//personGroupSelect := fmt.Sprintf(
+		//	"((%v) and %v)",
+		//	strings.Join(groupSqlList, " or "),
+		//	"JSON_CONTAINS(state, JSON_OBJECT('process_method', 'persongroup'))",
+		//)
 
 		// 3. 部门
-		departmentSelect := fmt.Sprintf("(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'department')))", userInfo.Dept)
+		//departmentSelect := fmt.Sprintf("(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'department')))", userInfo.Dept)
 
 		// 4. 变量
-		variableSelect := fmt.Sprintf("((%v) or (%v))",
-			fmt.Sprintf("JSON_CONTAINS(state, JSON_OBJECT('processor', 1)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'variable')) and creator = %v", c.GetInt("userId")),
-			fmt.Sprintf("JSON_CONTAINS(state, JSON_OBJECT('processor', 2)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'variable')) and creator = %v", userInfo.Dept),
+		variableSelect := fmt.Sprintf("(%v)",
+			fmt.Sprintf("JSON_CONTAINS(state, JSON_OBJECT('processor', 1)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'variable')) and creator = %v", tools.GetUserId(c)),
 		)
+		//variableSelect := fmt.Sprintf("((%v) or (%v))",
+		//	fmt.Sprintf("JSON_CONTAINS(state, JSON_OBJECT('processor', 1)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'variable')) and creator = %v", tools.GetUserId(c)),
+		//	fmt.Sprintf("JSON_CONTAINS(state, JSON_OBJECT('processor', 2)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'variable')) and creator = %v", userInfo.Dept),
+		//)
 
-		db = db.Where(fmt.Sprintf("(%v or %v or %v or %v) and is_end = 0", personSelect, personGroupSelect, departmentSelect, variableSelect))
+		//db = db.Where(fmt.Sprintf("(%v or %v or %v or %v) and is_end = 0", personSelect, personGroupSelect, departmentSelect, variableSelect))
+		db = db.Where(fmt.Sprintf("(%v or %v) and is_end = 0", personSelect, variableSelect))
 	case 2:
 		// 我创建的
-		db = db.Where("creator = ?", c.GetInt("userId"))
+		db = db.Where("creator = ?", tools.GetUserId(c))
 	case 3:
 		// 我相关的
-		db = db.Where(fmt.Sprintf("JSON_CONTAINS(related_person, '%v')", c.GetInt("userId")))
+		db = db.Where(fmt.Sprintf("JSON_CONTAINS(related_person, '%v')", tools.GetUserId(c)))
 	case 4:
 	// 所有工单
 	default:

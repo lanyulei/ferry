@@ -154,53 +154,51 @@ func ProcessDetails(c *gin.Context) {
 }
 
 // 分类流程列表
-//func ClassifyProcessList(c *gin.Context) {
-//	type classifyProcess struct {
-//		process2.Classify
-//		ProcessList []*process2.Info `json:"process_list"`
-//	}
-//
-//	var (
-//		err          error
-//		classifyList []*classifyProcess
-//	)
-//
-//	processName := c.DefaultQuery("name", "")
-//	if processName == "" {
-//		err = connection.DB.Self.Model(&process2.Classify{}).Find(&classifyList).Error
-//		if err != nil {
-//			Response(c, code.SelectError, nil, fmt.Sprintf("获取分类列表失败，%v", err.Error()))
-//			return
-//		}
-//	} else {
-//		var classifyIdList []int
-//		err = connection.DB.Self.Model(&process2.Info{}).
-//			Where("name LIKE ?", fmt.Sprintf("%%%v%%", processName)).
-//			Pluck("distinct classify", &classifyIdList).Error
-//		if err != nil {
-//			Response(c, code.SelectError, nil, fmt.Sprintf("获取分类失败，%v", err.Error()))
-//			return
-//		}
-//
-//		err = connection.DB.Self.Model(&process2.Classify{}).
-//			Where("id in (?)", classifyIdList).
-//			Find(&classifyList).Error
-//		if err != nil {
-//			Response(c, code.SelectError, nil, fmt.Sprintf("获取分类失败，%v", err.Error()))
-//			return
-//		}
-//	}
-//
-//	for _, item := range classifyList {
-//		err = connection.DB.Self.Model(&process2.Info{}).
-//			Where("classify = ?", item.Id).
-//			Select("id, create_time, update_time, name").
-//			Find(&item.ProcessList).Error
-//		if err != nil {
-//			Response(c, code.SelectError, nil, fmt.Sprintf("获取流程失败，%v", err.Error()))
-//			return
-//		}
-//	}
-//
-//	Response(c, nil, classifyList, "")
-//}
+func ClassifyProcessList(c *gin.Context) {
+	var (
+		err            error
+		classifyIdList []int
+		classifyList   []*struct {
+			process2.Classify
+			ProcessList []*process2.Info `json:"process_list"`
+		}
+	)
+
+	processName := c.DefaultQuery("name", "")
+	if processName == "" {
+		err = orm.Eloquent.Model(&process2.Classify{}).Find(&classifyList).Error
+		if err != nil {
+			app.Error(c, -1, err, fmt.Sprintf("获取分类列表失败，%v", err.Error()))
+			return
+		}
+	} else {
+		err = orm.Eloquent.Model(&process2.Info{}).
+			Where("name LIKE ?", fmt.Sprintf("%%%v%%", processName)).
+			Pluck("distinct classify", &classifyIdList).Error
+		if err != nil {
+			app.Error(c, -1, err, fmt.Sprintf("获取分类失败，%v", err.Error()))
+			return
+		}
+
+		err = orm.Eloquent.Model(&process2.Classify{}).
+			Where("id in (?)", classifyIdList).
+			Find(&classifyList).Error
+		if err != nil {
+			app.Error(c, -1, err, fmt.Sprintf("获取分类失败，%v", err.Error()))
+			return
+		}
+	}
+
+	for _, item := range classifyList {
+		err = orm.Eloquent.Model(&process2.Info{}).
+			Where("classify = ? and name LIKE ?", item.Id, fmt.Sprintf("%%%v%%", processName)).
+			Select("id, create_time, update_time, name").
+			Find(&item.ProcessList).Error
+		if err != nil {
+			app.Error(c, -1, err, fmt.Sprintf("获取流程失败，%v", err.Error()))
+			return
+		}
+	}
+
+	app.OK(c, classifyList, "成功获取数据")
+}

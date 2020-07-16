@@ -1,3 +1,5 @@
+script:
+  path: ./public/scripts
 settings:
   application:
     domain: localhost:8000

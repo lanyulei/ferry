@@ -3,10 +3,9 @@ package service
 import (
 	"encoding/json"
 	"errors"
+	"ferry/global/orm"
 	"ferry/models/process"
-	"ferry/models/tpl"
-	"ferry/models/workOrder"
-	"ferry/pkg/connection"
+	"ferry/tools"
 	"fmt"
 	"strconv"
 
@@ -18,7 +17,7 @@ import (
 */
 
 type WorkOrderData struct {
-	workOrder.Info
+	process.WorkOrderInfo
 	CurrentState string `json:"current_state"`
 }
 
@@ -27,14 +26,14 @@ func ProcessStructure(c *gin.Context, processId int, workOrderId int) (result ma
 		processValue            process.Info
 		processStructureDetails map[string]interface{}
 		processNode             []map[string]interface{}
-		tplDetails              []*tpl.Info
+		tplDetails              []*process.TplInfo
 		workOrderInfo           WorkOrderData
-		workOrderTpls           []*workOrder.TplData
-		workOrderHistory        []*workOrder.CirculationHistory
+		workOrderTpls           []*process.TplData
+		workOrderHistory        []*process.CirculationHistory
 		stateList               []map[string]interface{}
 	)
 
-	err = connection.DB.Self.Model(&processValue).Where("id = ?", processId).Find(&processValue).Error
+	err = orm.Eloquent.Model(&processValue).Where("id = ?", processId).Find(&processValue).Error
 	if err != nil {
 		err = fmt.Errorf("查询流程失败，%v", err.Error())
 		return
@@ -77,7 +76,7 @@ func ProcessStructure(c *gin.Context, processId int, workOrderId int) (result ma
 	}
 
 	// 获取历史记录
-	err = connection.DB.Self.Model(&workOrder.CirculationHistory{}).
+	err = orm.Eloquent.Model(&process.CirculationHistory{}).
 		Where("work_order = ?", workOrderId).
 		Order("id desc").
 		Find(&workOrderHistory).Error
@@ -94,7 +93,7 @@ func ProcessStructure(c *gin.Context, processId int, workOrderId int) (result ma
 			err = fmt.Errorf("json转map失败，%v", err.Error())
 			return
 		}
-		err = connection.DB.Self.Model(&tplDetails).
+		err = orm.Eloquent.Model(&tplDetails).
 			Where("id in (?)", tplIdList).
 			Find(&tplDetails).Error
 		if err != nil {
@@ -104,7 +103,7 @@ func ProcessStructure(c *gin.Context, processId int, workOrderId int) (result ma
 		result["tpls"] = tplDetails
 	} else {
 		// 查询工单信息
-		err = connection.DB.Self.Model(&workOrder.Info{}).
+		err = orm.Eloquent.Model(&process.WorkOrderInfo{}).
 			Where("id = ?", workOrderId).
 			Scan(&workOrderInfo).Error
 		if err != nil {
@@ -145,7 +144,7 @@ func ProcessStructure(c *gin.Context, processId int, workOrderId int) (result ma
 				for _, processNodeValue := range processStructureDetails["nodes"].([]interface{}) {
 					if stateValue["id"].(string) == processNodeValue.(map[string]interface{})["id"] {
 						for _, userId := range stateValue["processor"].([]interface{}) {
-							if int(userId.(float64)) == c.GetInt("userId") {
+							if int(userId.(float64)) == tools.GetUserId(c) {
 								workOrderInfo.CurrentState = stateValue["id"].(string)
 								break breakStateTag
 							}
@@ -162,7 +161,7 @@ func ProcessStructure(c *gin.Context, processId int, workOrderId int) (result ma
 		result["workOrder"] = workOrderInfo
 
 		// 查询工单表单数据
-		err = connection.DB.Self.Model(&workOrderTpls).
+		err = orm.Eloquent.Model(&workOrderTpls).
 			Where("work_order = ?", workOrderId).
 			Find(&workOrderTpls).Error
 		if err != nil {

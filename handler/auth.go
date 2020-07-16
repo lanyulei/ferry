@@ -120,7 +120,7 @@ func LogOut(c *gin.Context) {
 	loginlog.Platform = ua.Platform()
 	loginlog.Username = tools.GetUserName(c)
 	loginlog.Msg = "退出成功"
-	loginlog.Create()
+	_, _ = loginlog.Create()
 	c.JSON(http.StatusOK, gin.H{
 		"code": 200,
 		"msg":  "退出成功",

@@ -2,10 +2,9 @@ package service
 
 import (
 	"encoding/json"
+	"ferry/global/orm"
 	"ferry/models/process"
-	"ferry/models/user"
-	"ferry/models/workOrder"
-	"ferry/pkg/connection"
+	"ferry/tools"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,10 +21,10 @@ func JudgeUserAuthority(c *gin.Context, workOrderId int, currentState string) (s
 		variable 变量
 	*/
 	var (
-		workOrderInfo     workOrder.Info
-		userInfo          user.Info
-		userDept          user.Dept
-		cirHistoryList    []workOrder.CirculationHistory
+		workOrderInfo process.WorkOrderInfo
+		//userInfo          system.SysUser
+		//userDept          system.Dept
+		cirHistoryList    []process.CirculationHistory
 		stateValue        map[string]interface{}
 		processInfo       process.Info
 		processState      ProcessState
@@ -33,7 +32,7 @@ func JudgeUserAuthority(c *gin.Context, workOrderId int, currentState string) (s
 		currentStateValue map[string]interface{}
 	)
 	// 获取工单信息
-	err = connection.DB.Self.Model(&workOrderInfo).
+	err = orm.Eloquent.Model(&workOrderInfo).
 		Where("id = ?", workOrderId).
 		Find(&workOrderInfo).Error
 	if err != nil {
@@ -41,7 +40,7 @@ func JudgeUserAuthority(c *gin.Context, workOrderId int, currentState string) (s
 	}
 
 	// 获取流程信息
-	err = connection.DB.Self.Model(&process.Info{}).Where("id = ?", workOrderInfo.Process).Find(&processInfo).Error
+	err = orm.Eloquent.Model(&process.Info{}).Where("id = ?", workOrderInfo.Process).Find(&processInfo).Error
 	if err != nil {
 		return
 	}
@@ -71,7 +70,7 @@ func JudgeUserAuthority(c *gin.Context, workOrderId int, currentState string) (s
 	if currentStateValue["processor"] != nil && len(currentStateValue["processor"].([]interface{})) > 1 {
 		if isCounterSign, ok := stateValue["isCounterSign"]; ok {
 			if isCounterSign.(bool) {
-				err = connection.DB.Self.Model(&workOrder.CirculationHistory{}).
+				err = orm.Eloquent.Model(&process.CirculationHistory{}).
 					Where("work_order = ?", workOrderId).
 					Order("id desc").
 					Find(&cirHistoryList).Error
@@ -82,7 +81,7 @@ func JudgeUserAuthority(c *gin.Context, workOrderId int, currentState string) (s
 					if cirHistoryValue.Source != stateValue["id"] {
 						break
 					}
-					if cirHistoryValue.Source == stateValue["id"] && cirHistoryValue.ProcessorId == c.GetInt("userId") {
+					if cirHistoryValue.Source == stateValue["id"] && cirHistoryValue.ProcessorId == tools.GetUserId(c) {
 						return
 					}
 				}
@@ -93,54 +92,54 @@ func JudgeUserAuthority(c *gin.Context, workOrderId int, currentState string) (s
 	switch currentStateValue["process_method"].(string) {
 	case "person":
 		for _, processorValue := range currentStateValue["processor"].([]interface{}) {
-			if int(processorValue.(float64)) == c.GetInt("userId") {
+			if int(processorValue.(float64)) == tools.GetUserId(c) {
 				status = true
 			}
 		}
-	case "persongroup":
-		var persongroupCount int
-		err = connection.DB.Self.Model(&user.UserGroup{}).
-			Where("group in (?) and user = ?", currentStateValue["processor"].([]interface{}), c.GetInt("userId")).
-			Count(&persongroupCount).Error
-		if err != nil {
-			return
-		}
-		if persongroupCount > 0 {
-			status = true
-		}
-	case "department":
-		var departmentCount int
-		err = connection.DB.Self.Model(&user.Info{}).
-			Where("dept in (?) and id = ?", currentStateValue["processor"].([]interface{}), c.GetInt("userId")).
-			Count(&departmentCount).Error
-		if err != nil {
-			return
-		}
-		if departmentCount > 0 {
-			status = true
-		}
+	//case "persongroup":
+	//	var persongroupCount int
+	//	err = orm.Eloquent.Model(&user.UserGroup{}).
+	//		Where("group in (?) and user = ?", currentStateValue["processor"].([]interface{}), tools.GetUserId(c)).
+	//		Count(&persongroupCount).Error
+	//	if err != nil {
+	//		return
+	//	}
+	//	if persongroupCount > 0 {
+	//		status = true
+	//	}
+	//case "department":
+	//	var departmentCount int
+	//	err = orm.Eloquent.Model(&system.SysUser{}).
+	//		Where("dept in (?) and id = ?", currentStateValue["processor"].([]interface{}), tools.GetUserId(c)).
+	//		Count(&departmentCount).Error
+	//	if err != nil {
+	//		return
+	//	}
+	//	if departmentCount > 0 {
+	//		status = true
+	//	}
 	case "variable":
 		for _, p := range currentStateValue["processor"].([]interface{}) {
 			switch int(p.(float64)) {
 			case 1:
-				if workOrderInfo.Creator == c.GetInt("userId") {
+				if workOrderInfo.Creator == tools.GetUserId(c) {
 					status = true
 				}
-			case 2:
-				err = connection.DB.Self.Model(&userInfo).Where("id = ?", workOrderInfo.Creator).Find(&userInfo).Error
-				if err != nil {
-					return
-				}
-				err = connection.DB.Self.Model(&userDept).Where("id = ?", userInfo.Dept).Find(&userDept).Error
-				if err != nil {
-					return
-				}
-
-				if userDept.Approver == c.GetInt("userId") {
-					status = true
-				} else if userDept.Leader == c.GetInt("userId") {
-					status = true
-				}
+				//case 2:
+				//	err = orm.Eloquent.Model(&userInfo).Where("id = ?", workOrderInfo.Creator).Find(&userInfo).Error
+				//	if err != nil {
+				//		return
+				//	}
+				//	err = orm.Eloquent.Model(&userDept).Where("id = ?", userInfo.Dept).Find(&userDept).Error
+				//	if err != nil {
+				//		return
+				//	}
+				//
+				//	if userDept.Approver == tools.GetUserId(c) {
+				//		status = true
+				//	} else if userDept.Leader == tools.GetUserId(c) {
+				//		status = true
+				//	}
 			}
 		}
 	}
