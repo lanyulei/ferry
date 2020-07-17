@@ -7,21 +7,21 @@ settings:
     ishttps: false
     mode: dev
     name: testApp
-    port: "8000"
+    port: "8002"
     readtimeout: 1
     writertimeout: 2
   database:
     dbtype: mysql
     host: 127.0.0.1
-    name: ferry_admin
-    password: 123456
+    name: ferry
+    password: ferry@2020
     port: 3306
-    username: root
+    username: ferry
   jwt:
     secret: ferry
     timeout: 3600
   log:
-    dir: temp/logs
+    dir: logs
     operdb: false
   ssl:
     key: keystring
