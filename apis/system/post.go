@@ -8,6 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+/*
+  @Author : lanyulei
+*/
+
 // @Summary 职位列表数据
 // @Description 获取JSON
 // @Tags 职位

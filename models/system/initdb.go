@@ -8,6 +8,10 @@ import (
 	"strings"
 )
 
+/*
+  @Author : lanyulei
+*/
+
 func InitDb() error {
 	filePath := "config/db.sql"
 	if config2.DatabaseConfig.Dbtype == "sqlite3" {

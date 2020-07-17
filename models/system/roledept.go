@@ -5,6 +5,10 @@ import (
 	"fmt"
 )
 
+/*
+  @Author : lanyulei
+*/
+
 //sys_role_dept
 type SysRoleDept struct {
 	RoleId int `gorm:"type:int(11)"`

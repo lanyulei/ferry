@@ -7,6 +7,10 @@ import (
 	_ "time"
 )
 
+/*
+  @Author : lanyulei
+*/
+
 type Dept struct {
 	DeptId   int    `json:"deptId" gorm:"primary_key;AUTO_INCREMENT"` //部门编码
 	ParentId int    `json:"parentId" gorm:"type:int(11);"`            //上级部门

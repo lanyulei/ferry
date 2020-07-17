@@ -4,6 +4,10 @@ import (
 	"ferry/global/orm"
 )
 
+/*
+  @Author : lanyulei
+*/
+
 type Post struct {
 	PostId   int    `gorm:"primary_key;AUTO_INCREMENT" json:"postId"` //岗位编号
 	PostName string `gorm:"type:varchar(128);" json:"postName"`       //岗位名称

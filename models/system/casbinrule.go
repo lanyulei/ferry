@@ -1,5 +1,9 @@
 package system
 
+/*
+  @Author : lanyulei
+*/
+
 //casbin_rule
 type CasbinRule struct {
 	PType string `json:"p_type" gorm:"type:varchar(100);"`

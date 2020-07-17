@@ -8,6 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+/*
+  @Author : lanyulei
+*/
+
 func GetInfo(c *gin.Context) {
 
 	var roles = make([]string, 1)

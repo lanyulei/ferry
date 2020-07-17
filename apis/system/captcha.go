@@ -8,6 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+/*
+  @Author : lanyulei
+*/
+
 func GenerateCaptchaHandler(c *gin.Context) {
 	id, b64s, err := captcha.DriverDigitFunc()
 	if err != nil {

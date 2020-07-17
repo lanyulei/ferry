@@ -10,6 +10,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+/*
+  @Author : lanyulei
+*/
+
 // User
 type User struct {
 	// key

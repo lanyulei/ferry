@@ -6,6 +6,10 @@ import (
 	"ferry/tools"
 )
 
+/*
+  @Author : lanyulei
+*/
+
 type Menu struct {
 	MenuId     int    `json:"menuId" gorm:"primary_key;AUTO_INCREMENT"`
 	MenuName   string `json:"menuName" gorm:"type:varchar(128);"`

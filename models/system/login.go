@@ -5,6 +5,10 @@ import (
 	"ferry/tools"
 )
 
+/*
+  @Author : lanyulei
+*/
+
 type Login struct {
 	Username string `form:"UserName" json:"username" binding:"required"`
 	Password string `form:"Password" json:"password" binding:"required"`

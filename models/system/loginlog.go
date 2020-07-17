@@ -5,6 +5,10 @@ import (
 	"time"
 )
 
+/*
+  @Author : lanyulei
+*/
+
 type LoginLog struct {
 	InfoId        int       `json:"infoId" gorm:"primary_key;AUTO_INCREMENT"` //主键
 	Username      string    `json:"username" gorm:"type:varchar(128);"`       //用户名

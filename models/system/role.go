@@ -6,6 +6,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+/*
+  @Author : lanyulei
+*/
+
 type SysRole struct {
 	RoleId   int    `json:"roleId" gorm:"primary_key;AUTO_INCREMENT"` // 角色编码
 	RoleName string `json:"roleName" gorm:"type:varchar(128);"`       // 角色名称

@@ -6,6 +6,10 @@ import (
 	"fmt"
 )
 
+/*
+  @Author : lanyulei
+*/
+
 type RoleMenu struct {
 	RoleId   int    `gorm:"type:int(11)"`
 	MenuId   int    `gorm:"type:int(11)"`
