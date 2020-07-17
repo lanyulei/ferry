@@ -6,7 +6,9 @@ import (
 	"ferry/global/orm"
 	"ferry/models/base"
 	"ferry/models/process"
+	"ferry/models/system"
 	"ferry/tools"
+	"ferry/tools/app"
 	"fmt"
 	"reflect"
 	"time"
@@ -330,6 +332,7 @@ func (h *Handle) HandleWorkOrder(
 		relatedPersonValue []byte
 		parallelStatusOk   bool
 		processInfo        process.Info
+		currentUserInfo    system.SysUser
 	)
 
 	defer func() {
@@ -616,6 +619,15 @@ func (h *Handle) HandleWorkOrder(
 		}
 	}
 
+	// 获取当前用户信息
+	err = orm.Eloquent.Model(&currentUserInfo).
+		Where("user_id = ?", tools.GetUserId(c)).
+		Find(&currentUserInfo).Error
+	if err != nil {
+		app.Error(c, -1, err, fmt.Sprintf("当前用户查询失败，%v", err.Error()))
+		return
+	}
+
 	cirHistoryData = process.CirculationHistory{
 		Model:        base.Model{},
 		Title:        h.workOrderDetails.Title,
@@ -624,7 +636,7 @@ func (h *Handle) HandleWorkOrder(
 		Source:       h.stateValue["id"].(string),
 		Target:       h.targetStateValue["id"].(string),
 		Circulation:  circulationValue,
-		Processor:    c.GetString("nickname"),
+		Processor:    currentUserInfo.NickName,
 		ProcessorId:  tools.GetUserId(c),
 		CostDuration: costDurationValue,
 	}
@@ -643,7 +655,7 @@ func (h *Handle) HandleWorkOrder(
 			WorkOrder:   h.workOrderDetails.Id,
 			State:       h.targetStateValue["label"].(string),
 			Source:      h.targetStateValue["id"].(string),
-			Processor:   c.GetString("nickname"),
+			Processor:   currentUserInfo.NickName,
 			ProcessorId: tools.GetUserId(c),
 			Circulation: "结束",
 		}).Error

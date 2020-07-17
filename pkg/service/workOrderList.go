@@ -32,7 +32,7 @@ func WorkOrderList(c *gin.Context, classify int) (result interface{}, err error)
 	title := c.DefaultQuery("title", "")
 	db := orm.Eloquent.Model(&process.WorkOrderInfo{}).Where("title like ?", fmt.Sprintf("%%%v%%", title))
 
-	err = orm.Eloquent.Model(&system.SysUser{}).Where("id = ?", tools.GetUserId(c)).Find(&userInfo).Error
+	err = orm.Eloquent.Model(&system.SysUser{}).Where("user_id = ?", tools.GetUserId(c)).Find(&userInfo).Error
 	if err != nil {
 		return
 	}

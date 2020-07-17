@@ -21,8 +21,8 @@ func GetPrincipal(processor []int, processMethod string) (principals string, err
 	switch processMethod {
 	case "person":
 		err = orm.Eloquent.Model(&system.SysUser{}).
-			Where("id in (?)", processor).
-			Pluck("nickname", &principalList).Error
+			Where("user_id in (?)", processor).
+			Pluck("nick_name", &principalList).Error
 		if err != nil {
 			return
 		}

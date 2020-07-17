@@ -261,6 +261,7 @@ func UnityWorkOrder(c *gin.Context) {
 		err           error
 		workOrderId   string
 		workOrderInfo process.WorkOrderInfo
+		userInfo      system.SysUser
 	)
 
 	workOrderId = c.DefaultQuery("work_oroder_id", "")
@@ -295,13 +296,23 @@ func UnityWorkOrder(c *gin.Context) {
 		return
 	}
 
+	// 获取当前用户信息
+	err = tx.Model(&userInfo).
+		Where("user_id = ?", tools.GetUserId(c)).
+		Find(&userInfo).Error
+	if err != nil {
+		tx.Rollback()
+		app.Error(c, -1, err, fmt.Sprintf("当前用户查询失败，%v", err.Error()))
+		return
+	}
+
 	// 写入历史
 	tx.Create(&process.CirculationHistory{
 		Title:       workOrderInfo.Title,
 		WorkOrder:   workOrderInfo.Id,
 		State:       "结束工单",
 		Circulation: "结束",
-		Processor:   c.GetString("nickname"),
+		Processor:   userInfo.NickName,
 		ProcessorId: tools.GetUserId(c),
 		Remarks:     "手动结束工单。",
 	})
@@ -314,19 +325,29 @@ func UnityWorkOrder(c *gin.Context) {
 // 转交工单
 func InversionWorkOrder(c *gin.Context) {
 	var (
-		err           error
-		workOrderInfo process.WorkOrderInfo
-		stateList     []map[string]interface{}
-		stateValue    []byte
-		currentState  map[string]interface{}
-		userInfo      system.SysUser
-		params        struct {
+		err             error
+		workOrderInfo   process.WorkOrderInfo
+		stateList       []map[string]interface{}
+		stateValue      []byte
+		currentState    map[string]interface{}
+		userInfo        system.SysUser
+		currentUserInfo system.SysUser
+		params          struct {
 			WorkOrderId int    `json:"work_order_id"`
 			NodeId      string `json:"node_id"`
 			UserId      int    `json:"user_id"`
 			Remarks     string `json:"remarks"`
 		}
 	)
+
+	// 获取当前用户信息
+	err = orm.Eloquent.Model(&currentUserInfo).
+		Where("user_id = ?", tools.GetUserId(c)).
+		Find(&currentUserInfo).Error
+	if err != nil {
+		app.Error(c, -1, err, fmt.Sprintf("当前用户查询失败，%v", err.Error()))
+		return
+	}
 
 	err = c.ShouldBind(&params)
 	if err != nil {
@@ -391,7 +412,7 @@ func InversionWorkOrder(c *gin.Context) {
 		WorkOrder:   workOrderInfo.Id,
 		State:       currentState["label"].(string),
 		Circulation: "转交",
-		Processor:   c.GetString("nickname"),
+		Processor:   currentUserInfo.NickName,
 		ProcessorId: tools.GetUserId(c),
 		Remarks:     fmt.Sprintf("此阶段负责人已转交给《%v》", userInfo.NickName),
 	})
