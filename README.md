@@ -15,7 +15,7 @@
   </a>
 </p>
 
-<p>
+<p align="center">
   <h3>开源不易，请尊重作者的成果</h3>
 </p>
 
@@ -27,7 +27,7 @@
 
 **系统管理**
 
-基于casbin的RBAC控制，可以在页面对API、菜单、页面按钮等操作，进行灵活且简单的配置。
+基于casbin的RBAC权限控制，借鉴了go-admin项目的前端权限管理，可以在页面对API、菜单、页面按钮等操作，进行灵活且简单的配置。
 
 演示demo: [http://fdevops.com:8001/#/dashboard](http://fdevops.com:8001/#/dashboard)
 
