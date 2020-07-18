@@ -1,8 +1,8 @@
 script:
-  path: ./public/scripts
+  path: ./static/scripts
 settings:
   application:
-    domain: localhost:8000
+    domain: localhost:8002
     host: 0.0.0.0
     ishttps: false
     mode: dev
