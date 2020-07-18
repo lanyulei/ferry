@@ -15,7 +15,7 @@
   </a>
 </p>
 
-##### 基于Gin + Vue + Element UI前后端分离的工单系统
+## 基于Gin + Vue + Element UI前后端分离的工单系统
 
 **流程中心**
 
@@ -178,7 +178,7 @@ mv dist web
 
 [兰玉磊的技术博客](https://www.fdevops.com/)
 
-## 🤝 特别感谢
+## 特别感谢
 [go-amdin # 不错的后台开发框架](https://github.com/wenjianzhang/go-admin.git)
 
 [vue-element-admin # 不错的前端模版框架](https://github.com/PanJiaChen/vue-element-admin)
@@ -187,17 +187,9 @@ mv dist web
 
 [wfd-vue # 流程设计器](https://github.com/guozhaolong/wfd-vue)
 
-当然还要感谢很多很多的开源贡献者
+[machinery # 任务队列](https://github.com/RichardKnop/machinery.git)
 
-[spf13/viper](https://github.com/spf13/viper)
-
-[gorm](https://github.com/jinzhu/gorm)
-
-[gin-swagger](https://github.com/swaggo/gin-swagger)
-
-[machinery](https://github.com/RichardKnop/machinery.git)
-
-还有很多很多，就不在此一一列举的。
+等等...
 
 ## 打赏
 
@@ -214,4 +206,3 @@ mv dist web
 [MIT](https://github.com/lanyulei/ferry/blob/master/LICENSE)
 
 Copyright (c) 2020 lanyulei
-
