@@ -195,9 +195,7 @@ mv dist web
 
 > 如果你觉得这个项目帮助到了你，你可以请作者喝一杯咖啡表示鼓励:
 
-<img class="no-margin" src="https://www.fdevops.com/wp-content/uploads/2020/07/1595072566-51595072477_.pic_.jpg"  height="200px" >
-<img class="no-margin" src="https://www.fdevops.com/wp-content/uploads/2020/07/1595072569-71595072557_.pic_.jpg"  height="200px" >
-<img class="no-margin" src="https://www.fdevops.com/wp-content/uploads/2020/07/1595072562-41595072433_.pic_.jpg"  height="200px" >
+<img class="no-margin" src="https://www.fdevops.com/wp-content/uploads/2020/07/1595075890-81595075871_.pic_hd.png"  height="200px" >
 
 ## License
 
