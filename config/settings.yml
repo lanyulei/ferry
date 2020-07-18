@@ -1,3 +1,5 @@
+script:
+  path: ./static/scripts
 settings:
   application:
     mode: prod  # dev开发环境 test测试环境 prod线上环境
@@ -24,5 +26,3 @@ settings:
     password: 123456
     port: 3306
     username: root
-script:
-  path: ./public/scripts
