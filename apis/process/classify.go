@@ -32,6 +32,7 @@ func CreateClassify(c *gin.Context) {
 	// 判断创建的分类是否存在
 	err = orm.Eloquent.Table("p_process_classify").
 		Where("name = ?", classifyValue.Name).
+		Where("`delete_time` IS NULL").
 		Count(&classifyCount).Error
 	if err != nil {
 		app.Error(c, -1, err, "")

@@ -249,7 +249,7 @@ func (e SysUser) Insert() (id int, err error) {
 
 	// check 用户名
 	var count int
-	orm.Eloquent.Table(e.TableName()).Where("username = ?", e.Username).Count(&count)
+	orm.Eloquent.Table(e.TableName()).Where("username = ? and `delete_time` IS NULL", e.Username).Count(&count)
 	if count > 0 {
 		err = errors.New("账户已存在！")
 		return
