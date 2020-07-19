@@ -45,7 +45,7 @@ npm >= 6.14
 # 1. 获取代码
 git clone https://github.com/lanyulei/ferry.git
 or
-git clone https://gitee.com/xiao_lei/ferry.git
+git clone https://gitee.com/yllan/ferry.git
 
 # 2. 进入工作路径
 cd ./ferry
@@ -71,7 +71,7 @@ go run main.go server -c=config/settings.dev.yml
 # 1. 获取代码
 git clone https://github.com/lanyulei/ferry_web.git
 or
-git clone https://gitee.com/xiao_lei/ferry_web.git
+git clone https://gitee.com/yllan/ferry_web.git
 
 # 2. 进入工作路径
 cd ./ferry_web
