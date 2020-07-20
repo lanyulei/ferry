@@ -18,6 +18,7 @@ type Info struct {
 	Tpls      json.RawMessage `gorm:"column:tpls; type:json" json:"tpls" form:"tpls"`                // 模版
 	Task      json.RawMessage `gorm:"column:task; type:json" json:"task" form:"task"`                // 任务ID, array, 可执行多个任务，可以当成通知任务，每个节点都会去执行
 	Creator   int             `gorm:"column:creator; type:int(11)" json:"creator" form:"creator"`    // 创建者
+	Notice    json.RawMessage `gorm:"column:notice; type:json" json:"notice" form:"notice"`          // TODO：绑定通知
 }
 
 func (Info) TableName() string {

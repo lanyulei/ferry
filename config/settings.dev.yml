@@ -1,27 +1,27 @@
 script:
-  path: ./public/scripts
+  path: ./static/scripts
 settings:
   application:
-    domain: localhost:8000
+    domain: localhost:8002
     host: 0.0.0.0
     ishttps: false
     mode: dev
-    name: testApp
-    port: "8000"
+    name: ferry-test
+    port: "8002"
     readtimeout: 1
     writertimeout: 2
   database:
     dbtype: mysql
     host: 127.0.0.1
-    name: ferry_admin
+    name: ferry
     password: 123456
     port: 3306
-    username: root
+    username: ferry
   jwt:
     secret: ferry
     timeout: 3600
   log:
-    dir: temp/logs
+    dir: logs
     operdb: false
   ssl:
     key: keystring

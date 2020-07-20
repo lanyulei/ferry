@@ -108,7 +108,7 @@ func (role *SysRole) GetRoleMeunId() ([]int, error) {
 
 func (role *SysRole) Insert() (id int, err error) {
 	i := 0
-	orm.Eloquent.Table("sys_role").Where("role_name=? or role_key = ?", role.RoleName, role.RoleKey).Count(&i)
+	orm.Eloquent.Table("sys_role").Where("(role_name = ? or role_key = ?) and `delete_time` IS NULL", role.RoleName, role.RoleKey).Count(&i)
 	if i > 0 {
 		return 0, errors.New("角色名称或者角色标识已经存在！")
 	}
