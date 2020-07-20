@@ -16,6 +16,7 @@ type WorkOrderInfo struct {
 	Process       int             `gorm:"column:process; type:int(11)" json:"process" form:"process"`                   // 流程ID
 	Classify      int             `gorm:"column:classify; type:int(11)" json:"classify" form:"classify"`                // 分类ID
 	IsEnd         int             `gorm:"column:is_end; type:int(11); default:0" json:"is_end" form:"is_end"`           // 是否结束， 0 未结束，1 已结束
+	IsDenied      int             `gorm:"column:is_denied; type:int(11); default:0" json:"is_denied" form:"is_denied"`  // 是否被拒绝， 0 没有，1 有
 	State         json.RawMessage `gorm:"column:state; type:json" json:"state" form:"state"`                            // 状态信息
 	RelatedPerson json.RawMessage `gorm:"column:related_person; type:json" json:"related_person" form:"related_person"` // 工单所有处理人
 	Creator       int             `gorm:"column:creator; type:int(11)" json:"creator" form:"creator"`                   // 创建人
