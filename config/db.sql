@@ -79,11 +79,11 @@ INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`, `id`) VA
 COMMIT;
 
 BEGIN;
-INSERT INTO `sys_dept`(`dept_id`, `parent_id`, `dept_path`, `dept_name`, `sort`, `leader`, `phone`, `email`, `status`, `create_by`, `update_by`) VALUES (1, 0, '/0/1', '磊哥科技', 0, 'leige', '', 'lanyulei@fdevops.com', 0, '1', '1');
-INSERT INTO `sys_dept`(`dept_id`, `parent_id`, `dept_path`, `dept_name`, `sort`, `leader`, `phone`, `email`, `status`, `create_by`, `update_by`) VALUES (7, 1, '/0/1/7', '研发部', 1, '', '', '', 0, '1', '1');
-INSERT INTO `sys_dept`(`dept_id`, `parent_id`, `dept_path`, `dept_name`, `sort`, `leader`, `phone`, `email`, `status`, `create_by`, `update_by`) VALUES (8, 1, '/0/1/8', '运维部', 0, '', '', '', 0, '1', NULL);
-INSERT INTO `sys_dept`(`dept_id`, `parent_id`, `dept_path`, `dept_name`, `sort`, `leader`, `phone`, `email`, `status`, `create_by`, `update_by`) VALUES (9, 1, '/0/1/9', '客服部', 0, '', '', '', 0, '1', NULL);
-INSERT INTO `sys_dept`(`dept_id`, `parent_id`, `dept_path`, `dept_name`, `sort`, `leader`, `phone`, `email`, `status`, `create_by`, `update_by`) VALUES (10, 1, '/0/1/10', '人力资源', 3, '张三', '', '', 1, '1', '1');
+INSERT INTO `sys_dept`(`dept_id`, `parent_id`, `dept_path`, `dept_name`, `sort`, `leader`, `phone`, `email`, `status`, `create_by`, `update_by`) VALUES (1, 0, '/0/1', '磊哥科技', 0, null, '', 'lanyulei@fdevops.com', 0, '1', '1');
+INSERT INTO `sys_dept`(`dept_id`, `parent_id`, `dept_path`, `dept_name`, `sort`, `leader`, `phone`, `email`, `status`, `create_by`, `update_by`) VALUES (7, 1, '/0/1/7', '研发部', 1, null, '', '', 0, '1', '1');
+INSERT INTO `sys_dept`(`dept_id`, `parent_id`, `dept_path`, `dept_name`, `sort`, `leader`, `phone`, `email`, `status`, `create_by`, `update_by`) VALUES (8, 1, '/0/1/8', '运维部', 0, null, '', '', 0, '1', NULL);
+INSERT INTO `sys_dept`(`dept_id`, `parent_id`, `dept_path`, `dept_name`, `sort`, `leader`, `phone`, `email`, `status`, `create_by`, `update_by`) VALUES (9, 1, '/0/1/9', '客服部', 0, null, '', '', 0, '1', NULL);
+INSERT INTO `sys_dept`(`dept_id`, `parent_id`, `dept_path`, `dept_name`, `sort`, `leader`, `phone`, `email`, `status`, `create_by`, `update_by`) VALUES (10, 1, '/0/1/10', '人力资源', 3, null, '', '', 1, '1', '1');
 COMMIT;
 
 BEGIN;

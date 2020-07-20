@@ -56,6 +56,7 @@ func ProcessStructure(c *gin.Context) {
 func CreateWorkOrder(c *gin.Context) {
 	var (
 		userInfo       system.SysUser
+		variableValue  []interface{}
 		workOrderValue struct {
 			process.WorkOrderInfo
 			Tpls        map[string][]interface{} `json:"tpls"`
@@ -72,6 +73,23 @@ func CreateWorkOrder(c *gin.Context) {
 	}
 
 	relatedPerson, err := json.Marshal([]int{tools.GetUserId(c)})
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
+
+	// 获取变量值
+	err = json.Unmarshal(workOrderValue.State, &variableValue)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
+	err = service.GetVariableValue(variableValue, tools.GetUserId(c))
+	if err != nil {
+		app.Error(c, -1, err, fmt.Sprintf("获取处理人变量值失败，%v", err.Error()))
+		return
+	}
+	workOrderValue.State, err = json.Marshal(variableValue)
 	if err != nil {
 		app.Error(c, -1, err, "")
 		return

@@ -17,7 +17,7 @@ type Dept struct {
 	DeptPath string `json:"deptPath" gorm:"type:varchar(255);"`       //
 	DeptName string `json:"deptName"  gorm:"type:varchar(128);"`      //部门名称
 	Sort     int    `json:"sort" gorm:"type:int(4);"`                 //排序
-	Leader   string `json:"leader" gorm:"type:varchar(128);"`         //负责人
+	Leader   int    `json:"leader" gorm:"type:int(11);"`              //负责人
 	Phone    string `json:"phone" gorm:"type:varchar(11);"`           //手机
 	Email    string `json:"email" gorm:"type:varchar(64);"`           //邮箱
 	Status   string `json:"status" gorm:"type:int(1);"`               //状态

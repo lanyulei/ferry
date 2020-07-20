@@ -70,17 +70,10 @@ func WorkOrderList(c *gin.Context, classify int) (result interface{}, err error)
 		// 3. 部门
 		//departmentSelect := fmt.Sprintf("(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'department')))", userInfo.Dept)
 
-		// 4. 变量
-		variableSelect := fmt.Sprintf("(%v)",
-			fmt.Sprintf("JSON_CONTAINS(state, JSON_OBJECT('processor', 1)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'variable')) and creator = %v", tools.GetUserId(c)),
-		)
-		//variableSelect := fmt.Sprintf("((%v) or (%v))",
-		//	fmt.Sprintf("JSON_CONTAINS(state, JSON_OBJECT('processor', 1)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'variable')) and creator = %v", tools.GetUserId(c)),
-		//	fmt.Sprintf("JSON_CONTAINS(state, JSON_OBJECT('processor', 2)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'variable')) and creator = %v", userInfo.Dept),
-		//)
+		// 4. 变量会转成个人数据
 
 		//db = db.Where(fmt.Sprintf("(%v or %v or %v or %v) and is_end = 0", personSelect, personGroupSelect, departmentSelect, variableSelect))
-		db = db.Where(fmt.Sprintf("(%v or %v) and is_end = 0", personSelect, variableSelect))
+		db = db.Where(fmt.Sprintf("(%v) and is_end = 0", personSelect))
 	case 2:
 		// 我创建的
 		db = db.Where("creator = ?", tools.GetUserId(c))

@@ -35,9 +35,9 @@ func GetPrincipal(processor []int, processMethod string) (principals string, err
 		for _, p := range processor {
 			switch p {
 			case 1:
-				principalList = append(principalList, "创建人")
+				principalList = append(principalList, "创建者")
 			case 2:
-				principalList = append(principalList, "创建人领导")
+				principalList = append(principalList, "创建者负责人")
 			}
 		}
 	}

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"ferry/global/orm"
 	"ferry/models/process"
+	"ferry/models/system"
 	"ferry/tools"
 
 	"github.com/gin-gonic/gin"
@@ -21,9 +22,9 @@ func JudgeUserAuthority(c *gin.Context, workOrderId int, currentState string) (s
 		variable 变量
 	*/
 	var (
-		workOrderInfo process.WorkOrderInfo
-		//userInfo          system.SysUser
-		//userDept          system.Dept
+		userDept          system.Dept
+		workOrderInfo     process.WorkOrderInfo
+		userInfo          system.SysUser
 		cirHistoryList    []process.CirculationHistory
 		stateValue        map[string]interface{}
 		processInfo       process.Info
@@ -125,21 +126,19 @@ func JudgeUserAuthority(c *gin.Context, workOrderId int, currentState string) (s
 				if workOrderInfo.Creator == tools.GetUserId(c) {
 					status = true
 				}
-				//case 2:
-				//	err = orm.Eloquent.Model(&userInfo).Where("id = ?", workOrderInfo.Creator).Find(&userInfo).Error
-				//	if err != nil {
-				//		return
-				//	}
-				//	err = orm.Eloquent.Model(&userDept).Where("id = ?", userInfo.Dept).Find(&userDept).Error
-				//	if err != nil {
-				//		return
-				//	}
-				//
-				//	if userDept.Approver == tools.GetUserId(c) {
-				//		status = true
-				//	} else if userDept.Leader == tools.GetUserId(c) {
-				//		status = true
-				//	}
+			case 2:
+				err = orm.Eloquent.Model(&userInfo).Where("user_id = ?", workOrderInfo.Creator).Find(&userInfo).Error
+				if err != nil {
+					return
+				}
+				err = orm.Eloquent.Model(&userDept).Where("dept_id = ?", userInfo.DeptId).Find(&userDept).Error
+				if err != nil {
+					return
+				}
+
+				if userDept.Leader == tools.GetUserId(c) {
+					status = true
+				}
 			}
 		}
 	}

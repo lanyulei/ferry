@@ -111,6 +111,11 @@ func (h *Handle) circulation() (err error) {
 		stateValue []byte
 	)
 
+	err = GetVariableValue(h.updateValue["state"].([]interface{}), h.workOrderDetails.Creator)
+	if err != nil {
+		return
+	}
+
 	stateValue, err = json.Marshal(h.updateValue["state"])
 	if err != nil {
 		return
