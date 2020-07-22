@@ -6,6 +6,7 @@ import (
 	"ferry/handler"
 	"ferry/pkg/jwtauth"
 	jwt "ferry/pkg/jwtauth"
+	"ferry/router/dashboard"
 	"ferry/router/process"
 	systemRouter "ferry/router/system"
 
@@ -61,6 +62,9 @@ func sysCheckRoleRouterInit(r *gin.RouterGroup, authMiddleware *jwtauth.GinJWTMi
 	r.GET("/refresh_token", authMiddleware.RefreshHandler)
 
 	v1 := r.Group("/api/v1")
+
+	// 首页
+	dashboard.RegisterDashboardRouter(v1, authMiddleware)
 
 	// 系统管理
 	systemRouter.RegisterPageRouter(v1, authMiddleware)

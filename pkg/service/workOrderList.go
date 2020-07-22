@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"ferry/global/orm"
 	"ferry/models/process"
-	"ferry/models/system"
 	"ferry/pkg/pagination"
 	"ferry/tools"
 	"fmt"
@@ -16,33 +15,31 @@ import (
   @Author : lanyulei
 */
 
-func WorkOrderList(c *gin.Context, classify int) (result interface{}, err error) {
-	type workOrderInfo struct {
-		process.WorkOrderInfo
-		Principals   string `json:"principals"`
-		DataClassify int    `json:"data_classify"`
-	}
+type WorkOrder struct {
+	Classify int
+	GinObj   *gin.Context
+}
+
+type workOrderInfo struct {
+	process.WorkOrderInfo
+	Principals   string `json:"principals"`
+	DataClassify int    `json:"data_classify"`
+}
+
+func (w *WorkOrder) PureWorkOrderList() (result interface{}, err error) {
 	var (
 		workOrderInfoList []workOrderInfo
-		principals        string
-		userInfo          system.SysUser
-		StateList         []map[string]interface{}
 	)
 
-	title := c.DefaultQuery("title", "")
+	title := w.GinObj.DefaultQuery("title", "")
 	db := orm.Eloquent.Model(&process.WorkOrderInfo{}).Where("title like ?", fmt.Sprintf("%%%v%%", title))
 
-	err = orm.Eloquent.Model(&system.SysUser{}).Where("user_id = ?", tools.GetUserId(c)).Find(&userInfo).Error
-	if err != nil {
-		return
-	}
-
 	// 获取当前用户信息
-	switch classify {
+	switch w.Classify {
 	case 1:
 		// 待办工单
 		// 1. 个人
-		personSelect := fmt.Sprintf("(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'person')))", tools.GetUserId(c))
+		personSelect := fmt.Sprintf("(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'person')))", tools.GetUserId(w.GinObj))
 
 		// 2. 小组
 		//groupList := make([]int, 0)
@@ -76,10 +73,10 @@ func WorkOrderList(c *gin.Context, classify int) (result interface{}, err error)
 		db = db.Where(fmt.Sprintf("(%v) and is_end = 0", personSelect))
 	case 2:
 		// 我创建的
-		db = db.Where("creator = ?", tools.GetUserId(c))
+		db = db.Where("creator = ?", tools.GetUserId(w.GinObj))
 	case 3:
 		// 我相关的
-		db = db.Where(fmt.Sprintf("JSON_CONTAINS(related_person, '%v')", tools.GetUserId(c)))
+		db = db.Where(fmt.Sprintf("JSON_CONTAINS(related_person, '%v')", tools.GetUserId(w.GinObj)))
 	case 4:
 	// 所有工单
 	default:
@@ -87,11 +84,25 @@ func WorkOrderList(c *gin.Context, classify int) (result interface{}, err error)
 	}
 
 	result, err = pagination.Paging(&pagination.Param{
-		C:  c,
+		C:  w.GinObj,
 		DB: db,
 	}, &workOrderInfoList)
 	if err != nil {
 		err = fmt.Errorf("查询工单列表失败，%v", err.Error())
+		return
+	}
+	return
+}
+
+func (w *WorkOrder) WorkOrderList() (result interface{}, err error) {
+
+	var (
+		principals string
+		StateList  []map[string]interface{}
+	)
+
+	result, err = w.PureWorkOrderList()
+	if err != nil {
 		return
 	}
 
@@ -114,7 +125,7 @@ func WorkOrderList(c *gin.Context, classify int) (result interface{}, err error)
 		}
 		workOrderDetails := *result.(*pagination.Paginator).Data.(*[]workOrderInfo)
 		workOrderDetails[i].Principals = principals
-		workOrderDetails[i].DataClassify = classify
+		workOrderDetails[i].DataClassify = w.Classify
 	}
 
 	return result, nil

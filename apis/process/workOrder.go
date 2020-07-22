@@ -214,7 +214,11 @@ func WorkOrderList(c *gin.Context) {
 	}
 
 	classifyInt, _ = strconv.Atoi(classify)
-	result, err = service.WorkOrderList(c, classifyInt)
+	w := service.WorkOrder{
+		Classify: classifyInt,
+		GinObj:   c,
+	}
+	result, err = w.WorkOrderList()
 	if err != nil {
 		app.Error(c, -1, err, fmt.Sprintf("查询工单数据失败，%v", err.Error()))
 		return
