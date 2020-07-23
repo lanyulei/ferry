@@ -99,6 +99,7 @@ func CreateWorkOrder(c *gin.Context) {
 	tx := orm.Eloquent.Begin()
 	var workOrderInfo = process.WorkOrderInfo{
 		Title:         workOrderValue.Title,
+		Priority:      workOrderValue.Priority,
 		Process:       workOrderValue.Process,
 		Classify:      workOrderValue.Classify,
 		State:         workOrderValue.State,

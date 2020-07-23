@@ -13,6 +13,7 @@ import (
 type WorkOrderInfo struct {
 	base.Model
 	Title         string          `gorm:"column:title; type:varchar(128)" json:"title" form:"title"`                    // 工单标题
+	Priority      int             `gorm:"column:priority; type:int(11)" json:"priority" form:"priority"`                // 工单优先级 1，正常 2，紧急 3，非常紧急
 	Process       int             `gorm:"column:process; type:int(11)" json:"process" form:"process"`                   // 流程ID
 	Classify      int             `gorm:"column:classify; type:int(11)" json:"classify" form:"classify"`                // 分类ID
 	IsEnd         int             `gorm:"column:is_end; type:int(11); default:0" json:"is_end" form:"is_end"`           // 是否结束， 0 未结束，1 已结束
