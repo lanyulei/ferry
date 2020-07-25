@@ -108,6 +108,7 @@ func UpdateProcess(c *gin.Context) {
 			"tpls":      processValue.Tpls,
 			"classify":  processValue.Classify,
 			"task":      processValue.Task,
+			"notice":    processValue.Notice,
 		}).Error
 	if err != nil {
 		app.Error(c, -1, err, fmt.Sprintf("更新流程信息失败，%v", err.Error()))

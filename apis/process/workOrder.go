@@ -6,6 +6,7 @@ import (
 	"ferry/global/orm"
 	"ferry/models/process"
 	"ferry/models/system"
+	"ferry/pkg/notify"
 	"ferry/pkg/service"
 	"ferry/tools"
 	"ferry/tools/app"
@@ -55,8 +56,13 @@ func ProcessStructure(c *gin.Context) {
 // 新建工单
 func CreateWorkOrder(c *gin.Context) {
 	var (
+		taskList       []string
+		stateList      []map[string]interface{}
 		userInfo       system.SysUser
 		variableValue  []interface{}
+		processValue   process.Info
+		sendToUserList []system.SysUser
+		noticeList     []int
 		workOrderValue struct {
 			process.WorkOrderInfo
 			Tpls        map[string][]interface{} `json:"tpls"`
@@ -97,6 +103,13 @@ func CreateWorkOrder(c *gin.Context) {
 
 	// 创建工单数据
 	tx := orm.Eloquent.Begin()
+
+	// 查询流程信息
+	err = tx.Model(&processValue).Where("id = ?", workOrderValue.Process).Find(&processValue).Error
+	if err != nil {
+		return
+	}
+
 	var workOrderInfo = process.WorkOrderInfo{
 		Title:         workOrderValue.Title,
 		Priority:      workOrderValue.Priority,
@@ -156,7 +169,6 @@ func CreateWorkOrder(c *gin.Context) {
 	}
 
 	// 创建历史记录
-	var stateList []map[string]interface{}
 	err = json.Unmarshal(workOrderInfo.State, &stateList)
 	if err != nil {
 		tx.Rollback()
@@ -181,14 +193,33 @@ func CreateWorkOrder(c *gin.Context) {
 
 	tx.Commit()
 
+	// 发送通知
+	err = json.Unmarshal(processValue.Notice, &noticeList)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
+	if len(noticeList) > 0 {
+		sendToUserList, err = service.GetPrincipalUserInfo(stateList, workOrderInfo.Creator)
+		if err != nil {
+			app.Error(c, -1, err, fmt.Sprintf("获取所有处理人的用户信息失败，%v", err.Error()))
+			return
+		}
+
+		go notify.SendNotify(noticeList, map[string]interface{}{
+			"userList": sendToUserList,
+		}, "您有一条待办工单，请及时处理。", "测试")
+	}
+
 	// 执行任务
-	var taskList []string
 	err = json.Unmarshal(workOrderValue.Tasks, &taskList)
 	if err != nil {
 		app.Error(c, -1, err, "")
 		return
 	}
-	go service.ExecTask(taskList)
+	if len(taskList) > 0 {
+		go service.ExecTask(taskList)
+	}
 
 	app.OK(c, "", "成功提交工单申请")
 }

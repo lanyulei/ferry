@@ -26,3 +26,9 @@ settings:
   ssl:
     key: keystring
     pem: temp/pem.pem
+  email:
+    alias: ferry
+    host: smtp.163.com
+    pass: your password
+    port: 465
+    user: your username

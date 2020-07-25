@@ -9,7 +9,7 @@ require (
 	github.com/casbin/casbin/v2 v2.2.1
 	github.com/casbin/gorm-adapter/v2 v2.0.3
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/gin-contrib/cors v1.3.1
+	github.com/gin-contrib/cors v1.3.1 // indirect
 	github.com/gin-gonic/gin v1.5.0
 	github.com/go-kit/kit v0.8.0
 	github.com/go-ole/go-ole v1.2.4 // indirect
@@ -35,5 +35,7 @@ require (
 	github.com/ugorji/go v1.1.7 // indirect
 	github.com/unrolled/secure v1.0.8
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
+	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
