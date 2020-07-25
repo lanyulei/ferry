@@ -12,6 +12,7 @@ import (
 	"ferry/tools/app"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -206,9 +207,22 @@ func CreateWorkOrder(c *gin.Context) {
 			return
 		}
 
-		go notify.SendNotify(noticeList, map[string]interface{}{
-			"userList": sendToUserList,
-		}, "您有一条待办工单，请及时处理。", "测试")
+		// 发送通知
+		go func() {
+			bodyData := notify.BodyData{
+				SendTo: map[string]interface{}{
+					"userList": sendToUserList,
+				},
+				Subject:   "您有一条待办工单，请及时处理。",
+				Classify:  noticeList,
+				Id:        workOrderValue.Id,
+				Title:     workOrderValue.Title,
+				Creator:   userInfo.NickName,
+				Priority:  workOrderValue.Priority,
+				CreatedAt: time.Now().Format("2006-01-02 15:04:05"),
+			}
+			bodyData.SendNotify()
+		}()
 	}
 
 	// 执行任务

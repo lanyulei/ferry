@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ferry</title>
+</head>
+<body>
+    <br>
+    您有一条待办工单请及时处理，以下为工单详情：
+    <br>
+    <br>
+    <table>
+        <tr>
+            <td style="text-align: right">标题：</td>
+            <td>{{ .Title }}</td>
+        </tr>
+        <tr>
+            <td style="text-align: right">申请人：</td>
+            <td>{{ .Creator }}</td>
+        </tr>
+        <tr>
+            <td style="text-align: right">优先级：</td>
+            <td>{{ .PriorityValue }}</td>
+        </tr>
+        <tr>
+            <td style="text-align: right">申请时间：</td>
+            <td>{{ .CreatedAt }}</td>
+        </tr>
+    </table>
+
+    <br>
+    <a href="" target="_blank">点击此处跳转工单详情</a>
+</body>
+<style>
+    table {
+        border: 1px solid #ccc;
+        border-collapse:collapse;
+    }
+    td {
+        padding: 10px 15px 10px 15px;
+        border: 1px solid #ccc;
+    }
+</style>
+</html>
