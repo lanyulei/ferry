@@ -213,13 +213,15 @@ func CreateWorkOrder(c *gin.Context) {
 				SendTo: map[string]interface{}{
 					"userList": sendToUserList,
 				},
-				Subject:   "您有一条待办工单，请及时处理。",
-				Classify:  noticeList,
-				Id:        workOrderValue.Id,
-				Title:     workOrderValue.Title,
-				Creator:   userInfo.NickName,
-				Priority:  workOrderValue.Priority,
-				CreatedAt: time.Now().Format("2006-01-02 15:04:05"),
+				Subject:     "您有一条待办工单，请及时处理",
+				Description: "您有一条待办工单请及时处理，工单描述如下",
+				Classify:    noticeList,
+				ProcessId:   workOrderValue.Process,
+				Id:          workOrderInfo.Id,
+				Title:       workOrderValue.Title,
+				Creator:     userInfo.NickName,
+				Priority:    workOrderValue.Priority,
+				CreatedAt:   time.Now().Format("2006-01-02 15:04:05"),
 			}
 			bodyData.SendNotify()
 		}()

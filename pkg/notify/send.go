@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"ferry/models/system"
 	"ferry/pkg/notify/email"
-	"os"
 	"text/template"
 
 	log "github.com/sirupsen/logrus"
@@ -26,6 +25,8 @@ type BodyData struct {
 	PriorityValue string      // 工单优先级
 	CreatedAt     string      // 工单创建时间
 	Content       string      // 通知的内容
+	Description   string      // 表格上面的描述信息
+	ProcessId     int         // 流程ID
 }
 
 func (b *BodyData) ParsingTemplate() (err error) {
@@ -34,7 +35,6 @@ func (b *BodyData) ParsingTemplate() (err error) {
 		buf bytes.Buffer
 	)
 
-	log.Info(os.Getwd())
 	tmpl, err := template.ParseFiles("./pkg/notify/template/email.html")
 	if err != nil {
 		return
@@ -68,15 +68,18 @@ func (b *BodyData) SendNotify() {
 	for _, c := range b.Classify {
 		switch c {
 		case 1: // 邮件
-			for _, user := range b.SendTo.(map[string]interface{})["userList"].([]system.SysUser) {
-				emailList = append(emailList, user.Email)
+			users := b.SendTo.(map[string]interface{})["userList"].([]system.SysUser)
+			if len(users) > 0 {
+				for _, user := range users {
+					emailList = append(emailList, user.Email)
+				}
+				err = b.ParsingTemplate()
+				if err != nil {
+					log.Errorf("模版内容解析失败，%v", err.Error())
+					return
+				}
+				go email.SendMail(emailList, b.Subject, b.Content)
 			}
-			err = b.ParsingTemplate()
-			if err != nil {
-				log.Errorf("模版内容解析失败，%v", err.Error())
-				return
-			}
-			go email.SendMail(emailList, b.Subject, b.Content)
 		}
 	}
 }

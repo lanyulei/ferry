@@ -7,6 +7,7 @@ import (
 	"ferry/models/base"
 	"ferry/models/process"
 	"ferry/models/system"
+	"ferry/pkg/notify"
 	"ferry/tools"
 	"ferry/tools/app"
 	"fmt"
@@ -338,6 +339,11 @@ func (h *Handle) HandleWorkOrder(
 		parallelStatusOk   bool
 		processInfo        process.Info
 		currentUserInfo    system.SysUser
+		sendToUserList     []system.SysUser
+		noticeList         []int
+		stateList          []map[string]interface{}
+		sendSubject        string = "您有一条待办工单，请及时处理"
+		sendDescription    string = "您有一条待办工单请及时处理，工单描述如下"
 	)
 
 	defer func() {
@@ -651,9 +657,10 @@ func (h *Handle) HandleWorkOrder(
 		h.tx.Rollback()
 		return
 	}
-
 	// 判断目标是否是结束节点
 	if h.targetStateValue["clazz"] == "end" && h.endHistory == true {
+		sendSubject = "您的工单已完成"
+		sendDescription = "您的工单已完成，工单描述如下"
 		err = h.tx.Create(&process.CirculationHistory{
 			Model:       base.Model{},
 			Title:       h.workOrderDetails.Title,
@@ -671,6 +678,39 @@ func (h *Handle) HandleWorkOrder(
 	}
 
 	h.tx.Commit() // 提交事务
+
+	// 发送通知
+	err = json.Unmarshal(processInfo.Notice, &noticeList)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
+	if len(noticeList) > 0 {
+		sendToUserList, err = GetPrincipalUserInfo(stateList, h.workOrderDetails.Creator)
+		if err != nil {
+			app.Error(c, -1, err, fmt.Sprintf("获取所有处理人的用户信息失败，%v", err.Error()))
+			return
+		}
+
+		// 发送通知
+		go func() {
+			bodyData := notify.BodyData{
+				SendTo: map[string]interface{}{
+					"userList": sendToUserList,
+				},
+				Subject:     sendSubject,
+				Description: sendDescription,
+				Classify:    noticeList,
+				ProcessId:   h.workOrderDetails.Process,
+				Id:          h.workOrderDetails.Id,
+				Title:       h.workOrderDetails.Title,
+				Creator:     currentUserInfo.NickName,
+				Priority:    h.workOrderDetails.Priority,
+				CreatedAt:   h.workOrderDetails.CreatedAt.Format("2006-01-02 15:04:05"),
+			}
+			bodyData.SendNotify()
+		}()
+	}
 
 	// 执行流程公共任务及节点任务
 	if h.stateValue["task"] != nil {

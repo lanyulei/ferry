@@ -6,7 +6,7 @@
 </head>
 <body>
     <br>
-    您有一条待办工单请及时处理，以下为工单详情：
+    {{ .Description }}：
     <br>
     <br>
     <table>
@@ -29,7 +29,7 @@
     </table>
 
     <br>
-    <a href="" target="_blank">点击此处跳转工单详情</a>
+    <a href="http://localhost:9527/#/process/handle-ticket?workOrderId={{ .Id }}&processId={{ .ProcessId }}" target="_blank">点击此处跳转到工单详情</a>
 </body>
 <style>
     table {
