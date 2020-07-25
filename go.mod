@@ -20,7 +20,6 @@ require (
 	github.com/jinzhu/gorm v1.9.10
 	github.com/json-iterator/go v1.1.8 // indirect
 	github.com/mailru/easyjson v0.7.1 // indirect
-	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/mojocn/base64Captcha v1.3.1
 	github.com/mssola/user_agent v0.5.1
 	github.com/pkg/errors v0.9.1
@@ -28,6 +27,7 @@ require (
 	github.com/satori/go.uuid v1.2.0
 	github.com/shirou/gopsutil v2.20.3+incompatible
 	github.com/sirupsen/logrus v1.4.2
+	github.com/smallnest/rpcx v0.0.0-20200724150913-530623a2800b
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/viper v1.6.2
 	github.com/swaggo/gin-swagger v1.2.0

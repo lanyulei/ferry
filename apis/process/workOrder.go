@@ -58,7 +58,7 @@ func ProcessStructure(c *gin.Context) {
 func CreateWorkOrder(c *gin.Context) {
 	var (
 		taskList       []string
-		stateList      []map[string]interface{}
+		stateList      []interface{}
 		userInfo       system.SysUser
 		variableValue  []interface{}
 		processValue   process.Info
@@ -181,7 +181,7 @@ func CreateWorkOrder(c *gin.Context) {
 		WorkOrder:   workOrderInfo.Id,
 		State:       workOrderValue.SourceState,
 		Source:      workOrderValue.Source,
-		Target:      stateList[0]["id"].(string),
+		Target:      stateList[0].(map[string]interface{})["id"].(string),
 		Circulation: "新建",
 		Processor:   nameValue,
 		ProcessorId: userInfo.UserId,

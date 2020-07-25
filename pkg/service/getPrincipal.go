@@ -46,7 +46,7 @@ func GetPrincipal(processor []int, processMethod string) (principals string, err
 }
 
 // 获取用户对应
-func GetPrincipalUserInfo(stateList []map[string]interface{}, creator int) (userInfoList []system.SysUser, err error) {
+func GetPrincipalUserInfo(stateList []interface{}, creator int) (userInfoList []system.SysUser, err error) {
 	var (
 		userInfo        system.SysUser
 		deptInfo        system.Dept
@@ -59,17 +59,17 @@ func GetPrincipalUserInfo(stateList []map[string]interface{}, creator int) (user
 	}
 
 	for _, stateItem := range stateList {
-		switch stateItem["process_method"] {
+		switch stateItem.(map[string]interface{})["process_method"] {
 		case "person":
 			err = orm.Eloquent.Model(&system.SysUser{}).
-				Where("user_id in (?)", stateItem["processor"].([]interface{})).
+				Where("user_id in (?)", stateItem.(map[string]interface{})["processor"].([]interface{})).
 				Find(&userInfoListTmp).Error
 			if err != nil {
 				return
 			}
 			userInfoList = append(userInfoList, userInfoListTmp...)
 		case "variable": // 变量
-			for _, processor := range stateItem["processor"].([]interface{}) {
+			for _, processor := range stateItem.(map[string]interface{})["processor"].([]interface{}) {
 				if int(processor.(float64)) == 1 {
 					// 创建者
 					userInfoList = append(userInfoList, userInfo)
