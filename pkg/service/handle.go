@@ -661,6 +661,21 @@ func (h *Handle) HandleWorkOrder(
 		return
 	}
 
+	bodyData := notify.BodyData{
+		SendTo: map[string]interface{}{
+			"userList": sendToUserList,
+		},
+		Subject:     sendSubject,
+		Description: sendDescription,
+		Classify:    noticeList,
+		ProcessId:   h.workOrderDetails.Process,
+		Id:          h.workOrderDetails.Id,
+		Title:       h.workOrderDetails.Title,
+		Creator:     currentUserInfo.NickName,
+		Priority:    h.workOrderDetails.Priority,
+		CreatedAt:   h.workOrderDetails.CreatedAt.Format("2006-01-02 15:04:05"),
+	}
+
 	// 判断目标是否是结束节点
 	if h.targetStateValue["clazz"] == "end" && h.endHistory == true {
 		sendSubject = "您的工单已处理完成"
@@ -679,33 +694,26 @@ func (h *Handle) HandleWorkOrder(
 			h.tx.Rollback()
 			return
 		}
-
-		// 查询工单创建人信息
-		err = h.tx.Model(&system.SysUser{}).
-			Where("user_id = ?", h.workOrderDetails.Creator).
-			Find(&sendToUserList).Error
-		if err != nil {
-			return
-		}
-
-		// 发送通知
-		go func() {
-			bodyData := notify.BodyData{
-				SendTo: map[string]interface{}{
-					"userList": sendToUserList,
-				},
-				Subject:     sendSubject,
-				Description: sendDescription,
-				Classify:    noticeList,
-				ProcessId:   h.workOrderDetails.Process,
-				Id:          h.workOrderDetails.Id,
-				Title:       h.workOrderDetails.Title,
-				Creator:     currentUserInfo.NickName,
-				Priority:    h.workOrderDetails.Priority,
-				CreatedAt:   h.workOrderDetails.CreatedAt.Format("2006-01-02 15:04:05"),
+		if len(noticeList) > 0 {
+			// 查询工单创建人信息
+			err = h.tx.Model(&system.SysUser{}).
+				Where("user_id = ?", h.workOrderDetails.Creator).
+				Find(&sendToUserList).Error
+			if err != nil {
+				return
 			}
-			bodyData.SendNotify()
-		}()
+
+			bodyData.SendTo = map[string]interface{}{
+				"userList": sendToUserList,
+			}
+			bodyData.Subject = sendSubject
+			bodyData.Description = sendDescription
+
+			// 发送通知
+			go func(bodyData notify.BodyData) {
+				bodyData.SendNotify()
+			}(bodyData)
+		}
 	}
 
 	h.tx.Commit() // 提交事务
@@ -717,24 +725,16 @@ func (h *Handle) HandleWorkOrder(
 			return
 		}
 
+		bodyData.SendTo = map[string]interface{}{
+			"userList": sendToUserList,
+		}
+		bodyData.Subject = sendSubject
+		bodyData.Description = sendDescription
+
 		// 发送通知
-		go func() {
-			bodyData := notify.BodyData{
-				SendTo: map[string]interface{}{
-					"userList": sendToUserList,
-				},
-				Subject:     sendSubject,
-				Description: sendDescription,
-				Classify:    noticeList,
-				ProcessId:   h.workOrderDetails.Process,
-				Id:          h.workOrderDetails.Id,
-				Title:       h.workOrderDetails.Title,
-				Creator:     currentUserInfo.NickName,
-				Priority:    h.workOrderDetails.Priority,
-				CreatedAt:   h.workOrderDetails.CreatedAt.Format("2006-01-02 15:04:05"),
-			}
+		go func(bodyData notify.BodyData) {
 			bodyData.SendNotify()
-		}()
+		}(bodyData)
 	}
 
 	// 执行流程公共任务及节点任务
