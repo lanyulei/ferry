@@ -50,10 +50,9 @@ func (b *BodyData) ParsingTemplate() (err error) {
 	return
 }
 
-func (b *BodyData) SendNotify() {
+func (b *BodyData) SendNotify() (err error) {
 	var (
 		emailList []string
-		err       error
 	)
 
 	switch b.Priority {
@@ -82,4 +81,5 @@ func (b *BodyData) SendNotify() {
 			}
 		}
 	}
+	return
 }

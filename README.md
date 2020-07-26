@@ -209,7 +209,7 @@ QQ群：1127401830
 
 ## 打赏
 
-> 如果你觉得这个项目帮助到了你，你可以请作者喝一杯咖啡表示鼓励:
+> 如果您觉得这个项目帮助到了您，您可以请作者喝一杯咖啡表示鼓励:
 
 <img class="no-margin" src="https://www.fdevops.com/wp-content/uploads/2020/07/1595075890-81595075871_.pic_hd.png"  height="200px" >
 

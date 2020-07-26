@@ -711,7 +711,10 @@ func (h *Handle) HandleWorkOrder(
 
 			// 发送通知
 			go func(bodyData notify.BodyData) {
-				bodyData.SendNotify()
+				err = bodyData.SendNotify()
+				if err != nil {
+					return
+				}
 			}(bodyData)
 		}
 	}
@@ -733,7 +736,10 @@ func (h *Handle) HandleWorkOrder(
 
 		// 发送通知
 		go func(bodyData notify.BodyData) {
-			bodyData.SendNotify()
+			err = bodyData.SendNotify()
+			if err != nil {
+				return
+			}
 		}(bodyData)
 	}
 
