@@ -35,7 +35,7 @@ func (b *BodyData) ParsingTemplate() (err error) {
 		buf bytes.Buffer
 	)
 
-	tmpl, err := template.ParseFiles("./pkg/notify/template/email.html")
+	tmpl, err := template.ParseFiles("./static/template/email.html")
 	if err != nil {
 		return
 	}
