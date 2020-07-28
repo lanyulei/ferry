@@ -27,9 +27,9 @@
 
 演示demo: [http://fdevops.com:8001/#/dashboard](http://fdevops.com:8001/#/dashboard)
 
-文档: [https://www.fdevops.com/docs/ferry](https://www.fdevops.com/docs/ferry-tutorial-document/introduction)
-
 账号密码：admin/123456
+
+文档: [https://www.fdevops.com/docs/ferry](https://www.fdevops.com/docs/ferry-tutorial-document/introduction)
 
 ## 安装部署
 
