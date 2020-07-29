@@ -31,7 +31,15 @@
 
 文档: [https://www.fdevops.com/docs/ferry](https://www.fdevops.com/docs/ferry-tutorial-document/introduction)
 
+```
+需注意，因有人恶意删除演示数据，将可删除的数据全都删除了，因此演示的Demo上已经将删除操作的隐藏了。
 
+但是直接在Github或者Gitee下载下来的代码是完整的，请放心。
+
+如果总是出现此类删除数据，关闭演示用户的情况的话，可能考虑不在维护demo，仅放置一些项目截图。
+
+请大家一起监督。
+```
 
 ## 安装部署
 
