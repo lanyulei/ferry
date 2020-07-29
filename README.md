@@ -29,15 +29,9 @@
 
 账号密码：admin/123456
 
-```
-需注意，因有人恶意删除演示数据，将可删除的数据全都删除了，因此演示的Demo上已经将删除操作的隐藏了。
+文档: [https://www.fdevops.com/docs/ferry](https://www.fdevops.com/docs/ferry-tutorial-document/introduction)
 
-但是直接在Github或者Gitee下载下来的代码是完整的，请放心。
 
-如果总是出现此类删除数据，关闭演示用户的情况的话，可能考虑不在维护demo，仅放置一些项目截图。
-
-请大家一起监督。
-```
 
 ## 安装部署
 
@@ -219,7 +213,7 @@ QQ群：1127401830
 
 ## 打赏
 
-> 如果你觉得这个项目帮助到了你，你可以请作者喝一杯咖啡表示鼓励:
+> 如果您觉得这个项目帮助到了您，您可以请作者喝一杯咖啡表示鼓励:
 
 <img class="no-margin" src="https://www.fdevops.com/wp-content/uploads/2020/07/1595075890-81595075871_.pic_hd.png"  height="200px" >
 

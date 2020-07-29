@@ -6,6 +6,8 @@ import (
 	"ferry/tools/config"
 	"strconv"
 
+	"github.com/spf13/viper"
+
 	_ "github.com/go-sql-driver/mysql" //加载mysql
 	"github.com/jinzhu/gorm"
 	log "github.com/sirupsen/logrus"
@@ -39,7 +41,14 @@ func (e *Mysql) Setup() {
 		log.Fatalf("database error %v", orm.Eloquent.Error)
 	}
 
-	orm.Eloquent.LogMode(true)
+	// 是否开启详细日志记录
+	orm.Eloquent.LogMode(viper.GetBool("settings.gorm.logMode"))
+
+	// 设置最大打开连接数
+	orm.Eloquent.DB().SetMaxOpenConns(viper.GetInt("settings.gorm.maxOpenConn"))
+
+	// 用于设置闲置的连接数.设置闲置的连接数则当开启的一个连接使用完成后可以放在池里等候下一次使用
+	orm.Eloquent.DB().SetMaxIdleConns(viper.GetInt("settings.gorm.maxIdleConn"))
 }
 
 type Mysql struct {

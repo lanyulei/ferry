@@ -6,11 +6,13 @@ import (
 	"ferry/global/orm"
 	"ferry/models/process"
 	"ferry/models/system"
+	"ferry/pkg/notify"
 	"ferry/pkg/service"
 	"ferry/tools"
 	"ferry/tools/app"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -55,8 +57,13 @@ func ProcessStructure(c *gin.Context) {
 // 新建工单
 func CreateWorkOrder(c *gin.Context) {
 	var (
+		taskList       []string
+		stateList      []interface{}
 		userInfo       system.SysUser
 		variableValue  []interface{}
+		processValue   process.Info
+		sendToUserList []system.SysUser
+		noticeList     []int
 		workOrderValue struct {
 			process.WorkOrderInfo
 			Tpls        map[string][]interface{} `json:"tpls"`
@@ -97,6 +104,13 @@ func CreateWorkOrder(c *gin.Context) {
 
 	// 创建工单数据
 	tx := orm.Eloquent.Begin()
+
+	// 查询流程信息
+	err = tx.Model(&processValue).Where("id = ?", workOrderValue.Process).Find(&processValue).Error
+	if err != nil {
+		return
+	}
+
 	var workOrderInfo = process.WorkOrderInfo{
 		Title:         workOrderValue.Title,
 		Priority:      workOrderValue.Priority,
@@ -156,7 +170,6 @@ func CreateWorkOrder(c *gin.Context) {
 	}
 
 	// 创建历史记录
-	var stateList []map[string]interface{}
 	err = json.Unmarshal(workOrderInfo.State, &stateList)
 	if err != nil {
 		tx.Rollback()
@@ -168,7 +181,7 @@ func CreateWorkOrder(c *gin.Context) {
 		WorkOrder:   workOrderInfo.Id,
 		State:       workOrderValue.SourceState,
 		Source:      workOrderValue.Source,
-		Target:      stateList[0]["id"].(string),
+		Target:      stateList[0].(map[string]interface{})["id"].(string),
 		Circulation: "新建",
 		Processor:   nameValue,
 		ProcessorId: userInfo.UserId,
@@ -181,14 +194,52 @@ func CreateWorkOrder(c *gin.Context) {
 
 	tx.Commit()
 
+	// 发送通知
+	err = json.Unmarshal(processValue.Notice, &noticeList)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
+	if len(noticeList) > 0 {
+		sendToUserList, err = service.GetPrincipalUserInfo(stateList, workOrderInfo.Creator)
+		if err != nil {
+			app.Error(c, -1, err, fmt.Sprintf("获取所有处理人的用户信息失败，%v", err.Error()))
+			return
+		}
+
+		// 发送通知
+		go func() {
+			bodyData := notify.BodyData{
+				SendTo: map[string]interface{}{
+					"userList": sendToUserList,
+				},
+				Subject:     "您有一条待办工单，请及时处理",
+				Description: "您有一条待办工单请及时处理，工单描述如下",
+				Classify:    noticeList,
+				ProcessId:   workOrderValue.Process,
+				Id:          workOrderInfo.Id,
+				Title:       workOrderValue.Title,
+				Creator:     userInfo.NickName,
+				Priority:    workOrderValue.Priority,
+				CreatedAt:   time.Now().Format("2006-01-02 15:04:05"),
+			}
+			err = bodyData.SendNotify()
+			if err != nil {
+				app.Error(c, -1, err, fmt.Sprintf("通知发送失败，%v", err.Error()))
+				return
+			}
+		}()
+	}
+
 	// 执行任务
-	var taskList []string
 	err = json.Unmarshal(workOrderValue.Tasks, &taskList)
 	if err != nil {
 		app.Error(c, -1, err, "")
 		return
 	}
-	go service.ExecTask(taskList)
+	if len(taskList) > 0 {
+		go service.ExecTask(taskList)
+	}
 
 	app.OK(c, "", "成功提交工单申请")
 }
@@ -443,4 +494,80 @@ func InversionWorkOrder(c *gin.Context) {
 	tx.Commit()
 
 	app.OK(c, nil, "工单已手动结单")
+}
+
+// 催办工单
+func UrgeWorkOrder(c *gin.Context) {
+	var (
+		workOrderInfo  process.WorkOrderInfo
+		sendToUserList []system.SysUser
+		stateList      []interface{}
+		userInfo       system.SysUser
+	)
+	workOrderId := c.DefaultQuery("workOrderId", "")
+	if workOrderId == "" {
+		app.Error(c, -1, errors.New("参数不正确，缺失workOrderId"), "")
+		return
+	}
+
+	// 查询工单数据
+	err := orm.Eloquent.Model(&process.WorkOrderInfo{}).Where("id = ?", workOrderId).Find(&workOrderInfo).Error
+	if err != nil {
+		app.Error(c, -1, err, fmt.Sprintf("查询工单信息失败，%v", err.Error()))
+		return
+	}
+
+	// 确认是否可以催办
+	if workOrderInfo.UrgeLastTime != 0 && (int(time.Now().Unix())-workOrderInfo.UrgeLastTime) < 600 {
+		app.Error(c, -1, errors.New("十分钟内无法多次催办工单。"), "")
+		return
+	}
+
+	// 获取当前工单处理人信息
+	err = json.Unmarshal(workOrderInfo.State, &stateList)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
+	sendToUserList, err = service.GetPrincipalUserInfo(stateList, workOrderInfo.Creator)
+
+	// 查询创建人信息
+	err = orm.Eloquent.Model(&system.SysUser{}).Where("user_id = ?", workOrderInfo.Creator).Find(&userInfo).Error
+	if err != nil {
+		app.Error(c, -1, err, fmt.Sprintf("创建人信息查询失败，%v", err.Error()))
+		return
+	}
+
+	// 发送催办提醒
+	bodyData := notify.BodyData{
+		SendTo: map[string]interface{}{
+			"userList": sendToUserList,
+		},
+		Subject:     "您被催办工单了，请及时处理。",
+		Description: "您有一条待办工单，请及时处理，工单描述如下",
+		Classify:    []int{1}, // todo 1 表示邮箱，后续添加了其他的在重新补充
+		ProcessId:   workOrderInfo.Process,
+		Id:          workOrderInfo.Id,
+		Title:       workOrderInfo.Title,
+		Creator:     userInfo.NickName,
+		Priority:    workOrderInfo.Priority,
+		CreatedAt:   workOrderInfo.CreatedAt.Format("2006-01-02 15:04:05"),
+	}
+	err = bodyData.SendNotify()
+	if err != nil {
+		app.Error(c, -1, err, fmt.Sprintf("催办提醒发送失败，%v", err.Error()))
+		return
+	}
+
+	// 更新数据库
+	err = orm.Eloquent.Model(&process.WorkOrderInfo{}).Where("id = ?", workOrderInfo.Id).Updates(map[string]interface{}{
+		"urge_count":     workOrderInfo.UrgeCount + 1,
+		"urge_last_time": int(time.Now().Unix()),
+	}).Error
+	if err != nil {
+		app.Error(c, -1, err, fmt.Sprintf("更新催办信息失败，%v", err.Error()))
+		return
+	}
+
+	app.OK(c, "", "")
 }

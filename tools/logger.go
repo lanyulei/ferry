@@ -54,7 +54,7 @@ func (p *logFileWriter) Write(data []byte) (n int, err error) {
 	p.size += int64(n)
 	//每天一个文件
 	if p.file.Name() != config2.LogConfig.Dir+"/api-"+time.Now().Format("2006-01-02")+".log" {
-		p.file.Close()
+		_ = p.file.Close()
 		p.file, _ = os.OpenFile(config2.LogConfig.Dir+"/api-"+time.Now().Format("2006-01-02")+".log", os.O_WRONLY|os.O_APPEND|os.O_CREATE|os.O_SYNC, 0600)
 		p.size = 0
 	}

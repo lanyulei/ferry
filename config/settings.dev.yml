@@ -17,6 +17,16 @@ settings:
     password: 123456
     port: 3306
     username: ferry
+  email:
+    alias: ferry
+    host: smtp.163.com
+    pass: your password
+    port: 465
+    user: fdevops@163.com
+  gorm:
+    logmode: 0
+    maxidleconn: 0
+    maxopenconn: 20000
   jwt:
     secret: ferry
     timeout: 3600

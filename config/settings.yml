@@ -26,3 +26,13 @@ settings:
     password: 123456
     port: 3306
     username: root
+  email:
+    alias: ferry
+    host: smtp.163.com
+    pass: your password
+    port: 465
+    user: your username
+  gorm:
+    logmode: 0
+    maxidleconn: 0
+    maxopenconn: 20000
