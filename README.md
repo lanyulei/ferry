@@ -89,6 +89,7 @@ git clone https://gitee.com/yllan/ferry_web.git
 cd ./ferry_web
 
 # 3. 安装依赖
+npm config set registry https://registry.npm.taobao.org
 npm install
 
 # 4. 启动程序
