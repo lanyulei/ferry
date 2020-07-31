@@ -547,11 +547,21 @@ func (h *Handle) HandleWorkOrder(
 			}
 			if parallelStatusOk {
 				h.endHistory = true
+				endAssignValue, ok := h.targetStateValue["assignValue"]
+				if !ok {
+					endAssignValue = []int{}
+				}
+
+				endAssignType, ok := h.targetStateValue["assignType"]
+				if !ok {
+					endAssignType = ""
+				}
+
 				h.updateValue["state"] = []map[string]interface{}{{
 					"id":             h.targetStateValue["id"].(string),
 					"label":          h.targetStateValue["label"],
-					"processor":      h.targetStateValue["assignValue"],
-					"process_method": h.targetStateValue["assignType"],
+					"processor":      endAssignValue,
+					"process_method": endAssignType,
 				}}
 				err = h.circulation()
 				if err != nil {
