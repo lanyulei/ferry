@@ -111,7 +111,11 @@ func (h *Handle) circulation() (err error) {
 		stateValue []byte
 	)
 
-	err = GetVariableValue(h.updateValue["state"].([]interface{}), h.workOrderDetails.Creator)
+	stateList := make([]interface{}, 0)
+	for _, v := range h.updateValue["state"].([]map[string]interface{}) {
+		stateList = append(stateList, v)
+	}
+	err = GetVariableValue(stateList, h.workOrderDetails.Creator)
 	if err != nil {
 		return
 	}
@@ -569,7 +573,7 @@ func (h *Handle) HandleWorkOrder(
 	case "start":
 		stateValue["processor"] = []int{h.workOrderDetails.Creator}
 		stateValue["process_method"] = "person"
-		h.updateValue["state"] = []interface{}{stateValue}
+		h.updateValue["state"] = []map[string]interface{}{stateValue}
 		err = h.circulation()
 		if err != nil {
 			return
@@ -577,7 +581,7 @@ func (h *Handle) HandleWorkOrder(
 	case "userTask":
 		stateValue["processor"] = h.targetStateValue["assignValue"].([]interface{})
 		stateValue["process_method"] = h.targetStateValue["assignType"].(string)
-		h.updateValue["state"] = []interface{}{stateValue}
+		h.updateValue["state"] = []map[string]interface{}{stateValue}
 		err = h.commonProcessing(c)
 		if err != nil {
 			return
@@ -585,7 +589,7 @@ func (h *Handle) HandleWorkOrder(
 	case "receiveTask":
 		stateValue["processor"] = h.targetStateValue["assignValue"].([]interface{})
 		stateValue["process_method"] = h.targetStateValue["assignType"].(string)
-		h.updateValue["state"] = []interface{}{stateValue}
+		h.updateValue["state"] = []map[string]interface{}{stateValue}
 		err = h.commonProcessing(c)
 		if err != nil {
 			return
@@ -593,11 +597,11 @@ func (h *Handle) HandleWorkOrder(
 	case "scriptTask":
 		stateValue["processor"] = []int{}
 		stateValue["process_method"] = ""
-		h.updateValue["state"] = []interface{}{stateValue}
+		h.updateValue["state"] = []map[string]interface{}{stateValue}
 	case "end":
 		stateValue["processor"] = []int{}
 		stateValue["process_method"] = ""
-		h.updateValue["state"] = []interface{}{stateValue}
+		h.updateValue["state"] = []map[string]interface{}{stateValue}
 		err = h.circulation()
 		if err != nil {
 			h.tx.Rollback()
