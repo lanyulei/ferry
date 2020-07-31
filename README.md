@@ -19,7 +19,11 @@
 
 **流程中心**
 
-通过灵活的配置流程、模版等数据，非常快速方便的生成工单流程，通过对流程进行任务绑定，实现流程中的钩子操作，未兼容更多的通知方式，因此未在代码中直接写死通知方式，可通过任务绑定实现处理通知。
+通过灵活的配置流程、模版等数据，非常快速方便的生成工单流程，通过对流程进行任务绑定，实现流程中的钩子操作，目前支持绑定邮件来通知处理，当然为兼容更多的通知方式，也可以自己写任务脚本来进行任务通知，可根据自己的需求定制。
+
+兼容了多种处理情况，包括串行处理、并行处理以及根据条件判断进行节点跳转。
+
+可通过变量设置处理人，例如：直接负责人、部门负责人、HRBP等变量数据。
 
 **系统管理**
 
@@ -41,153 +45,27 @@
 请大家一起监督。
 ```
 
-## 安装部署
+## 功能介绍
 
-```
-go >= 1.14
-vue >= 2.6
-npm >= 6.14
-```
+<!-- wp:paragraph -->
+<p>下面对本系统的功能做一个简单介绍。</p>
+<!-- /wp:paragraph -->
 
-#### 本地二次开发
+<!-- wp:paragraph -->
+<p>工单系统相关功能：</p>
+<!-- /wp:paragraph -->
 
-后端
+<!-- wp:list -->
+<ul><li>工单提交申请</li><li>工单统计</li><li>多维度工单列表，包括（我创建的、我相关的、我待办的、所有工单）</li><li>自定义流程</li><li>自定义模版</li><li>任务钩子</li><li>任务管理</li><li>催办</li><li>转交</li><li>手动结单</li><li>加签</li><li>多维度处理人，包括（个人，变量(创建者、创建者负责人)）</li><li>排他网关，即根据条件判断进行工单跳转</li><li>并行网关，即多个节点同时进行审批处理</li><li>通知提醒（目前仅支持邮件）</li><li>流程分类管理</li></ul>
+<!-- /wp:list -->
 
-```
-# 1. 获取代码
-git clone https://github.com/lanyulei/ferry.git
-or
-git clone https://gitee.com/yllan/ferry.git
+<!-- wp:paragraph -->
+<p>权限管理相关功能，使用casbin实现接口权限控制：</p>
+<!-- /wp:paragraph -->
 
-# 2. 进入工作路径
-cd ./ferry
-
-# 3. 修改配置 ferry/config/settings.dev.yml
-vi ferry/config/settings.dev.yml
-
-# 配置信息注意事项：
-1. 程序的启动参数
-2. 数据库的相关信息
-3. 日志的路径
-
-# 4. 初始化数据库
-go run main.go init -c=config/settings.dev.yml
-
-# 5. 启动程序
-go run main.go server -c=config/settings.dev.yml
-```
-
-前端
-
-```
-# 1. 获取代码
-git clone https://github.com/lanyulei/ferry_web.git
-or
-git clone https://gitee.com/yllan/ferry_web.git
-
-# 2. 进入工作路径
-cd ./ferry_web
-
-# 3. 安装依赖
-npm config set registry https://registry.npm.taobao.org
-npm install
-
-# 4. 启动程序
-npm run dev
-```
-
-
-#### 上线部署
-
-后端
-
-```
-# 1. 进入到项目路径下进行交叉编译（centos）
-env GOOS=linux GOARCH=amd64 go build
-
-更多交叉编译内容，请访问 https://www.fdevops.com/2020/03/08/go-locale-configuration
-
-# 2. config目录上传到项目根路径下，并确认配置信息是否正确
-vi ferry/config/settings.yml
-
-# 配置信息注意事项：
-1. 程序的启动参数
-2. 数据库的相关信息
-3. 日志的路径
-
-# 3. 创建日志路径及静态文件经历
-mkdir -p log static/uploadfile
-
-# 4. 初始化数据
-./ferry init -c=config/settings.yml
-
-# 5. 启动程序，推荐通过"进程管理工具"进行启动维护
-nohup ./ferry server -c=config/settings.yml > /dev/null 2>&1 &
-```
-
-前端
-
-```
-# 1. 编译
-npm run build:prod
-
-# 2. 将dist目录上传至项目路径下即可。
-mv dist web
-
-# 3. nginx配置，根据业务自行调整即可
-  server {
-    listen 8001; # 监听端口
-    server_name localhost; # 域名可以有多个，用空格隔开
-  
-    #charset koi8-r;
-  
-    #access_log  logs/host.access.log  main;
-    location / {
-      root /data/ferry/web;
-      index index.html index.htm; #目录内的默认打开文件,如果没有匹配到index.html,则搜索index.htm,依次类推
-    }
-  
-    #ssl配置省略
-    location /api {
-      # rewrite ^.+api/?(.*)$ /$1 break;
-      proxy_pass http://127.0.0.1:8002; #node api server 即需要代理的IP地址
-      proxy_redirect off;
-      proxy_set_header Host $host;
-      proxy_set_header X-Real-IP $remote_addr;
-      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    }
-  
-    # 登陆
-    location /login {
-      proxy_pass http://127.0.0.1:8002; #node api server 即需要代理的IP地址
-    }
-  
-    # 刷新token
-    location /refresh_token {
-      proxy_pass http://127.0.0.1:8002; #node api server 即需要代理的IP地址
-    }
-  
-    # 接口地址
-    location /swagger {
-      proxy_pass http://127.0.0.1:8002; #node api server 即需要代理的IP地址
-    }
-  
-    # 后端静态文件路径
-    location /static/uploadfile {
-      proxy_pass http://127.0.0.1:8002; #node api server 即需要代理的IP地址
-    }
-  
-    #error_page  404              /404.html;    #对错误页面404.html 做了定向配置
-  
-    # redirect server error pages to the static page /50x.html
-    #将服务器错误页面重定向到静态页面/50x.html
-    #
-    error_page 500 502 503 504 /50x.html;
-    location = /50x.html {
-      root html;
-    }
-  }
-```
+<!-- wp:list -->
+<ul><li>用户、角色、岗位的增删查改，批量删除，多条件搜索</li><li>角色、岗位数据导出Excel</li><li>重置用户密码</li><li>维护个人信息，上传管理头像，修改当前账户密码</li><li>部门的增删查改</li><li>菜单目录、跳转、按钮及API接口的增删查改</li><li>登陆日志管理</li><li>左菜单权限控制</li><li>页面按钮权限控制</li><li>API接口权限控制</li></ul>
+<!-- /wp:list -->
 
 ## 交流群
 
