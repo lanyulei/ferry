@@ -192,6 +192,16 @@ func CreateWorkOrder(c *gin.Context) {
 		return
 	}
 
+	// 更新流程提交数量统计
+	err = tx.Model(&process.Info{}).
+		Where("id = ?", workOrderValue.Process).
+		Update("submit_count", processValue.SubmitCount+1).Error
+	if err != nil {
+		tx.Rollback()
+		app.Error(c, -1, err, fmt.Sprintf("更新流程提交数量统计失败，%v", err.Error()))
+		return
+	}
+
 	tx.Commit()
 
 	// 发送通知
