@@ -792,7 +792,11 @@ func (h *Handle) HandleWorkOrder(
 
 	// 发送通知
 	if len(noticeList) > 0 {
-		sendToUserList, err = GetPrincipalUserInfo(h.updateValue["state"].([]interface{}), h.workOrderDetails.Creator)
+		stateList := make([]interface{}, 0)
+		for _, v := range h.updateValue["state"].([]map[string]interface{}) {
+			stateList = append(stateList, v)
+		}
+		sendToUserList, err = GetPrincipalUserInfo(stateList, h.workOrderDetails.Creator)
 		if err != nil {
 			log.Error(err)
 			return
