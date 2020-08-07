@@ -106,6 +106,14 @@ QQ群：1127401830
 
 <img class="no-margin" src="https://www.fdevops.com/wp-content/uploads/2020/07/1595075890-81595075871_.pic_hd.png"  height="200px" >
 
+------------------------------
+
+感谢各位的打赏，你的支持，我的动力。所有打赏将作为项目维护成本。
+
+* 王*   1元
+* p*i  1元
+* LJ   10元
+
 ## License
 
 开源不易，请尊重作者的付出，感谢。
