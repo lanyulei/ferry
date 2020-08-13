@@ -1,12 +1,12 @@
 package router
 
 import (
-	"ferry/apis/dashboard"
 	"ferry/apis/monitor"
 	"ferry/apis/system"
 	"ferry/handler"
 	"ferry/pkg/jwtauth"
 	jwt "ferry/pkg/jwtauth"
+	"ferry/router/dashboard"
 	"ferry/router/process"
 	systemRouter "ferry/router/system"
 
@@ -54,9 +54,6 @@ func sysNoCheckRoleRouter(r *gin.RouterGroup) {
 	v1.GET("/monitor/server", monitor.ServerInfo)
 	v1.GET("/getCaptcha", system.GenerateCaptchaHandler)
 	v1.GET("/menuTreeselect", system.GetMenuTreeelect)
-
-	// 首页数据
-	v1.GET("/dashboard", dashboard.InitData)
 }
 
 func sysCheckRoleRouterInit(r *gin.RouterGroup, authMiddleware *jwtauth.GinJWTMiddleware) {
@@ -67,7 +64,7 @@ func sysCheckRoleRouterInit(r *gin.RouterGroup, authMiddleware *jwtauth.GinJWTMi
 	v1 := r.Group("/api/v1")
 
 	// 首页
-	//dashboard.RegisterDashboardRouter(v1, authMiddleware)
+	dashboard.RegisterDashboardRouter(v1, authMiddleware)
 
 	// 系统管理
 	systemRouter.RegisterPageRouter(v1, authMiddleware)
