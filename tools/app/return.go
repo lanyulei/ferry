@@ -1,8 +1,10 @@
 package app
 
 import (
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 )
 
 // 失败数据处理
@@ -12,6 +14,7 @@ func Error(c *gin.Context, code int, err error, msg string) {
 	if msg != "" {
 		res.Msg = msg
 	}
+	log.Error(res.Msg)
 	c.JSON(http.StatusOK, res.ReturnError(code))
 }
 
@@ -26,7 +29,7 @@ func OK(c *gin.Context, data interface{}, msg string) {
 }
 
 // 分页数据处理
-func PageOK(c *gin.Context, result interface{},count int,pageIndex int,pageSize int, msg string) {
+func PageOK(c *gin.Context, result interface{}, count int, pageIndex int, pageSize int, msg string) {
 	var res PageResponse
 	res.Data.List = result
 	res.Data.Count = count
@@ -40,5 +43,5 @@ func PageOK(c *gin.Context, result interface{},count int,pageIndex int,pageSize 
 
 // 兼容函数
 func Custum(c *gin.Context, data gin.H) {
-	c.JSON(http.StatusOK,data)
+	c.JSON(http.StatusOK, data)
 }

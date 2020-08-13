@@ -302,6 +302,7 @@ func ProcessWorkOrder(c *gin.Context) {
 			WorkOrderId    int    `json:"work_order_id"`   // 工单ID
 			Circulation    string `json:"circulation"`     // 流转ID
 			FlowProperties int    `json:"flow_properties"` // 流转类型 0 拒绝，1 同意，2 其他
+			Remarks        string `json:"remarks"`         // 处理的备注信息
 		}
 	)
 
@@ -330,6 +331,7 @@ func ProcessWorkOrder(c *gin.Context) {
 		params.SourceState,    // 源节点
 		params.Circulation,    // 流转标题
 		params.FlowProperties, // 流转属性
+		params.Remarks,        // 备注信息
 	)
 	if err != nil {
 		app.Error(c, -1, nil, fmt.Sprintf("处理工单失败，%v", err.Error()))
