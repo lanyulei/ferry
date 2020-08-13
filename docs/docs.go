@@ -22,7 +22,7 @@ var doc = `{
         "contact": {},
         "license": {
             "name": "MIT",
-            "url": "https://github.com/wenjianzhang/ferry/blob/master/LICENSE.md"
+            "url": "https://github.com/lanyulei/ferry/blob/master/LICENSE"
         },
         "version": "{{.Version}}"
     },
@@ -3103,7 +3103,7 @@ var SwaggerInfo = swaggerInfo{
 	BasePath:    "",
 	Schemes:     []string{},
 	Title:       "ferry API",
-	Description: "基于Gin + Vue + Element UI的前后端分离权限管理系统的接口文档\n添加qq群: 74520518 进入技术交流群 请备注，谢谢！",
+	Description: "基于Gin + Vue + Element UI前后端分离的工单系统的接口文档\n添加qq群: 1127401830 进入技术交流群 请备注，谢谢！",
 }
 
 type s struct{}
