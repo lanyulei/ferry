@@ -45,7 +45,7 @@ func run() {
 	log.Println("数据库结构初始化成功！")
 	//5. 数据初始化完成
 	if err := system.InitDb(); err != nil {
-		log.Fatal("数据库基础数据初始化失败！")
+		log.Fatalf("数据库基础数据初始化失败，%v", err)
 	}
 
 	usage = `数据库基础数据初始化成功`
