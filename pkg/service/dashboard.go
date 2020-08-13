@@ -14,7 +14,7 @@ func WeeklyStatistics() (statisticsData map[string][]interface{}, err error) {
 	var (
 		datetime   string
 		total      int
-		over       int
+		overs      int
 		processing int
 		sqlValue   string
 		rows       *sql.Rows
@@ -22,7 +22,7 @@ func WeeklyStatistics() (statisticsData map[string][]interface{}, err error) {
 	sqlValue = `SELECT
 		a.click_date,
 		ifnull( b.total, 0 ) AS total,
-		ifnull( b.over, 0 ) AS over,
+		ifnull( b.overs, 0 ) AS overs,
 		ifnull( b.processing, 0 ) AS processing 
 	FROM
 		(
@@ -45,7 +45,7 @@ func WeeklyStatistics() (statisticsData map[string][]interface{}, err error) {
 		SELECT
 			a1.datetime AS datetime,
 			a1.count AS total,
-			b1.count AS over,
+			b1.count AS overs,
 			c.count AS processing
 		FROM
 			(
@@ -86,13 +86,13 @@ func WeeklyStatistics() (statisticsData map[string][]interface{}, err error) {
 	}()
 	statisticsData = map[string][]interface{}{}
 	for rows.Next() {
-		err = rows.Scan(&datetime, &total, &over, &processing)
+		err = rows.Scan(&datetime, &total, &overs, &processing)
 		if err != nil {
 			return
 		}
 		statisticsData["datetime"] = append(statisticsData["datetime"], datetime[:10])
 		statisticsData["total"] = append(statisticsData["total"], total)
-		statisticsData["over"] = append(statisticsData["over"], over)
+		statisticsData["overs"] = append(statisticsData["overs"], overs)
 		statisticsData["processing"] = append(statisticsData["processing"], processing)
 	}
 	return
