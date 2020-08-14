@@ -6,6 +6,8 @@ import (
 	"ferry/pkg/notify/email"
 	"text/template"
 
+	"github.com/spf13/viper"
+
 	log "github.com/sirupsen/logrus"
 )
 
@@ -27,6 +29,7 @@ type BodyData struct {
 	Content       string      // 通知的内容
 	Description   string      // 表格上面的描述信息
 	ProcessId     int         // 流程ID
+	Domain        string      // 域名地址
 }
 
 func (b *BodyData) ParsingTemplate() (err error) {
@@ -40,6 +43,7 @@ func (b *BodyData) ParsingTemplate() (err error) {
 		return
 	}
 
+	b.Domain = viper.GetString("settings.domain")
 	err = tmpl.Execute(&buf, b)
 	if err != nil {
 		return
