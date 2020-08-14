@@ -14,13 +14,13 @@ settings:
     dbtype: mysql
     host: 127.0.0.1
     name: ferry
-    password: ferry@2020
+    password: your password
     port: 3306
     username: ferry
   email:
     alias: ferry
     host: smtp.163.com
-    pass: REYVECRYOZEZIFKL
+    pass: your password
     port: 465
     user: fdevops@163.com
   gorm:
