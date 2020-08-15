@@ -6,3 +6,4 @@ temp/
 vendor
 tmp/
 config/settings.dev.yml
+logs
