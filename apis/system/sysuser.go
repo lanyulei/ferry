@@ -2,13 +2,13 @@ package system
 
 import (
 	"ferry/models/system"
+	"ferry/pkg/logger"
 	"ferry/tools"
 	"ferry/tools/app"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/google/uuid"
-	log "github.com/sirupsen/logrus"
 )
 
 /*
@@ -265,7 +265,7 @@ func InsetSysUserAvatar(c *gin.Context) {
 	guid := uuid.New().String()
 	filPath := "static/uploadfile/" + guid + ".jpg"
 	for _, file := range files {
-		log.Println(file.Filename)
+		logger.Info(file.Filename)
 		// 上传文件至指定目录
 		err = c.SaveUploadedFile(file, filPath)
 		if err != nil {

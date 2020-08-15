@@ -3,10 +3,10 @@ package system
 import (
 	"errors"
 	"ferry/global/orm"
+	"ferry/pkg/logger"
 	"ferry/tools"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -303,7 +303,7 @@ func (e *SysUser) SetPwd(pwd SysUserPwd) (Result bool, err error) {
 		if strings.Contains(err.Error(), "hashedPassword is not the hash of the given password") {
 			tools.HasError(err, "密码错误(代码202)", 500)
 		}
-		log.Print(err)
+		logger.Info(err)
 		return
 	}
 	e.Password = pwd.NewPassword

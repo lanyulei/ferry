@@ -5,11 +5,9 @@ import (
 	"ferry/global/orm"
 	"ferry/models/gorm"
 	"ferry/models/system"
-	"ferry/tools"
+	"ferry/pkg/logger"
 	config2 "ferry/tools/config"
 	"fmt"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
 )
@@ -36,16 +34,14 @@ func run() {
 	fmt.Println(usage)
 	//1. 读取配置
 	config2.ConfigSetup(config)
-	//2. 设置日志
-	tools.InitLogger()
-	//3. 初始化数据库链接
+	//2. 初始化数据库链接
 	database.Setup()
-	//4. 数据库迁移
+	//3. 数据库迁移
 	_ = migrateModel()
-	log.Println("数据库结构初始化成功！")
-	//5. 数据初始化完成
+	logger.Info("数据库结构初始化成功！")
+	//4. 数据初始化完成
 	if err := system.InitDb(); err != nil {
-		log.Fatalf("数据库基础数据初始化失败，%v", err)
+		logger.Fatalf("数据库基础数据初始化失败，%v", err)
 	}
 
 	usage = `数据库基础数据初始化成功`

@@ -3,13 +3,13 @@ package handler
 import (
 	"ferry/models/system"
 	jwt "ferry/pkg/jwtauth"
+	"ferry/pkg/logger"
 	"ferry/tools"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mojocn/base64Captcha"
 	"github.com/mssola/user_agent"
-	log "github.com/sirupsen/logrus"
 )
 
 var store = base64Captcha.DefaultMemStore
@@ -71,26 +71,26 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 		loginlog.Status = "1"
 		loginlog.Msg = "数据解析失败"
 		loginlog.Username = loginVals.Username
-		loginlog.Create()
+		_, _ = loginlog.Create()
 		return nil, jwt.ErrMissingLoginValues
 	}
 	loginlog.Username = loginVals.Username
 	if !store.Verify(loginVals.UUID, loginVals.Code, true) {
 		loginlog.Status = "1"
 		loginlog.Msg = "验证码错误"
-		loginlog.Create()
+		_, _ = loginlog.Create()
 		return nil, jwt.ErrInvalidVerificationode
 	}
 
 	user, role, e := loginVals.GetUser()
 	if e == nil {
-		loginlog.Create()
+		_, _ = loginlog.Create()
 		return map[string]interface{}{"user": user, "role": role}, nil
 	} else {
 		loginlog.Status = "1"
 		loginlog.Msg = "登录失败"
-		loginlog.Create()
-		log.Println(e.Error())
+		_, _ = loginlog.Create()
+		logger.Info(e.Error())
 	}
 
 	return nil, jwt.ErrFailedAuthentication

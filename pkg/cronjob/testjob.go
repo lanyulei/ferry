@@ -1,19 +1,20 @@
 package cronjob
 
 import (
+	"ferry/pkg/logger"
+
 	"github.com/robfig/cron/v3"
-	log "github.com/sirupsen/logrus"
 )
 
 func TestJob(c *cron.Cron) {
 	id, err := c.AddFunc("1 * * * *", func() {
 
-		log.Println("Every hour on the one hour")
+		logger.Info("Every hour on the one hour")
 	})
 	if err != nil {
-		log.Println(err)
-		log.Println("start error")
+		logger.Info(err)
+		logger.Info("start error")
 	} else {
-		log.Printf("Start Success; ID: %v \r\n", id)
+		logger.Infof("Start Success; ID: %v \r\n", id)
 	}
 }

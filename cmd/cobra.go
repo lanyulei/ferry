@@ -4,9 +4,9 @@ import (
 	"errors"
 	"ferry/cmd/api"
 	"ferry/cmd/migrate"
+	"ferry/pkg/logger"
 	"os"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +25,7 @@ var rootCmd = &cobra.Command{
 	PersistentPreRunE: func(*cobra.Command, []string) error { return nil },
 	Run: func(cmd *cobra.Command, args []string) {
 		usageStr := `欢迎使用 ferry，可以是用 -h 查看命令`
-		log.Printf("%s\n", usageStr)
+		logger.Infof("%s\n", usageStr)
 	},
 }
 

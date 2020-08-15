@@ -12,6 +12,7 @@ require (
 	github.com/gin-contrib/cors v1.3.1 // indirect
 	github.com/gin-gonic/gin v1.5.0
 	github.com/go-kit/kit v0.8.0
+	github.com/go-ldap/ldap/v3 v3.2.3 // indirect
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/go-openapi/spec v0.19.7 // indirect
 	github.com/go-openapi/swag v0.19.8 // indirect
@@ -34,8 +35,10 @@ require (
 	github.com/swaggo/swag v1.6.5
 	github.com/ugorji/go v1.1.7 // indirect
 	github.com/unrolled/secure v1.0.8
+	go.uber.org/zap v1.10.0
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )

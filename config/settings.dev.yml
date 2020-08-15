@@ -31,9 +31,19 @@ settings:
   jwt:
     secret: ferry
     timeout: 3600
+  ldap:
+    host: 127.0.0.1
+    port: 389
   log:
-    dir: logs
-    operdb: false
+    compress: 1
+    consolestdout: 1
+    filestdout: 0
+    level: debug
+    localtime: 1
+    maxage: 30
+    maxbackups: 300
+    maxsize: 10240
+    path: ./logs/ferry.log
   redis:
     host: 127.0.0.1
     port: 6379

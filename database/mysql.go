@@ -3,6 +3,7 @@ package database
 import (
 	"bytes"
 	"ferry/global/orm"
+	"ferry/pkg/logger"
 	"ferry/tools/config"
 	"strconv"
 
@@ -10,7 +11,6 @@ import (
 
 	_ "github.com/go-sql-driver/mysql" //加载mysql
 	"github.com/jinzhu/gorm"
-	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -32,13 +32,13 @@ func (e *Mysql) Setup() {
 	orm.Eloquent, err = db.Open(DbType, orm.MysqlConn)
 
 	if err != nil {
-		log.Fatalf("%s connect error %v", DbType, err)
+		logger.Fatalf("%s connect error %v", DbType, err)
 	} else {
-		log.Printf("%s connect success!", DbType)
+		logger.Infof("%s connect success!", DbType)
 	}
 
 	if orm.Eloquent.Error != nil {
-		log.Fatalf("database error %v", orm.Eloquent.Error)
+		logger.Fatalf("database error %v", orm.Eloquent.Error)
 	}
 
 	// 是否开启详细日志记录
