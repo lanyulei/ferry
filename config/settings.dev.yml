@@ -17,6 +17,7 @@ settings:
     password: your password
     port: 3306
     username: ferry
+  domain: http://192.168.0.100:9527
   email:
     alias: ferry
     host: smtp.163.com
@@ -33,7 +34,9 @@ settings:
   log:
     dir: logs
     operdb: false
+  redis:
+    host: 127.0.0.1
+    port: 6379
   ssl:
     key: keystring
     pem: temp/pem.pem
-  domain: http://192.168.0.100:9527
