@@ -3,6 +3,8 @@ package jwtauth
 import (
 	"crypto/rsa"
 	"errors"
+	"ferry/global/orm"
+	"ferry/pkg/ldap"
 	config2 "ferry/tools/config"
 	"io/ioutil"
 	"net/http"
@@ -205,7 +207,6 @@ var (
 
 	NiceKey = "nice"
 
-	RKey      = "r"
 	RoleIdKey = "roleid"
 
 	RoleKey = "rolekey"
@@ -433,16 +434,79 @@ func (mw *GinJWTMiddleware) GetClaimsFromJWT(c *gin.Context) (MapClaims, error) 
 // Payload needs to be json in the form of {"username": "USERNAME", "password": "PASSWORD"}.
 // Reply will be of the form {"token": "TOKEN"}.
 func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
-	if mw.Authenticator == nil {
-		mw.unauthorized(c, http.StatusInternalServerError, mw.HTTPStatusMessageFunc(ErrMissingAuthenticatorFunc, c))
-		return
-	}
+	var (
+		data interface{}
+		err  error
+	)
 
-	data, err := mw.Authenticator(c)
+	loginType := c.DefaultQuery("login_type", "0")
 
-	if err != nil {
-		mw.unauthorized(c, 400, mw.HTTPStatusMessageFunc(err, c))
-		return
+	if loginType == "0" {
+		// 普通登陆
+		if mw.Authenticator == nil {
+			mw.unauthorized(c, http.StatusInternalServerError, mw.HTTPStatusMessageFunc(ErrMissingAuthenticatorFunc, c))
+			return
+		}
+
+		data, err = mw.Authenticator(c)
+
+		if err != nil {
+			mw.unauthorized(c, 400, mw.HTTPStatusMessageFunc(err, c))
+			return
+		}
+	} else {
+		// ldap登陆
+		// 1. 获取ldap用户信息
+		var (
+			roleValue struct {
+				RoleId int `json:"role_id"`
+			}
+			authUserCount int
+			l             = ldap.Connection{}
+			userInfo      struct {
+				Username string `json:"username"`
+				Password string `json:"password"`
+			}
+			addUserInfo struct {
+				Username string `json:"username"`
+				RoleId   int    `json:"role_id"`
+			}
+		)
+		err = c.ShouldBind(&userInfo)
+		if err != nil {
+			mw.unauthorized(c, -1, mw.HTTPStatusMessageFunc(err, c))
+			return
+		}
+		err = l.LdapLogin(userInfo.Username, userInfo.Password)
+		if err != nil {
+			mw.unauthorized(c, -1, mw.HTTPStatusMessageFunc(err, c))
+			return
+		}
+		// 2. 将ldap用户信息写入到用户数据表中
+		err = orm.Eloquent.Table("sys_user").
+			Where("username = ?", userInfo.Username).
+			Count(&authUserCount).Error
+		if err != nil {
+			mw.unauthorized(c, -1, mw.HTTPStatusMessageFunc(err, c))
+			return
+		}
+		if authUserCount == 0 {
+			addUserInfo.Username = userInfo.Username
+			// 获取默认权限ID
+			err = orm.Eloquent.Table("sys_role").Where("role_key = 'common'").Scan(&roleValue).Error
+			if err != nil {
+				mw.unauthorized(c, -1, mw.HTTPStatusMessageFunc(err, c))
+				return
+			}
+			addUserInfo.RoleId = roleValue.RoleId // 绑定通用角色
+			err = orm.Eloquent.Table("sys_user").Create(&addUserInfo).Error
+			if err != nil {
+				mw.unauthorized(c, -1, mw.HTTPStatusMessageFunc(err, c))
+				return
+			}
+		}
+
+		// 3. 获取
 	}
 
 	// Create the token

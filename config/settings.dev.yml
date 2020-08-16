@@ -32,7 +32,8 @@ settings:
     secret: ferry
     timeout: 3600
   ldap:
-    host: 127.0.0.1
+    basedn: dc=fdevops,dc=com
+    host: localhost
     port: 389
   log:
     compress: 1
