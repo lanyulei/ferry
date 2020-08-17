@@ -1,15 +1,18 @@
 package handler
 
 import (
+	"ferry/global/orm"
 	"ferry/models/system"
 	jwt "ferry/pkg/jwtauth"
+	"ferry/pkg/ldap"
+	"ferry/pkg/logger"
 	"ferry/tools"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mojocn/base64Captcha"
 	"github.com/mssola/user_agent"
-	log "github.com/sirupsen/logrus"
 )
 
 var store = base64Captcha.DefaultMemStore
@@ -51,46 +54,91 @@ func IdentityHandler(c *gin.Context) interface{} {
 // @Success 200 {string} string "{"code": 200, "expire": "2019-08-07T12:45:48+08:00", "token": ".eyJleHAiOjE1NjUxNTMxNDgsImlkIjoiYWRtaW4iLCJvcmlnX2lhdCI6MTU2NTE0OTU0OH0.-zvzHvbg0A" }"
 // @Router /login [post]
 func Authenticator(c *gin.Context) (interface{}, error) {
-	var loginVals system.Login
-	var loginlog system.LoginLog
+	var (
+		err           error
+		loginVal      system.Login
+		loginLog      system.LoginLog
+		roleValue     system.SysRole
+		authUserCount int
+		l             = ldap.Connection{}
+		userInfo      system.SysUser
+		addUserInfo   struct {
+			Username string `json:"username"`
+			RoleId   int    `json:"role_id"`
+		}
+	)
 
+	loginType := c.DefaultQuery("login_type", "0")
 	ua := user_agent.New(c.Request.UserAgent())
-	loginlog.Ipaddr = c.ClientIP()
+	loginLog.Ipaddr = c.ClientIP()
 	location := tools.GetLocation(c.ClientIP())
-	loginlog.LoginLocation = location
-	loginlog.LoginTime = tools.GetCurrntTime()
-	loginlog.Status = "0"
-	loginlog.Remark = c.Request.UserAgent()
+	loginLog.LoginLocation = location
+	loginLog.LoginTime = tools.GetCurrntTime()
+	loginLog.Status = "0"
+	loginLog.Remark = c.Request.UserAgent()
 	browserName, browserVersion := ua.Browser()
-	loginlog.Browser = browserName + " " + browserVersion
-	loginlog.Os = ua.OS()
-	loginlog.Msg = "登录成功"
-	loginlog.Platform = ua.Platform()
+	loginLog.Browser = browserName + " " + browserVersion
+	loginLog.Os = ua.OS()
+	loginLog.Msg = "登录成功"
+	loginLog.Platform = ua.Platform()
 
-	if err := c.ShouldBind(&loginVals); err != nil {
-		loginlog.Status = "1"
-		loginlog.Msg = "数据解析失败"
-		loginlog.Username = loginVals.Username
-		loginlog.Create()
+	// 获取前端过来的数据
+	if err := c.ShouldBind(&loginVal); err != nil {
+		fmt.Println("********** " + err.Error() + " **********")
+		loginLog.Status = "1"
+		loginLog.Msg = "数据解析失败"
+		loginLog.Username = loginVal.Username
+		_, _ = loginLog.Create()
 		return nil, jwt.ErrMissingLoginValues
 	}
-	loginlog.Username = loginVals.Username
-	if !store.Verify(loginVals.UUID, loginVals.Code, true) {
-		loginlog.Status = "1"
-		loginlog.Msg = "验证码错误"
-		loginlog.Create()
+	loginLog.Username = loginVal.Username
+
+	// 校验验证码
+	if !store.Verify(loginVal.UUID, loginVal.Code, true) {
+		loginLog.Status = "1"
+		loginLog.Msg = "验证码错误"
+		_, _ = loginLog.Create()
 		return nil, jwt.ErrInvalidVerificationode
 	}
 
-	user, role, e := loginVals.GetUser()
+	// ldap 验证
+	if loginType == "1" {
+		// ldap登陆
+		err = l.LdapLogin(loginVal.Username, loginVal.Password)
+		if err != nil {
+			return nil, jwt.ErrInvalidVerificationode
+		}
+		// 2. 将ldap用户信息写入到用户数据表中
+		err = orm.Eloquent.Table("sys_user").
+			Where("username = ?", userInfo.Username).
+			Count(&authUserCount).Error
+		if err != nil {
+			return nil, jwt.ErrInvalidVerificationode
+		}
+		if authUserCount == 0 {
+			addUserInfo.Username = userInfo.Username
+			// 获取默认权限ID
+			err = orm.Eloquent.Table("sys_role").Where("role_key = 'common'").Find(&roleValue).Error
+			if err != nil {
+				return nil, jwt.ErrInvalidVerificationode
+			}
+			addUserInfo.RoleId = roleValue.RoleId // 绑定通用角色
+			err = orm.Eloquent.Table("sys_user").Create(&addUserInfo).Error
+			if err != nil {
+				return nil, jwt.ErrInvalidVerificationode
+			}
+		}
+	}
+
+	user, role, e := loginVal.GetUser()
 	if e == nil {
-		loginlog.Create()
+		_, _ = loginLog.Create()
 		return map[string]interface{}{"user": user, "role": role}, nil
 	} else {
-		loginlog.Status = "1"
-		loginlog.Msg = "登录失败"
-		loginlog.Create()
-		log.Println(e.Error())
+		loginLog.Status = "1"
+		loginLog.Msg = "登录失败"
+		_, _ = loginLog.Create()
+		logger.Info(e.Error())
 	}
 
 	return nil, jwt.ErrFailedAuthentication

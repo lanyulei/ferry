@@ -1,11 +1,7 @@
 package router
 
 import (
-	"ferry/apis/monitor"
-	"ferry/apis/system"
-	"ferry/handler"
 	"ferry/pkg/jwtauth"
-	jwt "ferry/pkg/jwtauth"
 	"ferry/router/dashboard"
 	"ferry/router/process"
 	systemRouter "ferry/router/system"
@@ -17,10 +13,11 @@ import (
 	_ "github.com/gin-gonic/gin"
 )
 
-func InitSysRouter(r *gin.Engine, authMiddleware *jwt.GinJWTMiddleware) *gin.RouterGroup {
+func InitSysRouter(r *gin.Engine, authMiddleware *jwtauth.GinJWTMiddleware) *gin.RouterGroup {
 	g := r.Group("")
 
-	sysBaseRouter(g)
+	systemRouter.SysBaseRouter(g)
+
 	// 静态文件
 	sysStaticFileRouter(g)
 
@@ -28,16 +25,12 @@ func InitSysRouter(r *gin.Engine, authMiddleware *jwt.GinJWTMiddleware) *gin.Rou
 	sysSwaggerRouter(g)
 
 	// 无需认证
-	sysNoCheckRoleRouter(g)
+	systemRouter.SysNoCheckRoleRouter(g)
+
 	// 需要认证
 	sysCheckRoleRouterInit(g, authMiddleware)
 
 	return g
-}
-
-func sysBaseRouter(r *gin.RouterGroup) {
-	r.GET("/", system.HelloWorld)
-	r.GET("/info", handler.Ping)
 }
 
 func sysStaticFileRouter(r *gin.RouterGroup) {
@@ -46,14 +39,6 @@ func sysStaticFileRouter(r *gin.RouterGroup) {
 
 func sysSwaggerRouter(r *gin.RouterGroup) {
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-}
-
-func sysNoCheckRoleRouter(r *gin.RouterGroup) {
-	v1 := r.Group("/api/v1")
-
-	v1.GET("/monitor/server", monitor.ServerInfo)
-	v1.GET("/getCaptcha", system.GenerateCaptchaHandler)
-	v1.GET("/menuTreeselect", system.GetMenuTreeelect)
 }
 
 func sysCheckRoleRouterInit(r *gin.RouterGroup, authMiddleware *jwtauth.GinJWTMiddleware) {

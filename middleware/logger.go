@@ -1,10 +1,10 @@
 package middleware
 
 import (
+	"ferry/pkg/logger"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 // 日志记录到文件
@@ -36,7 +36,7 @@ func LoggerToFile() gin.HandlerFunc {
 		clientIP := c.ClientIP()
 
 		// 日志格式
-		log.Infof(" %s %3d %13v %15s %s %s \r\n",
+		logger.Infof(" %s %3d %13v %15s %s %s",
 			startTime.Format("2006-01-02 15:04:05.9999"),
 			statusCode,
 			latencyTime,

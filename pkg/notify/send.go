@@ -3,12 +3,11 @@ package notify
 import (
 	"bytes"
 	"ferry/models/system"
+	"ferry/pkg/logger"
 	"ferry/pkg/notify/email"
 	"text/template"
 
 	"github.com/spf13/viper"
-
-	log "github.com/sirupsen/logrus"
 )
 
 /*
@@ -78,7 +77,7 @@ func (b *BodyData) SendNotify() (err error) {
 				}
 				err = b.ParsingTemplate()
 				if err != nil {
-					log.Errorf("模版内容解析失败，%v", err.Error())
+					logger.Errorf("模版内容解析失败，%v", err.Error())
 					return
 				}
 				go email.SendMail(emailList, b.Subject, b.Content)

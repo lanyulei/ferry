@@ -2,6 +2,7 @@ package system
 
 import (
 	log2 "ferry/apis/log"
+	"ferry/apis/monitor"
 	"ferry/apis/system"
 	_ "ferry/docs"
 	"ferry/handler"
@@ -10,6 +11,19 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+func SysBaseRouter(r *gin.RouterGroup) {
+	r.GET("/", system.HelloWorld)
+	r.GET("/info", handler.Ping)
+}
+
+func SysNoCheckRoleRouter(r *gin.RouterGroup) {
+	v1 := r.Group("/api/v1")
+
+	v1.GET("/monitor/server", monitor.ServerInfo)
+	v1.GET("/getCaptcha", system.GenerateCaptchaHandler)
+	v1.GET("/menuTreeselect", system.GetMenuTreeelect)
+}
 
 func RegisterBaseRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddleware) {
 	v1auth := v1.Use(authMiddleware.MiddlewareFunc()).Use(middleware.AuthCheckRole())

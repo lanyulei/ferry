@@ -5,10 +5,9 @@ package pagination
 */
 
 import (
+	"ferry/pkg/logger"
 	"fmt"
 	"math"
-
-	"github.com/RichardKnop/machinery/v1/log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -45,7 +44,7 @@ func Paging(p *Param, result interface{}, args ...interface{}) (*Paginator, erro
 	)
 
 	if err := p.C.Bind(&param); err != nil {
-		log.ERROR.Printf("参数绑定失败，错误：%v", err)
+		logger.Errorf("参数绑定失败，错误：%v", err)
 		return nil, err
 	}
 
@@ -97,7 +96,7 @@ func Paging(p *Param, result interface{}, args ...interface{}) (*Paginator, erro
 
 	err := db.Limit(param.PerPage).Offset(offset).Scan(result).Error
 	if err != nil {
-		log.ERROR.Printf("数据查询失败，错误：%v", err)
+		logger.Errorf("数据查询失败，错误：%v", err)
 		return nil, err
 	}
 	<-done

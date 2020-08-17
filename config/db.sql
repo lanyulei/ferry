@@ -78,6 +78,17 @@ INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES (
 INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'admin', '/api/v1/work-order/inversion', 'POST', NULL, NULL, NULL);
 INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'admin', '/api/v1/dashboard', 'GET', NULL, NULL, NULL);
 INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'admin', '/api/v1/work-order/urge', 'GET', NULL, NULL, NULL);
+INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/user/profile', 'GET', NULL, NULL, NULL);
+INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/menurole', 'GET', NULL, NULL, NULL);
+INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/menuTreeselect', 'GET', NULL, NULL, NULL);
+INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/menuids', 'GET', NULL, NULL, NULL);
+INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/getinfo', 'GET', NULL, NULL, NULL);
+INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/roleDeptTreeselect/:id', 'GET', NULL, NULL, NULL);
+INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/deptTree', 'GET', NULL, NULL, NULL);
+INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/logout', 'POST', NULL, NULL, NULL);
+INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/user/avatar', 'POST', NULL, NULL, NULL);
+INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/user/pwd', 'PUT', NULL, NULL, NULL;
+INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/dashboard', 'GET', NULL, NULL, NULL);
 COMMIT;
 
 BEGIN;
@@ -430,6 +441,22 @@ INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `upd
 INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (1, 344, 'admin', NULL, NULL);
 INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (1, 350, 'admin', NULL, NULL);
 INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (1, 351, 'admin', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 63, 'common', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 80, 'common', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 92, 'common', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 94, 'common', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 142, 'common', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 201, 'common', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 252, 'common', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 254, 'common', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 255, 'common', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 256, 'common', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 258, 'common', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 259, 'common', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 260, 'common', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 267, 'common', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 280, 'common', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 344, 'common', NULL, NULL);
 COMMIT;
 
 BEGIN;
