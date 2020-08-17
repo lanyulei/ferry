@@ -17,6 +17,7 @@ settings:
     password: your password
     port: 3306
     username: ferry
+  domain: http://192.168.0.100:9527
   email:
     alias: ferry
     host: smtp.163.com
@@ -30,10 +31,23 @@ settings:
   jwt:
     secret: ferry
     timeout: 3600
+  ldap:
+    basedn: dc=fdevops,dc=com
+    host: localhost
+    port: 389
   log:
-    dir: logs
-    operdb: false
+    compress: 1
+    consolestdout: 1
+    filestdout: 0
+    level: debug
+    localtime: 1
+    maxage: 30
+    maxbackups: 300
+    maxsize: 10240
+    path: ./logs/ferry.log
+  redis:
+    host: 127.0.0.1
+    port: 6379
   ssl:
     key: keystring
     pem: temp/pem.pem
-  domain: http://192.168.0.100:9527

@@ -2,10 +2,10 @@ package tools
 
 import (
 	jwt "ferry/pkg/jwtauth"
+	"ferry/pkg/logger"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 func ExtractClaims(c *gin.Context) jwt.MapClaims {
@@ -22,7 +22,7 @@ func GetUserId(c *gin.Context) int {
 	if data["identity"] != nil {
 		return int((data["identity"]).(float64))
 	}
-	log.Println("********** 路径：" + c.Request.URL.Path + "  请求方法：" + c.Request.Method + "  说明：缺少identity")
+	logger.Info("********** 路径：" + c.Request.URL.Path + "  请求方法：" + c.Request.Method + "  说明：缺少identity")
 	return 0
 }
 
@@ -31,7 +31,7 @@ func GetUserIdStr(c *gin.Context) string {
 	if data["identity"] != nil {
 		return Int64ToString(int64((data["identity"]).(float64)))
 	}
-	log.Println("********** 路径：" + c.Request.URL.Path + "  请求方法：" + c.Request.Method + "  缺少identity")
+	logger.Info("********** 路径：" + c.Request.URL.Path + "  请求方法：" + c.Request.Method + "  缺少identity")
 	return ""
 }
 

@@ -1,10 +1,10 @@
 package app
 
 import (
+	"ferry/pkg/logger"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 // 失败数据处理
@@ -14,7 +14,7 @@ func Error(c *gin.Context, code int, err error, msg string) {
 	if msg != "" {
 		res.Msg = msg
 	}
-	log.Error(res.Msg)
+	logger.Error(res.Msg)
 	c.JSON(http.StatusOK, res.ReturnError(code))
 }
 

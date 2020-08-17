@@ -205,7 +205,6 @@ var (
 
 	NiceKey = "nice"
 
-	RKey      = "r"
 	RoleIdKey = "roleid"
 
 	RoleKey = "rolekey"
@@ -433,13 +432,17 @@ func (mw *GinJWTMiddleware) GetClaimsFromJWT(c *gin.Context) (MapClaims, error) 
 // Payload needs to be json in the form of {"username": "USERNAME", "password": "PASSWORD"}.
 // Reply will be of the form {"token": "TOKEN"}.
 func (mw *GinJWTMiddleware) LoginHandler(c *gin.Context) {
+	var (
+		data interface{}
+		err  error
+	)
+
 	if mw.Authenticator == nil {
 		mw.unauthorized(c, http.StatusInternalServerError, mw.HTTPStatusMessageFunc(ErrMissingAuthenticatorFunc, c))
 		return
 	}
 
-	data, err := mw.Authenticator(c)
-
+	data, err = mw.Authenticator(c)
 	if err != nil {
 		mw.unauthorized(c, 400, mw.HTTPStatusMessageFunc(err, c))
 		return

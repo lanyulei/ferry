@@ -1,7 +1,7 @@
 package pagination
 
 import (
-	"github.com/RichardKnop/machinery/v1/log"
+	"ferry/pkg/logger"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,7 +15,7 @@ func RequestParams(c *gin.Context) map[string]interface{} {
 
 	if c.Request.Form == nil {
 		if err := c.Request.ParseMultipartForm(32 << 20); err != nil {
-			log.ERROR.Println(err)
+			logger.Error(err)
 		}
 	}
 

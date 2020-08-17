@@ -6,11 +6,11 @@ package email
 */
 
 import (
+	"ferry/pkg/logger"
 	"strconv"
 
 	"github.com/spf13/viper"
 
-	log "github.com/sirupsen/logrus"
 	"gopkg.in/gomail.v2"
 )
 
@@ -41,8 +41,8 @@ func server(mailTo []string, subject, body string, args ...string) error {
 func SendMail(mailTo []string, subject, body string) {
 	err := server(mailTo, subject, body)
 	if err != nil {
-		log.Println(err)
+		logger.Info(err)
 		return
 	}
-	log.Println("send successfully")
+	logger.Info("send successfully")
 }
