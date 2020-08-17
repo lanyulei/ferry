@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"ferry/global/orm"
 	"ferry/models/system"
 	jwt "ferry/pkg/jwtauth"
@@ -106,26 +107,26 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 		// ldap登陆
 		err = l.LdapLogin(loginVal.Username, loginVal.Password)
 		if err != nil {
-			return nil, jwt.ErrInvalidVerificationode
+			return nil, errors.New("登陆失败，用户名或密码不正确。")
 		}
 		// 2. 将ldap用户信息写入到用户数据表中
 		err = orm.Eloquent.Table("sys_user").
 			Where("username = ?", userInfo.Username).
 			Count(&authUserCount).Error
 		if err != nil {
-			return nil, jwt.ErrInvalidVerificationode
+			return nil, errors.New(fmt.Sprintf("查询用户失败。%v", err))
 		}
 		if authUserCount == 0 {
 			addUserInfo.Username = userInfo.Username
 			// 获取默认权限ID
 			err = orm.Eloquent.Table("sys_role").Where("role_key = 'common'").Find(&roleValue).Error
 			if err != nil {
-				return nil, jwt.ErrInvalidVerificationode
+				return nil, errors.New(fmt.Sprintf("查询角色失败。%v", err))
 			}
 			addUserInfo.RoleId = roleValue.RoleId // 绑定通用角色
 			err = orm.Eloquent.Table("sys_user").Create(&addUserInfo).Error
 			if err != nil {
-				return nil, jwt.ErrInvalidVerificationode
+				return nil, errors.New(fmt.Sprintf("创建本地用户失败。%v", err))
 			}
 		}
 	}
