@@ -2,6 +2,7 @@ package system
 
 import (
 	"ferry/models/system"
+	"ferry/pkg/ldap"
 	"ferry/pkg/logger"
 	"ferry/tools"
 	"ferry/tools/app"
@@ -288,12 +289,22 @@ func SysUserUpdatePwd(c *gin.Context) {
 		app.Error(c, -1, err, "")
 		return
 	}
-	sysuser := system.SysUser{}
-	sysuser.UserId = tools.GetUserId(c)
-	_, err = sysuser.SetPwd(pwd)
-	if err != nil {
-		app.Error(c, -1, err, "")
-		return
+	if pwd.PasswordType == 0 {
+		sysuser := system.SysUser{}
+		sysuser.UserId = tools.GetUserId(c)
+		_, err = sysuser.SetPwd(pwd)
+		if err != nil {
+			app.Error(c, -1, err, "")
+			return
+		}
+	} else if pwd.PasswordType == 1 {
+		// 修改ldap密码
+		err = ldap.LdapUpdatePwd(tools.GetUserName(c), pwd.OldPassword, pwd.NewPassword)
+		if err != nil {
+			app.Error(c, -1, err, "")
+			return
+		}
 	}
+
 	app.OK(c, "", "密码修改成功")
 }
