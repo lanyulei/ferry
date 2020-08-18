@@ -5,12 +5,14 @@ import (
 	"ferry/global/orm"
 	"ferry/models/system"
 	jwt "ferry/pkg/jwtauth"
-	"ferry/pkg/ldap"
+	ldap1 "ferry/pkg/ldap"
 	"ferry/pkg/logger"
 	"ferry/tools"
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/go-ldap/ldap/v3"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mojocn/base64Captcha"
@@ -63,6 +65,7 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 		roleValue     system.SysRole
 		authUserCount int
 		addUserInfo   system.SysUser
+		ldapUserInfo  *ldap.Entry
 	)
 
 	ua := user_agent.New(c.Request.UserAgent())
@@ -99,7 +102,7 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 	// ldap 验证
 	if loginVal.LoginType == 1 {
 		// ldap登陆
-		err = ldap.LdapLogin(loginVal.Username, loginVal.Password)
+		ldapUserInfo, err = ldap1.LdapLogin(loginVal.Username, loginVal.Password)
 		if err != nil {
 			return nil, err
 		}
@@ -121,6 +124,12 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 			addUserInfo.Status = "0"
 			addUserInfo.CreatedAt = time.Now()
 			addUserInfo.UpdatedAt = time.Now()
+			addUserInfo.Email = ldapUserInfo.GetAttributeValue("mail")
+			addUserInfo.Phone = ldapUserInfo.GetAttributeValue("mobile")
+			addUserInfo.NickName = ldapUserInfo.GetAttributeValue("givenName")
+			addUserInfo.CreateBy = "1"
+			addUserInfo.UpdateBy = "1"
+			addUserInfo.Sex = "0"
 			err = orm.Eloquent.Table("sys_user").Create(&addUserInfo).Error
 			if err != nil {
 				return nil, errors.New(fmt.Sprintf("创建本地用户失败，%v", err))
