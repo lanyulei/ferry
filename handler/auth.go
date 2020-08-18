@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"ferry/global/orm"
 	"ferry/models/system"
 	jwt "ferry/pkg/jwtauth"
@@ -9,6 +10,7 @@ import (
 	"ferry/tools"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mojocn/base64Captcha"
@@ -60,15 +62,9 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 		loginLog      system.LoginLog
 		roleValue     system.SysRole
 		authUserCount int
-		l             = ldap.Connection{}
-		userInfo      system.SysUser
-		addUserInfo   struct {
-			Username string `json:"username"`
-			RoleId   int    `json:"role_id"`
-		}
+		addUserInfo   system.SysUser
 	)
 
-	loginType := c.DefaultQuery("login_type", "0")
 	ua := user_agent.New(c.Request.UserAgent())
 	loginLog.Ipaddr = c.ClientIP()
 	location := tools.GetLocation(c.ClientIP())
@@ -84,7 +80,6 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 
 	// 获取前端过来的数据
 	if err := c.ShouldBind(&loginVal); err != nil {
-		fmt.Println("********** " + err.Error() + " **********")
 		loginLog.Status = "1"
 		loginLog.Msg = "数据解析失败"
 		loginLog.Username = loginVal.Username
@@ -102,30 +97,33 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 	}
 
 	// ldap 验证
-	if loginType == "1" {
+	if loginVal.LoginType == 1 {
 		// ldap登陆
-		err = l.LdapLogin(loginVal.Username, loginVal.Password)
+		err = ldap.LdapLogin(loginVal.Username, loginVal.Password)
 		if err != nil {
-			return nil, jwt.ErrInvalidVerificationode
+			return nil, err
 		}
 		// 2. 将ldap用户信息写入到用户数据表中
 		err = orm.Eloquent.Table("sys_user").
-			Where("username = ?", userInfo.Username).
+			Where("username = ?", loginVal.Username).
 			Count(&authUserCount).Error
 		if err != nil {
-			return nil, jwt.ErrInvalidVerificationode
+			return nil, errors.New(fmt.Sprintf("查询用户失败，%v", err))
 		}
 		if authUserCount == 0 {
-			addUserInfo.Username = userInfo.Username
+			addUserInfo.Username = loginVal.Username
 			// 获取默认权限ID
 			err = orm.Eloquent.Table("sys_role").Where("role_key = 'common'").Find(&roleValue).Error
 			if err != nil {
-				return nil, jwt.ErrInvalidVerificationode
+				return nil, errors.New(fmt.Sprintf("查询角色失败，%v", err))
 			}
 			addUserInfo.RoleId = roleValue.RoleId // 绑定通用角色
+			addUserInfo.Status = "0"
+			addUserInfo.CreatedAt = time.Now()
+			addUserInfo.UpdatedAt = time.Now()
 			err = orm.Eloquent.Table("sys_user").Create(&addUserInfo).Error
 			if err != nil {
-				return nil, jwt.ErrInvalidVerificationode
+				return nil, errors.New(fmt.Sprintf("创建本地用户失败，%v", err))
 			}
 		}
 	}

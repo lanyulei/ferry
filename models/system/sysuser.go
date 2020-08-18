@@ -73,8 +73,9 @@ func (SysUser) TableName() string {
 }
 
 type SysUserPwd struct {
-	OldPassword string `json:"oldPassword"`
-	NewPassword string `json:"newPassword"`
+	OldPassword  string `json:"oldPassword" form:"oldPassword"`
+	NewPassword  string `json:"newPassword" form:"newPassword"`
+	PasswordType int    `json:"passwordType" form:"passwordType"`
 }
 
 type SysUserPage struct {
