@@ -38,9 +38,13 @@ settings:
     maxopenconn: 20000
   domain: http://192.168.0.100:9527
   ldap:
-    host: 127.0.0.1
-    port: 389
+    anonymousquery: 0
     basedn: dc=fdevops,dc=com
+    bindpwd: 123456
+    binduser: admin
+    host: localhost
+    port: 389
+    tls: 0
   log:
     compress: 1
     consolestdout: 1

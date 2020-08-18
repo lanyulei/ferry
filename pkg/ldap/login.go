@@ -1,27 +1,30 @@
 package ldap
 
 import (
-	"ferry/pkg/logger"
 	"fmt"
 
-	"github.com/spf13/viper"
+	"github.com/go-ldap/ldap/v3"
 )
 
 /*
   @Author : lanyulei
 */
 
-func LdapLogin(username string, password string) (err error) {
+func LdapLogin(username string, password string) (userInfo *ldap.Entry, err error) {
 	err = ldapConnection()
 	if err != nil {
 		return
 	}
 	defer conn.Close()
 
-	err = conn.Bind(fmt.Sprintf("cn=%v,%v", username, viper.GetString("settings.ldap.baseDn")), password)
+	userInfo, err = searchRequest(username)
 	if err != nil {
-		logger.Error("用户或密码错误。", err)
 		return
+	}
+
+	err = conn.Bind(userInfo.DN, password)
+	if err != nil {
+		return nil, fmt.Errorf("用户或密码不正确。")
 	}
 
 	return

@@ -32,9 +32,13 @@ settings:
     secret: ferry
     timeout: 3600
   ldap:
+    anonymousquery: 0
     basedn: dc=fdevops,dc=com
+    bindpwd: 123456
+    binduser: admin
     host: localhost
     port: 389
+    tls: 0
   log:
     compress: 1
     consolestdout: 1
