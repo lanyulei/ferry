@@ -24,6 +24,7 @@ func SysNoCheckRoleRouter(r *gin.RouterGroup) {
 	v1.GET("/monitor/server", monitor.ServerInfo)
 	v1.GET("/getCaptcha", system.GenerateCaptchaHandler)
 	v1.GET("/menuTreeselect", system.GetMenuTreeelect)
+	v1.GET("/settings", system.GetSettingsInfo)
 
 	registerPublicRouter(v1)
 }
@@ -127,7 +128,6 @@ func RegisterDeptRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddlewar
 func RegisterSysSettingRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddleware) {
 	setting := v1.Group("/settings").Use(authMiddleware.MiddlewareFunc()).Use(middleware.AuthCheckRole())
 	{
-		setting.GET("", system.GetSettingsInfo)
 		setting.POST("", system.SetSettingsInfo)
 	}
 }

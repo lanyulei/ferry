@@ -1,7 +1,10 @@
 package ldap
 
 import (
+	"encoding/json"
 	"errors"
+	"ferry/global/orm"
+	"ferry/models/system"
 	"ferry/pkg/logger"
 	"fmt"
 
@@ -13,9 +16,42 @@ import (
   @Author : lanyulei
 */
 
-func searchRequest(username string) (userInfo *ldap.Entry, err error) {
-	var cur *ldap.SearchResult
+func getLdapFields() (ldapFields []map[string]string, err error) {
+	var (
+		settingsValue system.Settings
+		contentList   []map[string]string
+	)
 
+	err = orm.Eloquent.Model(&settingsValue).Where("classify = 2").Find(&settingsValue).Error
+	if err != nil {
+		return
+	}
+
+	err = json.Unmarshal(settingsValue.Content, &contentList)
+	if err != nil {
+		return
+	}
+
+	for _, v := range contentList {
+		if v["ldap_field_name"] != "" {
+			ldapFields = append(ldapFields, v)
+		}
+	}
+	return
+}
+
+func searchRequest(username string) (userInfo *ldap.Entry, err error) {
+	var (
+		ldapFields       []map[string]string
+		cur              *ldap.SearchResult
+		ldapFieldsFilter = []string{
+			"dn",
+		}
+	)
+	ldapFields, err = getLdapFields()
+	for _, v := range ldapFields {
+		ldapFieldsFilter = append(ldapFieldsFilter, v["ldap_field_name"])
+	}
 	// 用来获取查询权限的用户。如果 ldap 禁止了匿名查询，那我们就需要先用这个帐户 bind 以下才能开始查询
 	if !viper.GetBool("settings.ldap.anonymousQuery") {
 		err = conn.Bind(
@@ -37,7 +73,7 @@ func searchRequest(username string) (userInfo *ldap.Entry, err error) {
 		0,
 		false,
 		fmt.Sprintf("(cn=%s)", username),
-		[]string{"dn", "sAMAccountName", "displayName", "mail", "mobile", "employeeID", "givenName"},
+		ldapFieldsFilter,
 		nil)
 
 	if cur, err = conn.Search(sql); err != nil {

@@ -18,9 +18,15 @@ func GetSettingsInfo(c *gin.Context) {
 	var (
 		err          error
 		settingsInfo []*system.Settings
+		classify     string
 	)
+	db := orm.Eloquent.Model(&settingsInfo)
+	classify = c.DefaultQuery("classify", "")
+	if classify != "" {
+		db = db.Where("classify = ?", classify)
+	}
 
-	err = orm.Eloquent.Model(&settingsInfo).Find(&settingsInfo).Error
+	err = db.Find(&settingsInfo).Error
 	if err != nil {
 		app.Error(c, -1, fmt.Errorf("查询数据失败，%v", err.Error()), "")
 		return
