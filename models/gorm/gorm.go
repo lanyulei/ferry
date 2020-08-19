@@ -20,6 +20,7 @@ func AutoMigrate(db *gorm.DB) error {
 		new(system.SysUser),
 		new(system.SysRole),
 		new(system.Post),
+		new(system.Settings),
 
 		// 流程中心
 		new(process.Classify),

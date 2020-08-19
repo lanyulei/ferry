@@ -3,6 +3,7 @@ package system
 import (
 	log2 "ferry/apis/log"
 	"ferry/apis/monitor"
+	"ferry/apis/public"
 	"ferry/apis/system"
 	_ "ferry/docs"
 	"ferry/handler"
@@ -23,6 +24,8 @@ func SysNoCheckRoleRouter(r *gin.RouterGroup) {
 	v1.GET("/monitor/server", monitor.ServerInfo)
 	v1.GET("/getCaptcha", system.GenerateCaptchaHandler)
 	v1.GET("/menuTreeselect", system.GetMenuTreeelect)
+
+	registerPublicRouter(v1)
 }
 
 func RegisterBaseRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddleware) {
@@ -118,5 +121,20 @@ func RegisterDeptRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddlewar
 		dept.POST("", system.InsertDept)
 		dept.PUT("", system.UpdateDept)
 		dept.DELETE("/:id", system.DeleteDept)
+	}
+}
+
+func RegisterSysSettingRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddleware) {
+	setting := v1.Group("/settings").Use(authMiddleware.MiddlewareFunc()).Use(middleware.AuthCheckRole())
+	{
+		setting.GET("", system.GetSettingsInfo)
+		setting.POST("", system.SetSettingsInfo)
+	}
+}
+
+func registerPublicRouter(v1 *gin.RouterGroup) {
+	p := v1.Group("/public")
+	{
+		p.POST("/uploadFile", public.UploadFile)
 	}
 }
