@@ -7,6 +7,9 @@ import (
 	"ferry/tools/app"
 	"fmt"
 	"io/ioutil"
+	"strings"
+
+	"github.com/spf13/viper"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -23,8 +26,16 @@ import (
 // @Router /api/v1/public/uploadFile [post]
 
 func UploadFile(c *gin.Context) {
-	tag, _ := c.GetPostForm("type")
-	urlPerfix := fmt.Sprintf("http://%s/", c.Request.Host)
+	var (
+		tag       string
+		urlPrefix string
+	)
+	tag, _ = c.GetPostForm("type")
+	if strings.HasSuffix(viper.GetString("settings.domain"), "/") {
+		urlPrefix = viper.GetString("settings.domain")
+	} else {
+		urlPrefix = fmt.Sprintf("%v/", viper.GetString("settings.domain"))
+	}
 	if tag == "" {
 		app.Error(c, 200, errors.New(""), "缺少标识")
 		return
@@ -41,7 +52,7 @@ func UploadFile(c *gin.Context) {
 
 			singleFile := "static/uploadfile/" + guid + utils.GetExt(files.Filename)
 			_ = c.SaveUploadedFile(files, singleFile)
-			app.OK(c, urlPerfix+singleFile, "上传成功")
+			app.OK(c, urlPrefix+singleFile, "上传成功")
 			return
 		case "2": // 多图
 			files := c.Request.MultipartForm.File["file"]
@@ -50,7 +61,7 @@ func UploadFile(c *gin.Context) {
 				guid := uuid.New().String()
 				multipartFileName := "static/uploadfile/" + guid + utils.GetExt(f.Filename)
 				_ = c.SaveUploadedFile(f, multipartFileName)
-				multipartFile = append(multipartFile, urlPerfix+multipartFileName)
+				multipartFile = append(multipartFile, urlPrefix+multipartFileName)
 			}
 			app.OK(c, multipartFile, "上传成功")
 			return
@@ -59,7 +70,7 @@ func UploadFile(c *gin.Context) {
 			ddd, _ := base64.StdEncoding.DecodeString(files)
 			guid := uuid.New().String()
 			_ = ioutil.WriteFile("static/uploadfile/"+guid+".jpg", ddd, 0666)
-			app.OK(c, urlPerfix+"static/uploadfile/"+guid+".jpg", "上传成功")
+			app.OK(c, urlPrefix+"static/uploadfile/"+guid+".jpg", "上传成功")
 		}
 	}
 }
