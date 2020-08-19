@@ -89,6 +89,8 @@ INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES (
 INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/user/avatar', 'POST', NULL, NULL, NULL);
 INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/user/pwd', 'PUT', NULL, NULL, NULL;
 INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/dashboard', 'GET', NULL, NULL, NULL);
+INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'admin', '/api/v1/settings', 'POST', NULL, NULL, NULL);
+INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'admin', '/api/v1/settings', 'GET', NULL, NULL, NULL);
 COMMIT;
 
 BEGIN;
@@ -266,6 +268,12 @@ INSERT INTO `sys_menu`(`menu_id`, `menu_name`, `title`, `icon`, `path`, `paths`,
 INSERT INTO `sys_menu`(`menu_id`, `menu_name`, `title`, `icon`, `path`, `paths`, `menu_type`, `action`, `permission`, `parent_id`, `no_cache`, `breadcrumb`, `component`, `sort`, `visible`, `create_by`, `update_by`, `is_frame`, `create_time`, `update_time`, `delete_time`) VALUES (344, '', '首页数据', '', '/api/v1/dashboard', '/0/63/256/344', 'A', 'GET', '', 256, '0', '', '', 0, '1', '11', '', 1, '2020-07-26 21:51:44', '2020-07-26 21:52:10', NULL);
 INSERT INTO `sys_menu`(`menu_id`, `menu_name`, `title`, `icon`, `path`, `paths`, `menu_type`, `action`, `permission`, `parent_id`, `no_cache`, `breadcrumb`, `component`, `sort`, `visible`, `create_by`, `update_by`, `is_frame`, `create_time`, `update_time`, `delete_time`) VALUES (350, '', '催办工单', '', '', '/0/268/270/350', 'F', '', 'process:list:upcoming:urge', 270, '0', '', '', 0, '0', '11', '', 1, '2020-07-26 21:51:44', '2020-07-26 21:52:10', NULL);
 INSERT INTO `sys_menu`(`menu_id`, `menu_name`, `title`, `icon`, `path`, `paths`, `menu_type`, `action`, `permission`, `parent_id`, `no_cache`, `breadcrumb`, `component`, `sort`, `visible`, `create_by`, `update_by`, `is_frame`, `create_time`, `update_time`, `delete_time`) VALUES (351, '', '催办工单', 'bug', '/api/v1/work-order/urge', '/0/63/281/333/351', 'A', 'GET', '', 333, '0', '', '', 0, '1', '11', '11', 1, '2020-07-26 21:51:44', '2020-07-26 21:52:10', NULL);
+INSERT INTO `sys_menu`(`menu_id`, `menu_name`, `title`, `icon`, `path`, `paths`, `menu_type`, `action`, `permission`, `parent_id`, `no_cache`, `breadcrumb`, `component`, `sort`, `visible`, `create_by`, `update_by`, `is_frame`, `create_time`, `update_time`, `delete_time`) VALUES (352, 'Settings', '系统配置', 'system', 'settings', '/0/2/352', 'C', '', 'system:settings:index', 2, '0', '', '/system/settings/index', 7, '0', '1', '1', 1, '2020-08-18 21:44:58', '2020-08-18 23:07:11', NULL);
+INSERT INTO `sys_menu`(`menu_id`, `menu_name`, `title`, `icon`, `path`, `paths`, `menu_type`, `action`, `permission`, `parent_id`, `no_cache`, `breadcrumb`, `component`, `sort`, `visible`, `create_by`, `update_by`, `is_frame`, `create_time`, `update_time`, `delete_time`) VALUES (353, '', '系统配置', 'system', '', '/0/63/280/353', 'M', '', '', 280, '0', '', '', 2, '1', '1', '1', 0, '2020-08-19 00:40:11', '2020-08-19 00:41:32', NULL);
+INSERT INTO `sys_menu`(`menu_id`, `menu_name`, `title`, `icon`, `path`, `paths`, `menu_type`, `action`, `permission`, `parent_id`, `no_cache`, `breadcrumb`, `component`, `sort`, `visible`, `create_by`, `update_by`, `is_frame`, `create_time`, `update_time`, `delete_time`) VALUES (354, '', '设置配置', 'bug', '/api/v1/settings', '/0/63/280/353/354', 'A', 'POST', '', 353, '0', '', '', 1, '1', '1', '1', 1, '2020-08-19 00:41:01', '2020-08-19 00:42:25', NULL);
+INSERT INTO `sys_menu`(`menu_id`, `menu_name`, `title`, `icon`, `path`, `paths`, `menu_type`, `action`, `permission`, `parent_id`, `no_cache`, `breadcrumb`, `component`, `sort`, `visible`, `create_by`, `update_by`, `is_frame`, `create_time`, `update_time`, `delete_time`) VALUES (355, '', '获取配置', 'bug', '/api/v1/settings', '/0/63/280/353/355', 'A', 'GET', '', 353, '0', '', '', 0, '1', '1', '', 1, '2020-08-19 00:42:47', '2020-08-19 00:42:47', NULL);
+INSERT INTO `sys_menu`(`menu_id`, `menu_name`, `title`, `icon`, `path`, `paths`, `menu_type`, `action`, `permission`, `parent_id`, `no_cache`, `breadcrumb`, `component`, `sort`, `visible`, `create_by`, `update_by`, `is_frame`, `create_time`, `update_time`, `delete_time`) VALUES (356, '', '保存系统配置', '', '', '/0/2/352/356', 'F', '', 'system:settings:index:config', 352, '0', '', '', 0, '0', '1', '', 1, '2020-08-19 13:28:23', '2020-08-19 13:28:23', NULL);
+INSERT INTO `sys_menu`(`menu_id`, `menu_name`, `title`, `icon`, `path`, `paths`, `menu_type`, `action`, `permission`, `parent_id`, `no_cache`, `breadcrumb`, `component`, `sort`, `visible`, `create_by`, `update_by`, `is_frame`, `create_time`, `update_time`, `delete_time`) VALUES (357, '', '保存LDAP配置', '', '', '/0/2/352/357', 'F', '', 'system:settings:index:ldap', 352, '0', '', '', 0, '0', '1', '', 1, '2020-08-19 13:29:08', '2020-08-19 13:29:08', NULL);
 COMMIT;
 
 BEGIN;
@@ -441,6 +449,12 @@ INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `upd
 INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (1, 344, 'admin', NULL, NULL);
 INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (1, 350, 'admin', NULL, NULL);
 INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (1, 351, 'admin', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (1, 352, 'admin', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (1, 353, 'admin', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (1, 354, 'admin', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (1, 355, 'admin', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (1, 356, 'admin', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (1, 357, 'admin', NULL, NULL);
 INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 63, 'common', NULL, NULL);
 INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 80, 'common', NULL, NULL);
 INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 92, 'common', NULL, NULL);
@@ -464,6 +478,11 @@ INSERT INTO `sys_user`(`user_id`, `nick_name`, `phone`, `role_id`, `salt`, `avat
 INSERT INTO `sys_user`(`user_id`, `nick_name`, `phone`, `role_id`, `salt`, `avatar`, `sex`, `email`, `dept_id`, `post_id`, `create_by`, `update_by`, `remark`, `status`, `username`, `password`) VALUES (2, 'lanyulei', '13211111111', 3, NULL, NULL, '0', 'q@q.com', 8, 2, '1', '1', NULL, 0, 'lanyulei', '$2a$10$oDXQLs1W7n19sjc64bCpHeuti1jhN6r5hDz0iSqZRQMJE2eym2ec6');
 INSERT INTO `sys_user`(`user_id`, `nick_name`, `phone`, `role_id`, `salt`, `avatar`, `sex`, `email`, `dept_id`, `post_id`, `create_by`, `update_by`, `remark`, `status`, `username`, `password`) VALUES (3, '李四', '13838385438', 2, '', '', '0', 'qq@qq.com', 7, 2, '1', '1', '', 0, 'lisi', '$2a$10$DejldFea5.hGZGC7/oVN9OLDrHAWgu9l29RDz9FomLnWnro4umYl2');
 INSERT INTO `sys_user`(`user_id`, `nick_name`, `phone`, `role_id`, `salt`, `avatar`, `sex`, `email`, `dept_id`, `post_id`, `create_by`, `update_by`, `remark`, `status`, `username`, `password`) VALUES (4, '王五', '13535353535', 3, '', '', '2', 'qq@qq.com', 8, 2, '1', '1', '', 0, 'wangwu', '$2a$10$3.RT6rpXANXvvlibX6PzU.FGA2CvfDxd1UmJ2H5zTzF4sYocbvsTO');
+COMMIT;
+
+BEGIN;
+INSERT INTO `sys_settings`(`id`, `create_time`, `update_time`, `delete_time`, `classify`, `content`) VALUES (3, '2020-08-19 01:00:19', '2020-08-19 12:40:47', NULL, 2, '[{\"ldap_field_name\": \"givenName\", \"local_field_name\": \"nick_name\", \"local_field_nick\": \"用户昵称\"}, {\"ldap_field_name\": \"\", \"local_field_name\": \"phone\", \"local_field_nick\": \"手机号\"}, {\"ldap_field_name\": \"\", \"local_field_name\": \"avatar\", \"local_field_nick\": \"头像\"}, {\"ldap_field_name\": \"\", \"local_field_name\": \"sex\", \"local_field_nick\": \"性别\"}, {\"ldap_field_name\": \"mail\", \"local_field_name\": \"email\", \"local_field_nick\": \"邮箱\"}, {\"ldap_field_name\": \"\", \"local_field_name\": \"remark\", \"local_field_nick\": \"备注\"}]');
+INSERT INTO `sys_settings`(`id`, `create_time`, `update_time`, `delete_time`, `classify`, `content`) VALUES (4, '2020-08-19 12:42:10', '2020-08-19 13:22:56', NULL, 1, '{\"logo\": \"https://www.fdevops.com/wp-content/uploads/2020/08/1597815294-ferry_logo_white.png\", \"name\": \"ferry 管理平台\"}');
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;

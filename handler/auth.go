@@ -113,6 +113,10 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 		if err != nil {
 			return nil, errors.New(fmt.Sprintf("查询用户失败，%v", err))
 		}
+		addUserInfo, err = ldap1.LdapFieldsMap(ldapUserInfo)
+		if err != nil {
+			return nil, fmt.Errorf("ldap映射本地字段失败，%v", err.Error())
+		}
 		if authUserCount == 0 {
 			addUserInfo.Username = loginVal.Username
 			// 获取默认权限ID
@@ -124,12 +128,9 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 			addUserInfo.Status = "0"
 			addUserInfo.CreatedAt = time.Now()
 			addUserInfo.UpdatedAt = time.Now()
-			addUserInfo.Email = ldapUserInfo.GetAttributeValue("mail")
-			addUserInfo.Phone = ldapUserInfo.GetAttributeValue("mobile")
-			addUserInfo.NickName = ldapUserInfo.GetAttributeValue("givenName")
-			addUserInfo.CreateBy = "1"
-			addUserInfo.UpdateBy = "1"
-			addUserInfo.Sex = "0"
+			if addUserInfo.Sex == "" {
+				addUserInfo.Sex = "0"
+			}
 			err = orm.Eloquent.Table("sys_user").Create(&addUserInfo).Error
 			if err != nil {
 				return nil, errors.New(fmt.Sprintf("创建本地用户失败，%v", err))
