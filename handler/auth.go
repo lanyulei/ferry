@@ -107,7 +107,7 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 			return nil, err
 		}
 		// 2. 将ldap用户信息写入到用户数据表中
-		err = orm.Eloquent.Table("sys_user").
+		err = orm.Eloquent.Model(&system.SysUser{}).
 			Where("username = ?", loginVal.Username).
 			Count(&authUserCount).Error
 		if err != nil {
@@ -120,7 +120,7 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 		if authUserCount == 0 {
 			addUserInfo.Username = loginVal.Username
 			// 获取默认权限ID
-			err = orm.Eloquent.Table("sys_role").Where("role_key = 'common'").Find(&roleValue).Error
+			err = orm.Eloquent.Model(&system.SysRole{}).Where("role_key = 'common'").Find(&roleValue).Error
 			if err != nil {
 				return nil, errors.New(fmt.Sprintf("查询角色失败，%v", err))
 			}
@@ -131,7 +131,7 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 			if addUserInfo.Sex == "" {
 				addUserInfo.Sex = "0"
 			}
-			err = orm.Eloquent.Table("sys_user").Create(&addUserInfo).Error
+			err = orm.Eloquent.Create(&addUserInfo).Error
 			if err != nil {
 				return nil, errors.New(fmt.Sprintf("创建本地用户失败，%v", err))
 			}
