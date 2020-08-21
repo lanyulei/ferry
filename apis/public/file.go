@@ -27,15 +27,21 @@ import (
 
 func UploadFile(c *gin.Context) {
 	var (
-		tag       string
 		urlPrefix string
+		tag       string
 	)
 	tag, _ = c.GetPostForm("type")
-	if strings.HasSuffix(viper.GetString("settings.domain"), "/") {
-		urlPrefix = viper.GetString("settings.domain")
+
+	if viper.GetBool("settings.domain.getHost") {
+		urlPrefix = fmt.Sprintf("http://%s/", c.Request.Host)
 	} else {
-		urlPrefix = fmt.Sprintf("%v/", viper.GetString("settings.domain"))
+		if strings.HasSuffix(viper.GetString("settings.domain.url"), "/") {
+			urlPrefix = viper.GetString("settings.domain.url")
+		} else {
+			urlPrefix = fmt.Sprintf("http://%s/", viper.GetString("settings.domain.url"))
+		}
 	}
+
 	if tag == "" {
 		app.Error(c, 200, errors.New(""), "缺少标识")
 		return

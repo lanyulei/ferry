@@ -17,7 +17,9 @@ settings:
     password: your password
     port: 3306
     username: ferry
-  domain: http://192.168.0.100:9527
+  domain:
+    gethost: 1
+    url: localhost:9527
   email:
     alias: ferry
     host: smtp.163.com
