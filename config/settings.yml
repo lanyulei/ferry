@@ -45,6 +45,7 @@ settings:
     host: localhost
     port: 389
     tls: 0
+    userfield: uid
   log:
     compress: 1
     consolestdout: 1

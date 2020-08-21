@@ -10,8 +10,11 @@ import (
 )
 
 func Start() {
-	// 启动异步任务框架
-	taskWorker := worker.NewAsyncTaskWorker(0)
+	// 1. 启动服务，连接redis
+	worker.StartServer()
+
+	// 2. 启动异步调度
+	taskWorker := worker.NewAsyncTaskWorker(1)
 	err := taskWorker.Launch()
 	if err != nil {
 		logger.Errorf("启动machinery失败，%v", err.Error())

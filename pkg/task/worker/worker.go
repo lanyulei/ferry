@@ -2,6 +2,9 @@ package worker
 
 import (
 	"ferry/pkg/logger"
+	"fmt"
+
+	"github.com/spf13/viper"
 
 	"github.com/RichardKnop/machinery/v1"
 	taskConfig "github.com/RichardKnop/machinery/v1/config"
@@ -10,7 +13,7 @@ import (
 
 var AsyncTaskCenter *machinery.Server
 
-func init() {
+func StartServer() {
 	tc, err := NewTaskCenter()
 	if err != nil {
 		panic(err)
@@ -20,7 +23,10 @@ func init() {
 
 func NewTaskCenter() (*machinery.Server, error) {
 	cnf := &taskConfig.Config{
-		Broker:        "redis://127.0.0.1:6379",
+		Broker: fmt.Sprintf("redis://%v:%v",
+			viper.GetString("settings.redis.host"),
+			viper.GetString("settings.redis.port"),
+		),
 		DefaultQueue:  "ServerTasksQueue",
 		ResultBackend: "eager",
 	}

@@ -5,6 +5,7 @@ import (
 	"ferry/database"
 	"ferry/global/orm"
 	"ferry/pkg/logger"
+	"ferry/pkg/task"
 	"ferry/router"
 	"ferry/tools"
 	config2 "ferry/tools/config"
@@ -52,10 +53,12 @@ func usage() {
 
 func setup() {
 
-	//1. 读取配置
+	// 1. 读取配置
 	config2.ConfigSetup(config)
-	//2. 初始化数据库链接
+	// 2. 初始化数据库链接
 	database.Setup()
+	// 3. 启动异步任务队列
+	go task.Start()
 
 }
 
