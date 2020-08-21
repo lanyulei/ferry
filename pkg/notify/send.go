@@ -42,7 +42,7 @@ func (b *BodyData) ParsingTemplate() (err error) {
 		return
 	}
 
-	b.Domain = viper.GetString("settings.domain")
+	b.Domain = viper.GetString("settings.domain.url")
 	err = tmpl.Execute(&buf, b)
 	if err != nil {
 		return
