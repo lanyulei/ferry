@@ -71,6 +71,7 @@ func RegisterLoginLogRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddl
 		loginlog.POST("", log2.InsertLoginLog)
 		loginlog.PUT("", log2.UpdateLoginLog)
 		loginlog.DELETE("/:infoId", log2.DeleteLoginLog)
+		loginlog.DELETE("", log2.CleanLoginLog)
 	}
 }
 
