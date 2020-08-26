@@ -41,8 +41,7 @@ settings:
     anonymousquery: 0
     basedn: dc=fdevops,dc=com
     bindpwd: 123456
-    binduser: admin
-    bindbasedn:
+    binduserdn: admin
     host: localhost
     port: 389
     tls: 0
