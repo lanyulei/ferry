@@ -54,14 +54,8 @@ func searchRequest(username string) (userInfo *ldap.Entry, err error) {
 	}
 	// 用来获取查询权限的用户。如果 ldap 禁止了匿名查询，那我们就需要先用这个帐户 bind 以下才能开始查询
 	if !viper.GetBool("settings.ldap.anonymousQuery") {
-		dn := viper.GetString("settings.ldap.baseDn")
-		if viper.GetString("settings.ldap.bindBaseDn") != "" {
-			dn = viper.GetString("settings.ldap.bindBaseDn")
-		}
 		err = conn.Bind(
-			fmt.Sprintf("cn=%v,%v",
-				viper.GetString("settings.ldap.bindUser"),
-				dn),
+			viper.GetString("settings.ldap.bindUserDn"),
 			viper.GetString("settings.ldap.bindPwd"))
 		if err != nil {
 			logger.Error("用户或密码错误。", err)
