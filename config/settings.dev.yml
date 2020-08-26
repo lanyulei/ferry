@@ -38,6 +38,7 @@ settings:
     basedn: dc=fdevops,dc=com
     bindpwd: 123456
     binduser: admin
+    bindbasedn:
     host: localhost
     port: 389
     tls: 0
