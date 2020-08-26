@@ -1,8 +1,10 @@
 package service
 
 import (
+	"errors"
 	"ferry/global/orm"
 	"ferry/models/system"
+	"reflect"
 	"strings"
 )
 
@@ -51,6 +53,7 @@ func GetPrincipalUserInfo(stateList []interface{}, creator int) (userInfoList []
 		userInfo        system.SysUser
 		deptInfo        system.Dept
 		userInfoListTmp []system.SysUser // 临时保存查询的列表数据
+		processorList   []interface{}
 	)
 
 	err = orm.Eloquent.Model(&userInfo).Where("user_id = ?", creator).Find(&userInfo).Error
@@ -59,17 +62,31 @@ func GetPrincipalUserInfo(stateList []interface{}, creator int) (userInfoList []
 	}
 
 	for _, stateItem := range stateList {
+
+		if reflect.TypeOf(stateItem.(map[string]interface{})["processor"]) == nil {
+			err = errors.New("未找到对应的处理人，请确认。")
+			return
+		}
+		stateItemType := reflect.TypeOf(stateItem.(map[string]interface{})["processor"]).String()
+		if stateItemType == "[]int" {
+			for _, v := range stateItem.(map[string]interface{})["processor"].([]int) {
+				processorList = append(processorList, v)
+			}
+		} else {
+			processorList = stateItem.(map[string]interface{})["processor"].([]interface{})
+		}
+
 		switch stateItem.(map[string]interface{})["process_method"] {
 		case "person":
 			err = orm.Eloquent.Model(&system.SysUser{}).
-				Where("user_id in (?)", stateItem.(map[string]interface{})["processor"].([]interface{})).
+				Where("user_id in (?)", processorList).
 				Find(&userInfoListTmp).Error
 			if err != nil {
 				return
 			}
 			userInfoList = append(userInfoList, userInfoListTmp...)
 		case "variable": // 变量
-			for _, processor := range stateItem.(map[string]interface{})["processor"].([]interface{}) {
+			for _, processor := range processorList {
 				if int(processor.(float64)) == 1 {
 					// 创建者
 					userInfoList = append(userInfoList, userInfo)
