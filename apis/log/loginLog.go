@@ -1,6 +1,7 @@
 package log
 
 import (
+	"ferry/global/orm"
 	"ferry/models/system"
 	"ferry/tools"
 	"ferry/tools/app"
@@ -159,4 +160,15 @@ func DeleteLoginLog(c *gin.Context) {
 	}
 	res.Msg = "删除成功"
 	c.JSON(http.StatusOK, res.ReturnOK())
+}
+
+func CleanLoginLog(c *gin.Context) {
+
+	err := orm.Eloquent.Delete(&system.LoginLog{}).Error
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
+
+	app.OK(c, "", "已清空")
 }
