@@ -78,6 +78,9 @@ INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES (
 INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'admin', '/api/v1/work-order/inversion', 'POST', NULL, NULL, NULL);
 INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'admin', '/api/v1/dashboard', 'GET', NULL, NULL, NULL);
 INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'admin', '/api/v1/work-order/urge', 'GET', NULL, NULL, NULL);
+INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'admin', '/api/v1/settings', 'POST', NULL, NULL, NULL);
+INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'admin', '/api/v1/settings', 'GET', NULL, NULL, NULL);
+INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'admin', '/api/v1/loginlog', 'DELETE', NULL, NULL, NULL);
 INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/user/profile', 'GET', NULL, NULL, NULL);
 INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/menurole', 'GET', NULL, NULL, NULL);
 INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/menuTreeselect', 'GET', NULL, NULL, NULL);
@@ -89,8 +92,6 @@ INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES (
 INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/user/avatar', 'POST', NULL, NULL, NULL);
 INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/user/pwd', 'PUT', NULL, NULL, NULL);
 INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/dashboard', 'GET', NULL, NULL, NULL);
-INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'admin', '/api/v1/settings', 'POST', NULL, NULL, NULL);
-INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'admin', '/api/v1/settings', 'GET', NULL, NULL, NULL);
 COMMIT;
 
 BEGIN;
@@ -274,6 +275,8 @@ INSERT INTO `sys_menu`(`menu_id`, `menu_name`, `title`, `icon`, `path`, `paths`,
 INSERT INTO `sys_menu`(`menu_id`, `menu_name`, `title`, `icon`, `path`, `paths`, `menu_type`, `action`, `permission`, `parent_id`, `no_cache`, `breadcrumb`, `component`, `sort`, `visible`, `create_by`, `update_by`, `is_frame`, `create_time`, `update_time`, `delete_time`) VALUES (355, '', '获取配置', 'bug', '/api/v1/settings', '/0/63/280/353/355', 'A', 'GET', '', 353, '0', '', '', 0, '1', '1', '', 1, '2020-08-19 00:42:47', '2020-08-19 00:42:47', NULL);
 INSERT INTO `sys_menu`(`menu_id`, `menu_name`, `title`, `icon`, `path`, `paths`, `menu_type`, `action`, `permission`, `parent_id`, `no_cache`, `breadcrumb`, `component`, `sort`, `visible`, `create_by`, `update_by`, `is_frame`, `create_time`, `update_time`, `delete_time`) VALUES (356, '', '保存系统配置', '', '', '/0/2/352/356', 'F', '', 'system:settings:index:config', 352, '0', '', '', 0, '0', '1', '', 1, '2020-08-19 13:28:23', '2020-08-19 13:28:23', NULL);
 INSERT INTO `sys_menu`(`menu_id`, `menu_name`, `title`, `icon`, `path`, `paths`, `menu_type`, `action`, `permission`, `parent_id`, `no_cache`, `breadcrumb`, `component`, `sort`, `visible`, `create_by`, `update_by`, `is_frame`, `create_time`, `update_time`, `delete_time`) VALUES (357, '', '保存LDAP配置', '', '', '/0/2/352/357', 'F', '', 'system:settings:index:ldap', 352, '0', '', '', 0, '0', '1', '', 1, '2020-08-19 13:29:08', '2020-08-19 13:29:08', NULL);
+INSERT INTO `sys_menu`(`menu_id`, `menu_name`, `title`, `icon`, `path`, `paths`, `menu_type`, `action`, `permission`, `parent_id`, `no_cache`, `breadcrumb`, `component`, `sort`, `visible`, `create_by`, `update_by`, `is_frame`, `create_time`, `update_time`, `delete_time`) VALUES (358, '', '清空登录日志', '', '/api/v1/loginlog', '/0/63/280/214/358', 'A', 'DELETE', '', 214, '0', '', '', 0, '1', '1', '', 1, '2020-08-27 10:00:11', '2020-08-27 10:00:11', NULL);
+INSERT INTO `sys_menu`(`menu_id`, `menu_name`, `title`, `icon`, `path`, `paths`, `menu_type`, `action`, `permission`, `parent_id`, `no_cache`, `breadcrumb`, `component`, `sort`, `visible`, `create_by`, `update_by`, `is_frame`, `create_time`, `update_time`, `delete_time`) VALUES (359, '', '清空登录日志', '', '', '/0/2/212/359', 'F', 'DELETE', 'system:sysloginlog:clean', 212, '0', '', '', 0, '0', '1', '', 1, '2020-08-27 10:01:12', '2020-08-27 10:01:12', NULL);
 COMMIT;
 
 BEGIN;
@@ -455,6 +458,8 @@ INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `upd
 INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (1, 355, 'admin', NULL, NULL);
 INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (1, 356, 'admin', NULL, NULL);
 INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (1, 357, 'admin', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (1, 358, 'admin', NULL, NULL);
+INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (1, 359, 'admin', NULL, NULL);
 INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 63, 'common', NULL, NULL);
 INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 80, 'common', NULL, NULL);
 INSERT INTO `sys_role_menu`(`role_id`, `menu_id`, `role_name`, `create_by`, `update_by`) VALUES (2, 92, 'common', NULL, NULL);
