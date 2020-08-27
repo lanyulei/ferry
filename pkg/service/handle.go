@@ -325,6 +325,7 @@ func (h *Handle) HandleWorkOrder(
 	circulationValue string,
 	flowProperties int,
 	remarks string,
+	tpls []map[string]interface{},
 ) (err error) {
 	h.workOrderId = workOrderId
 	h.flowProperties = flowProperties
@@ -626,6 +627,21 @@ func (h *Handle) HandleWorkOrder(
 		}
 	}
 
+	// 更新表单数据
+	for _, t := range tpls {
+		var tplValue []byte
+		tplValue, err = json.Marshal(t["tplValue"])
+		if err != nil {
+			h.tx.Rollback()
+			return
+		}
+		err = h.tx.Model(&process.TplData{}).Where("id = ?", t["tplDataId"]).Update("form_data", tplValue).Error
+		if err != nil {
+			h.tx.Rollback()
+			return
+		}
+	}
+
 	// 流转历史写入
 	err = orm.Eloquent.Model(&cirHistoryValue).
 		Where("work_order = ?", workOrderId).
@@ -663,7 +679,6 @@ func (h *Handle) HandleWorkOrder(
 		CostDuration: costDurationValue,
 		Remarks:      remarks,
 	}
-
 	err = h.tx.Create(&cirHistoryData).Error
 	if err != nil {
 		h.tx.Rollback()
