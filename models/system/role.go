@@ -46,13 +46,13 @@ func (e *SysRole) GetPage(pageSize int, pageIndex int) ([]SysRole, int, error) {
 		table = table.Where("role_id = ?", e.RoleId)
 	}
 	if e.RoleName != "" {
-		table = table.Where("role_name = ?", e.RoleName)
+		table = table.Where("role_name like ?", "%"+e.RoleName+"%")
 	}
 	if e.Status != "" {
 		table = table.Where("status = ?", e.Status)
 	}
 	if e.RoleKey != "" {
-		table = table.Where("role_key = ?", e.RoleKey)
+		table = table.Where("role_key like ?", "%"+e.RoleKey+"%")
 	}
 
 	if err := table.Order("role_sort").Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&doc).Error; err != nil {

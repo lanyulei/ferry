@@ -22,11 +22,20 @@ import (
 // @Router /api/v1/menulist [get]
 // @Security Bearer
 func GetMenuList(c *gin.Context) {
-	var Menu system.Menu
+	var (
+		err    error
+		Menu   system.Menu
+		result []system.Menu
+	)
 	Menu.MenuName = c.Request.FormValue("menuName")
 	Menu.Visible = c.Request.FormValue("visible")
 	Menu.Title = c.Request.FormValue("title")
-	result, err := Menu.SetMenu()
+
+	if Menu.Title == "" {
+		result, err = Menu.SetMenu()
+	} else {
+		result, err = Menu.GetPage()
+	}
 	if err != nil {
 		app.Error(c, -1, err, "")
 		return

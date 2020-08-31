@@ -109,7 +109,7 @@ func (e *Dept) GetPage(bl bool) ([]Dept, error) {
 		table = table.Where("dept_id = ?", e.DeptId)
 	}
 	if e.DeptName != "" {
-		table = table.Where("dept_name = ?", e.DeptName)
+		table = table.Where("dept_name like ?", "%"+e.DeptName+"%")
 	}
 	if e.Status != "" {
 		table = table.Where("status = ?", e.Status)
