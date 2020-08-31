@@ -93,10 +93,10 @@ func (e *Post) GetPage(pageSize int, pageIndex int) ([]Post, int, error) {
 		table = table.Where("post_id = ?", e.PostId)
 	}
 	if e.PostName != "" {
-		table = table.Where("post_name = ?", e.PostName)
+		table = table.Where("post_name like ?", "%"+e.PostName+"%")
 	}
 	if e.PostCode != "" {
-		table = table.Where("post_code = ?", e.PostCode)
+		table = table.Where("post_code like ?", "%"+e.PostCode+"%")
 	}
 	if e.Status != "" {
 		table = table.Where("status = ?", e.Status)

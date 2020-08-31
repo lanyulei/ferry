@@ -92,14 +92,14 @@ func (e *Menu) GetByMenuId() (Menu Menu, err error) {
 }
 
 func (e *Menu) SetMenu() (m []Menu, err error) {
-	menulist, err := e.GetPage()
+	menuList, err := e.GetPage()
 
 	m = make([]Menu, 0)
-	for i := 0; i < len(menulist); i++ {
-		if menulist[i].ParentId != 0 {
+	for i := 0; i < len(menuList); i++ {
+		if menuList[i].ParentId != 0 {
 			continue
 		}
-		menusInfo := DiguiMenu(&menulist, menulist[i])
+		menusInfo := DiguiMenu(&menuList, menuList[i])
 
 		m = append(m, menusInfo)
 	}
@@ -251,7 +251,7 @@ func (e *Menu) GetPage() (Menus []Menu, err error) {
 		table = table.Where("menu_name = ?", e.MenuName)
 	}
 	if e.Title != "" {
-		table = table.Where("title = ?", e.Title)
+		table = table.Where("title like ?", "%"+e.Title+"%")
 	}
 	if e.Visible != "" {
 		table = table.Where("visible = ?", e.Visible)

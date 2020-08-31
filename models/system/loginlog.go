@@ -53,13 +53,13 @@ func (e *LoginLog) GetPage(pageSize int, pageIndex int) ([]LoginLog, int, error)
 
 	table := orm.Eloquent.Select("*").Table(e.TableName())
 	if e.Ipaddr != "" {
-		table = table.Where("ipaddr = ?", e.Ipaddr)
+		table = table.Where("ipaddr like ?", "%"+e.Ipaddr+"%")
 	}
 	if e.Status != "" {
 		table = table.Where("status = ?", e.Status)
 	}
 	if e.Username != "" {
-		table = table.Where("userName = ?", e.Username)
+		table = table.Where("username like ?", "%"+e.Username+"%")
 	}
 
 	var count int

@@ -206,14 +206,14 @@ func (e *SysUser) GetPage(pageSize int, pageIndex int) ([]SysUserPage, int, erro
 	table = table.Joins("left join sys_dept on sys_dept.dept_id = sys_user.dept_id")
 
 	if e.Username != "" {
-		table = table.Where("username = ?", e.Username)
+		table = table.Where("sys_user.username like ?", "%"+e.Username+"%")
 	}
 	if e.Status != "" {
 		table = table.Where("sys_user.status = ?", e.Status)
 	}
 
 	if e.Phone != "" {
-		table = table.Where("sys_user.phone = ?", e.Phone)
+		table = table.Where("sys_user.phone like ?", "%"+e.Phone+"%")
 	}
 
 	if e.DeptId != 0 {

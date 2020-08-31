@@ -25,18 +25,24 @@ import (
 // @Security
 func GetDeptList(c *gin.Context) {
 	var (
-		Dept system.Dept
-		err  error
+		Dept   system.Dept
+		err    error
+		result []system.Dept
 	)
 	Dept.DeptName = c.Request.FormValue("deptName")
 	Dept.Status = c.Request.FormValue("status")
 	Dept.DeptId, _ = tools.StringToInt(c.Request.FormValue("deptId"))
 
-	result, err := Dept.SetDept(true)
+	if Dept.DeptName == "" {
+		result, err = Dept.SetDept(true)
+	} else {
+		result, err = Dept.GetPage(true)
+	}
 	if err != nil {
 		app.Error(c, -1, err, "")
 		return
 	}
+
 	app.OK(c, result, "")
 }
 
