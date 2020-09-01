@@ -24,7 +24,7 @@ var rootCmd = &cobra.Command{
 	},
 	PersistentPreRunE: func(*cobra.Command, []string) error { return nil },
 	Run: func(cmd *cobra.Command, args []string) {
-		usageStr := `欢迎使用 ferry，可以是用 -h 查看命令`
+		usageStr := `欢迎使用 ferry，可以使用 -h 查看命令`
 		logger.Infof("%s\n", usageStr)
 	},
 }
