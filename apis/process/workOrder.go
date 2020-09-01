@@ -585,3 +585,42 @@ func UrgeWorkOrder(c *gin.Context) {
 
 	app.OK(c, "", "")
 }
+
+// 主动处理
+func ActiveOrder(c *gin.Context) {
+	var (
+		workOrderId string
+		err         error
+		stateValue  []struct {
+			ID            string `json:"id"`
+			Label         string `json:"label"`
+			ProcessMethod string `json:"process_method"`
+			Processor     []int  `json:"processor"`
+		}
+		stateValueByte []byte
+	)
+
+	workOrderId = c.Param("id")
+
+	err = c.ShouldBind(&stateValue)
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
+
+	stateValueByte, err = json.Marshal(stateValue)
+	if err != nil {
+		app.Error(c, -1, fmt.Errorf("转byte失败，%v", err.Error()), "")
+		return
+	}
+
+	err = orm.Eloquent.Model(&process.WorkOrderInfo{}).
+		Where("id = ?", workOrderId).
+		Update("state", stateValueByte).Error
+	if err != nil {
+		app.Error(c, -1, fmt.Errorf("接单失败，%v", err.Error()), "")
+		return
+	}
+
+	app.OK(c, "", "接单成功，请及时处理")
+}
