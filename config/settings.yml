@@ -2,46 +2,42 @@ script:
   path: ./static/scripts
 settings:
   application:
-    mode: prod  # dev开发环境 test测试环境 prod线上环境
+    domain: localhost:8002
     host: 0.0.0.0
+    ishttps: false
+    mode: prod
     name: ferry
     port: 8002
     readtimeout: 1
     writertimeout: 2
-    domain: localhost:8002
-    ishttps: false
-  ssl:
-    key: keystring
-    pem: temp/pem.pem
-  jwt:
-    secret: ferry
-    timeout: 3600
   database:
-    name: ferry
     dbtype: mysql
     host: 127.0.0.1
+    name: ferry
     password: 123456
     port: 3306
     username: root
-  redis:
-    host: 127.0.0.1
-    port: 6379
+  domain:
+    gethost: 1
+    url: localhost:9527
   email:
     alias: ferry
     host: smtp.163.com
     pass: your password
     port: 465
-    user: your username
+    user: fdevops@163.com
   gorm:
     logmode: 0
     maxidleconn: 0
     maxopenconn: 20000
-  domain: http://192.168.0.100:9527
+  jwt:
+    secret: ferry
+    timeout: 3600
   ldap:
     anonymousquery: 0
     basedn: dc=fdevops,dc=com
     bindpwd: 123456
-    binduserdn: admin
+    binduserdn: cn=admin,dc=fdevops,dc=com
     host: localhost
     port: 389
     tls: 0
@@ -49,10 +45,16 @@ settings:
   log:
     compress: 1
     consolestdout: 1
-    filestdout: 1
-    level: info
+    filestdout: 0
+    level: debug
     localtime: 1
-    maxAge: 30
+    maxage: 30
     maxbackups: 300
     maxsize: 10240
     path: ./logs/ferry.log
+  redis:
+    host: 127.0.0.1
+    port: 6379
+  ssl:
+    key: keystring
+    pem: temp/pem.pem
