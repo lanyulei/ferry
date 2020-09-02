@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://www.fdevops.com/wp-content/uploads/2020/07/1595066253-ferry_logo_meitu_1.png">
+  <img src="https://www.fdevops.com/wp-content/uploads/2020/09/1599039924-ferry_log.png">
 </p>
 
 
