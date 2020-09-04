@@ -134,7 +134,7 @@ QQ群：1127401830
 
 ## 鸣谢
 
-特别感谢 [JetBrains](https://www.jetbrains.com/?from=mirai) 为本开源项目提供免费的 [IntelliJ IDEA](https://www.jetbrains.com/idea/?from=loonflow) 授权
+特别感谢 [JetBrains](https://www.jetbrains.com/?from=ferry) 为本开源项目提供免费的 [IntelliJ GoLand](https://www.jetbrains.com/go/?from=ferry) 授权
 
 <p>
  <a href="https://www.jetbrains.com/?from=ferry">
