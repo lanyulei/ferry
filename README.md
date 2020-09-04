@@ -132,6 +132,12 @@ QQ群：1127401830
 * everstar_l 10元
 * 五色花 20元
 
+## 鸣谢
+
+特别感谢 [JetBrains](https://www.jetbrains.com/?from=mirai) 为本开源项目提供免费的 [IntelliJ IDEA](https://www.jetbrains.com/idea/?from=loonflow) 授权
+
+![](https://www.jetbrains.com/?from=ferry)
+
 ## License
 
 开源不易，请尊重作者的付出，感谢。
