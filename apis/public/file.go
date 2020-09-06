@@ -1,18 +1,22 @@
 package public
 
 import (
+	"bytes"
 	"encoding/base64"
 	"errors"
+	"ferry/pkg/logger"
 	"ferry/pkg/utils"
 	"ferry/tools/app"
+	"ferry/tools/config"
 	"fmt"
-	"io/ioutil"
-	"strings"
-
-	"github.com/spf13/viper"
-
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/spf13/viper"
+	"io"
+	"mime/multipart"
+	"os"
+	"path/filepath"
+	"strings"
 )
 
 // @Summary 上传图片
@@ -54,29 +58,90 @@ func UploadFile(c *gin.Context) {
 				return
 			}
 			// 上传文件至指定目录
-			guid := uuid.New().String()
-
-			singleFile := "static/uploadfile/" + guid + utils.GetExt(files.Filename)
-			_ = c.SaveUploadedFile(files, singleFile)
-			app.OK(c, urlPrefix+singleFile, "上传成功")
+			name, err := saveUploadFile(files)
+			if err != nil {
+				app.Error(c, 200, err, "上传失败")
+				return
+			}
+			app.OK(c, urlPrefix+"upload/"+name, "上传成功")
 			return
 		case "2": // 多图
-			files := c.Request.MultipartForm.File["file"]
-			multipartFile := make([]string, len(files))
+			form, err := c.MultipartForm()
+			if err != nil {
+				app.Error(c, 200, err, "上传失败")
+				return
+			}
+			files := form.File["file"]
+			multipartFile := make([]string, 0)
 			for _, f := range files {
-				guid := uuid.New().String()
-				multipartFileName := "static/uploadfile/" + guid + utils.GetExt(f.Filename)
-				_ = c.SaveUploadedFile(f, multipartFileName)
-				multipartFile = append(multipartFile, urlPrefix+multipartFileName)
+				name, err := saveUploadFile(f)
+				if err != nil {
+					app.Error(c, 200, err, "上传失败")
+					return
+				}
+				multipartFileName := urlPrefix + "upload/" + name
+				multipartFile = append(multipartFile, multipartFileName)
 			}
 			app.OK(c, multipartFile, "上传成功")
 			return
 		case "3": // base64
+			//TODO: 应当根据header(data:image/png;base64)进行保存, 不是全部都保存为jpg
 			files, _ := c.GetPostForm("file")
 			ddd, _ := base64.StdEncoding.DecodeString(files)
-			guid := uuid.New().String()
-			_ = ioutil.WriteFile("static/uploadfile/"+guid+".jpg", ddd, 0666)
-			app.OK(c, urlPrefix+"static/uploadfile/"+guid+".jpg", "上传成功")
+			r := bytes.NewReader(ddd)
+			name, err := saveFile(r, ".jpg")
+			if err != nil {
+				app.Error(c, 200, err, "上传失败")
+				return
+			}
+			app.OK(c, urlPrefix+"upload/"+name, "上传成功")
 		}
 	}
+}
+
+func saveUploadFile(file *multipart.FileHeader) (string, error) {
+	f, err := file.Open()
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+	return saveFile(f, utils.GetExt(file.Filename))
+}
+
+//saveFile 返回name为保存后的文件名称，如果err不为nil, 则name为空
+func saveFile(r io.Reader, ext string) (name string, err error) {
+	var (
+		f *os.File
+	)
+
+	//检查上传目录是否存在,不存在则创建
+	dir := config.ApplicationConfig.Upload
+	if !isExistDir(dir) {
+		if err = os.MkdirAll(dir, 0600); err != nil {
+			logger.Debug("dir", dir)
+			return "", err
+		}
+	}
+
+	//生成一个文件名称
+	guid := uuid.New().String()
+	name = fmt.Sprintf("%s%s", guid, ext)
+
+	//保存文件内容
+	path := filepath.Join(dir, name)
+	f, err = os.OpenFile(path, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0600)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+	if _, err = io.Copy(f, r); err != nil {
+		return "", err
+	}
+	return name, nil
+}
+
+//isExistDir 检查给定的目录是否存在
+func isExistDir(s string) bool {
+	info, err := os.Stat(s)
+	return err == nil && info.IsDir()
 }

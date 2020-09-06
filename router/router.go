@@ -5,6 +5,7 @@ import (
 	"ferry/router/dashboard"
 	"ferry/router/process"
 	systemRouter "ferry/router/system"
+	"github.com/spf13/viper"
 
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
@@ -21,6 +22,9 @@ func InitSysRouter(r *gin.Engine, authMiddleware *jwtauth.GinJWTMiddleware) *gin
 	// 静态文件
 	sysStaticFileRouter(g)
 
+	// 上传文件
+	sysUploadFileRouter(g)
+
 	// swagger；注意：生产环境可以注释掉
 	sysSwaggerRouter(g)
 
@@ -35,6 +39,10 @@ func InitSysRouter(r *gin.Engine, authMiddleware *jwtauth.GinJWTMiddleware) *gin
 
 func sysStaticFileRouter(r *gin.RouterGroup) {
 	r.Static("/static", "./static")
+}
+
+func sysUploadFileRouter(r *gin.RouterGroup) {
+	r.Static("/upload", viper.GetString("settings.application.upload"))
 }
 
 func sysSwaggerRouter(r *gin.RouterGroup) {

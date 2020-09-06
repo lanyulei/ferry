@@ -13,6 +13,7 @@ type Application struct {
 	DemoMsg       string
 	Domain        string
 	IsHttps       bool
+	Upload        string
 }
 
 func InitApplication(cfg *viper.Viper) *Application {
@@ -27,6 +28,7 @@ func InitApplication(cfg *viper.Viper) *Application {
 		DemoMsg:       cfg.GetString("demoMsg"),
 		Domain:        cfg.GetString("domain"),
 		IsHttps:       cfg.GetBool("ishttps"),
+		Upload:        uploadDefault(cfg),
 	}
 }
 
@@ -38,6 +40,13 @@ func portDefault(cfg *viper.Viper) string {
 	} else {
 		return cfg.GetString("port")
 	}
+}
+
+func uploadDefault(cfg *viper.Viper) string {
+	if cfg.GetString("upload") == "" {
+		return "./upload"
+	}
+	return cfg.GetString("upload")
 }
 
 func isHttpsDefault(cfg *viper.Viper) bool {
