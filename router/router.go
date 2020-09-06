@@ -5,8 +5,7 @@ import (
 	"ferry/router/dashboard"
 	"ferry/router/process"
 	systemRouter "ferry/router/system"
-	"github.com/spf13/viper"
-
+	"ferry/tools/config"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 
@@ -42,7 +41,7 @@ func sysStaticFileRouter(r *gin.RouterGroup) {
 }
 
 func sysUploadFileRouter(r *gin.RouterGroup) {
-	r.Static("/upload", viper.GetString("settings.application.upload"))
+	r.Static("/upload", config.ApplicationConfig.Upload)
 }
 
 func sysSwaggerRouter(r *gin.RouterGroup) {
