@@ -1,8 +1,6 @@
 package middleware
 
 import (
-	"ferry/global/orm"
-	"ferry/models/system"
 	mycasbin "ferry/pkg/casbin"
 	"ferry/pkg/jwtauth"
 	_ "ferry/pkg/jwtauth"
@@ -17,8 +15,6 @@ import (
 //权限检查中间件
 func AuthCheckRole() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var menuValue system.Menu
-
 		data, _ := c.Get("JWT_PAYLOAD")
 		v := data.(jwtauth.MapClaims)
 		e, err := mycasbin.Casbin()
@@ -26,12 +22,6 @@ func AuthCheckRole() gin.HandlerFunc {
 		//检查权限
 		res, err := e.Enforce(v["rolekey"], c.Request.URL.Path, c.Request.Method)
 		logger.Info(v["rolekey"], c.Request.URL.Path, c.Request.Method)
-
-		tools.HasError(err, "", 500)
-
-		err = orm.Eloquent.Model(&menuValue).
-			Where("path = ? and action = ?", c.Request.URL.Path, c.Request.Method).
-			Find(&menuValue).Error
 		tools.HasError(err, "", 500)
 
 		if res {
@@ -39,7 +29,7 @@ func AuthCheckRole() gin.HandlerFunc {
 		} else {
 			c.JSON(http.StatusOK, gin.H{
 				"code": 403,
-				"msg":  fmt.Sprintf("对不起，您没有 <%v> 访问权限，请联系管理员", menuValue.Title),
+				"msg":  fmt.Sprintf("对不起，您没有 <%v-%v> 访问权限，请联系管理员", c.Request.URL.Path, c.Request.Method),
 			})
 			c.Abort()
 			return
