@@ -120,6 +120,7 @@ QQ群：1127401830
 * Super_z 10元
 * T*i 10元
 * *伟 10元
+* 老白@天智 20元
 
 支付宝：
 
@@ -146,6 +147,12 @@ QQ群：1127401830
 
 开源不易，请尊重作者的付出，感谢。
 
-[MIT](https://github.com/lanyulei/ferry/blob/master/LICENSE)
+在此处声明，本系统目前不建议商业产品使用，因本系统使用的`流程设计器`未设置开源协议，`表单设计器`是LGPL v3的协议。
+
+因此避免纠纷，不建议商业产品使用，若执意使用，请联系原作者获得授权。
+
+再次声明，若是未联系作者直接将本系统使用于商业产品，出现的商业纠纷，本系统概不承担，感谢。
+
+[LGPL-3.0](https://github.com/lanyulei/ferry/blob/master/LICENSE)
 
 Copyright (c) 2020 lanyulei
