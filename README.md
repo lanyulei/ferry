@@ -147,6 +147,8 @@ QQ群：1127401830
 
 开源不易，请尊重作者的付出，感谢。
 
+本系统目前禁止商业化，即便是您经过了二次开发不允许，请见谅，若发现有私自售卖或集成到其他商业产品中，将移交相关部门进行处理，后果自负，感谢支持。
+
 [MIT](https://github.com/lanyulei/ferry/blob/master/LICENSE)
 
 Copyright (c) 2020 lanyulei
