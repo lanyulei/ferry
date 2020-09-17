@@ -37,6 +37,11 @@ func UploadFile(c *gin.Context) {
 	tag, _ = c.GetPostForm("type")
 	fileType = c.DefaultQuery("file_type", "images")
 
+	if fileType != "images" && fileType != "files" {
+		app.Error(c, -1, fmt.Errorf("上传接口目前，仅支持图片上传和文件上传"), "")
+		return
+	}
+
 	if viper.GetBool("settings.domain.getHost") {
 		urlPrefix = fmt.Sprintf("http://%s/", c.Request.Host)
 	} else {
