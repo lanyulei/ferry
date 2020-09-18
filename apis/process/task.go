@@ -221,8 +221,11 @@ func TaskDetails(c *gin.Context) {
 	)
 
 	fileName = c.DefaultQuery("file_name", "")
-	if fileName == "" {
-		app.Error(c, -1, errors.New("参数不正确，请确认file_name参数是否存在"), "")
+	if fileName == "" ||
+		strings.HasPrefix(fileName, ".") ||
+		strings.HasPrefix(fileName, "/") ||
+		strings.HasPrefix(fileName, "\\") {
+		app.Error(c, -1, errors.New("file_name参数不正确，请确认"), "")
 		return
 	}
 
