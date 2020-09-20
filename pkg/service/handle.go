@@ -348,6 +348,12 @@ func (h *Handle) HandleWorkOrder(
 		noticeList         []int
 		sendSubject        string = "您有一条待办工单，请及时处理"
 		sendDescription    string = "您有一条待办工单请及时处理，工单描述如下"
+		paramsValue        struct {
+			Id       int           `json:"id"`
+			Title    string        `json:"title"`
+			Priority int           `json:"priority"`
+			FormData []interface{} `json:"form_data"`
+		}
 	)
 
 	defer func() {
@@ -638,6 +644,8 @@ func (h *Handle) HandleWorkOrder(
 			return
 		}
 
+		paramsValue.FormData = append(paramsValue.FormData, t["tplValue"])
+
 		// 是否可写，只有可写的模版可以更新数据
 		updateStatus := false
 		if writeTplList, writeOK := h.stateValue["writeTpls"]; writeOK {
@@ -823,7 +831,15 @@ continueTag:
 		}
 		execTasks = append(execTasks, task)
 	}
-	go ExecTask(execTasks)
+
+	paramsValue.Id = h.workOrderDetails.Id
+	paramsValue.Title = h.workOrderDetails.Title
+	paramsValue.Priority = h.workOrderDetails.Priority
+	params, err := json.Marshal(paramsValue)
+	if err != nil {
+		return err
+	}
+	go ExecTask(execTasks, string(params))
 
 	return
 }

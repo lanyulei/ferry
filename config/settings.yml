@@ -53,8 +53,7 @@ settings:
     maxsize: 10240
     path: ./logs/ferry.log
   redis:
-    host: 127.0.0.1
-    port: 6379
+    url: redis://ferry123456@127.0.0.1:6379
   ssl:
     key: keystring
     pem: temp/pem.pem

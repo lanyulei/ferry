@@ -109,6 +109,8 @@ func UpdateProcess(c *gin.Context) {
 			"classify":  processValue.Classify,
 			"task":      processValue.Task,
 			"notice":    processValue.Notice,
+			"icon":      processValue.Icon,
+			"remarks":   processValue.Remarks,
 		}).Error
 	if err != nil {
 		app.Error(c, -1, err, fmt.Sprintf("更新流程信息失败，%v", err.Error()))
@@ -193,7 +195,7 @@ func ClassifyProcessList(c *gin.Context) {
 	for _, item := range classifyList {
 		err = orm.Eloquent.Model(&process2.Info{}).
 			Where("classify = ? and name LIKE ?", item.Id, fmt.Sprintf("%%%v%%", processName)).
-			Select("id, create_time, update_time, name").
+			Select("id, create_time, update_time, name, icon, remarks").
 			Find(&item.ProcessList).Error
 		if err != nil {
 			app.Error(c, -1, err, fmt.Sprintf("获取流程失败，%v", err.Error()))

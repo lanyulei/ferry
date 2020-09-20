@@ -71,6 +71,12 @@ func CreateWorkOrder(c *gin.Context) {
 			Tasks       json.RawMessage          `json:"tasks"`
 			Source      string                   `json:"source"`
 		}
+		paramsValue struct {
+			Id       int           `json:"id"`
+			Title    string        `json:"title"`
+			Priority int           `json:"priority"`
+			FormData []interface{} `json:"form_data"`
+		}
 	)
 
 	err := c.ShouldBind(&workOrderValue)
@@ -248,7 +254,18 @@ func CreateWorkOrder(c *gin.Context) {
 		return
 	}
 	if len(taskList) > 0 {
-		go service.ExecTask(taskList)
+		paramsValue.Id = workOrderInfo.Id
+		paramsValue.Title = workOrderInfo.Title
+		paramsValue.Priority = workOrderInfo.Priority
+		paramsValue.FormData = workOrderValue.Tpls["form_data"]
+
+		params, err := json.Marshal(paramsValue)
+		if err != nil {
+			app.Error(c, -1, err, "")
+			return
+		}
+
+		go service.ExecTask(taskList, string(params))
 	}
 
 	app.OK(c, "", "成功提交工单申请")
