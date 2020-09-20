@@ -31,7 +31,12 @@
 
 演示demo: [http://fdevops.com:8001/#/dashboard](http://fdevops.com:8001/#/dashboard)
 
-账号密码：admin/123456
+```
+账号：admin
+密码：123456
+
+演示demo登陆需要取消ldap验证，就是登陆页面取消ldap的打勾。
+```
 
 文档: [https://www.fdevops.com/docs/ferry](https://www.fdevops.com/docs/ferry-tutorial-document/introduction)
 
