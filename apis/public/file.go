@@ -3,7 +3,6 @@ package public
 import (
 	"encoding/base64"
 	"errors"
-	"ferry/pkg/utils"
 	"ferry/tools/app"
 	"fmt"
 	"io/ioutil"
@@ -71,6 +70,8 @@ func UploadFile(c *gin.Context) {
 		}
 	}
 
+	guid := strings.ReplaceAll(uuid.New().String(), "-", "")
+
 	switch tag {
 	case "1": // 单图
 		files, err := c.FormFile("file")
@@ -79,9 +80,7 @@ func UploadFile(c *gin.Context) {
 			return
 		}
 		// 上传文件至指定目录
-		guid := uuid.New().String()
-
-		singleFile := saveFilePath + guid + utils.GetExt(files.Filename)
+		singleFile := saveFilePath + guid + "-" + files.Filename
 		_ = c.SaveUploadedFile(files, singleFile)
 		app.OK(c, urlPrefix+singleFile, "上传成功")
 		return
@@ -89,8 +88,8 @@ func UploadFile(c *gin.Context) {
 		files := c.Request.MultipartForm.File["file"]
 		multipartFile := make([]string, len(files))
 		for _, f := range files {
-			guid := uuid.New().String()
-			multipartFileName := saveFilePath + guid + utils.GetExt(f.Filename)
+			guid = strings.ReplaceAll(uuid.New().String(), "-", "")
+			multipartFileName := saveFilePath + guid + "-" + f.Filename
 			_ = c.SaveUploadedFile(f, multipartFileName)
 			multipartFile = append(multipartFile, urlPrefix+multipartFileName)
 		}
@@ -99,7 +98,6 @@ func UploadFile(c *gin.Context) {
 	case "3": // base64
 		files, _ := c.GetPostForm("file")
 		ddd, _ := base64.StdEncoding.DecodeString(files)
-		guid := uuid.New().String()
 		_ = ioutil.WriteFile(saveFilePath+guid+".jpg", ddd, 0666)
 		app.OK(c, urlPrefix+saveFilePath+guid+".jpg", "上传成功")
 	default:
