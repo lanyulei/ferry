@@ -641,3 +641,17 @@ func ActiveOrder(c *gin.Context) {
 
 	app.OK(c, "", "接单成功，请及时处理")
 }
+
+// 删除工单
+func DeleteWorkOrder(c *gin.Context) {
+
+	workOrderId := c.Param("id")
+
+	err := orm.Eloquent.Delete(&process.WorkOrderInfo{}, workOrderId).Error
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
+
+	app.OK(c, "", "工单已删除")
+}
