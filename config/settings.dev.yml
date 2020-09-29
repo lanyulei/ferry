@@ -32,7 +32,7 @@ settings:
     maxopenconn: 20000
   jwt:
     secret: ferry
-    timeout: 3600
+    timeout: 86400
   ldap:
     anonymousquery: 0
     basedn: dc=fdevops,dc=com
