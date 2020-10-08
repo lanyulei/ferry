@@ -44,7 +44,7 @@ type Handle struct {
 	updateValue      map[string]interface{}
 	stateValue       map[string]interface{}
 	targetStateValue map[string]interface{}
-	workOrderData    [][]byte
+	WorkOrderData    [][]byte
 	workOrderDetails process.WorkOrderInfo
 	endHistory       bool
 	flowProperties   int
@@ -159,7 +159,7 @@ func (h *Handle) ConditionalJudgment(condExpr map[string]interface{}) (result bo
 		}
 	}()
 
-	for _, data := range h.workOrderData {
+	for _, data := range h.WorkOrderData {
 		var formData map[string]interface{}
 		err = json.Unmarshal(data, &formData)
 		if err != nil {
@@ -401,7 +401,7 @@ func (h *Handle) HandleWorkOrder(
 	// 获取工单数据
 	err = orm.Eloquent.Model(&process.TplData{}).
 		Where("work_order = ?", workOrderId).
-		Pluck("form_data", &h.workOrderData).Error
+		Pluck("form_data", &h.WorkOrderData).Error
 	if err != nil {
 		return
 	}

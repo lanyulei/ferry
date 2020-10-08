@@ -20,7 +20,6 @@ func (p *ProcessState) GetNode(stateId string) (nodeValue map[string]interface{}
 			nodeValue = node
 		}
 	}
-
 	return
 }
 
