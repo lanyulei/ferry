@@ -64,6 +64,9 @@ func CreateWorkOrder(c *gin.Context) {
 		processValue   process.Info
 		sendToUserList []system.SysUser
 		noticeList     []int
+		handle         service.Handle
+		processState   service.ProcessState
+		condExprStatus bool
 		workOrderValue struct {
 			process.WorkOrderInfo
 			Tpls        map[string][]interface{} `json:"tpls"`
@@ -102,11 +105,6 @@ func CreateWorkOrder(c *gin.Context) {
 		app.Error(c, -1, err, fmt.Sprintf("获取处理人变量值失败，%v", err.Error()))
 		return
 	}
-	workOrderValue.State, err = json.Marshal(variableValue)
-	if err != nil {
-		app.Error(c, -1, err, "")
-		return
-	}
 
 	// 创建工单数据
 	tx := orm.Eloquent.Begin()
@@ -114,6 +112,83 @@ func CreateWorkOrder(c *gin.Context) {
 	// 查询流程信息
 	err = tx.Model(&processValue).Where("id = ?", workOrderValue.Process).Find(&processValue).Error
 	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
+
+	err = json.Unmarshal(processValue.Structure, &processState.Structure)
+	nodeValue, err := processState.GetNode(variableValue[0].(map[string]interface{})["id"].(string))
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
+
+	for _, v := range workOrderValue.Tpls["form_data"] {
+		tpl, err := json.Marshal(v)
+		if err != nil {
+			app.Error(c, -1, err, "")
+			return
+		}
+		handle.WorkOrderData = append(handle.WorkOrderData, tpl)
+	}
+
+	switch nodeValue["clazz"] {
+	// 排他网关
+	case "exclusiveGateway":
+		sourceEdges, err := processState.GetEdge(nodeValue["id"].(string), "source")
+		if err != nil {
+			app.Error(c, -1, err, "")
+			return
+		}
+	breakTag:
+		for _, edge := range sourceEdges {
+			edgeCondExpr := make([]map[string]interface{}, 0)
+			err = json.Unmarshal([]byte(edge["conditionExpression"].(string)), &edgeCondExpr)
+			if err != nil {
+				app.Error(c, -1, err, "")
+				return
+			}
+			for _, condExpr := range edgeCondExpr {
+				// 条件判断
+				condExprStatus, err = handle.ConditionalJudgment(condExpr)
+				if err != nil {
+					app.Error(c, -1, err, "")
+					return
+				}
+				if condExprStatus {
+					// 进行节点跳转
+					nodeValue, err = processState.GetNode(edge["target"].(string))
+					if err != nil {
+						app.Error(c, -1, err, "")
+						return
+					}
+
+					if nodeValue["clazz"] == "userTask" || nodeValue["clazz"] == "receiveTask" {
+						if nodeValue["assignValue"] == nil || nodeValue["assignType"] == "" {
+							app.Error(c, -1, errors.New("处理人不能为空"), "")
+							return
+						}
+					}
+					variableValue[0].(map[string]interface{})["id"] = nodeValue["id"].(string)
+					variableValue[0].(map[string]interface{})["label"] = nodeValue["label"]
+					variableValue[0].(map[string]interface{})["processor"] = nodeValue["assignValue"]
+					variableValue[0].(map[string]interface{})["process_method"] = nodeValue["assignType"]
+					break breakTag
+				}
+			}
+		}
+		if !condExprStatus {
+			app.Error(c, -1, errors.New("所有流转均不符合条件，请确认。"), "")
+			return
+		}
+	case "parallelGateway":
+		app.Error(c, -1, fmt.Errorf("新建工单无法使用并行网关，%v", err), "")
+		return
+	}
+
+	workOrderValue.State, err = json.Marshal(variableValue)
+	if err != nil {
+		app.Error(c, -1, err, "")
 		return
 	}
 
