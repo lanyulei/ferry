@@ -81,7 +81,7 @@ func WorkOrderList(c *gin.Context) {
 		classifyInt int
 	)
 
-	classify := c.DefaultQuery("classify", "0")
+	classify := c.DefaultQuery("classify", "")
 	if classify == "" {
 		app.Error(c, -1, errors.New("参数错误，请确认classify是否传递"), "")
 		return

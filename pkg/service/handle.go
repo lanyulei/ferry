@@ -243,7 +243,7 @@ func (h *Handle) ConditionalJudgment(condExpr map[string]interface{}) (result bo
 }
 
 // 并行网关，确认其他节点是否完成
-func (h *Handle) completeAllParallel(c *gin.Context, target string) (statusOk bool, err error) {
+func (h *Handle) completeAllParallel(target string) (statusOk bool, err error) {
 	var (
 		stateList []map[string]interface{}
 	)
@@ -548,7 +548,7 @@ func (h *Handle) HandleWorkOrder(
 			}
 		} else if len(sourceEdges) == 1 && len(targetEdges) > 1 {
 			// 出口
-			parallelStatusOk, err = h.completeAllParallel(c, sourceEdges[0]["target"].(string))
+			parallelStatusOk, err = h.completeAllParallel(sourceEdges[0]["target"].(string))
 			if err != nil {
 				err = fmt.Errorf("并行检测失败，%v", err.Error())
 				return
