@@ -99,8 +99,10 @@ func (w *WorkOrder) PureWorkOrderList() (result interface{}, err error) {
 func (w *WorkOrder) WorkOrderList() (result interface{}, err error) {
 
 	var (
-		principals string
-		StateList  []map[string]interface{}
+		principals        string
+		StateList         []map[string]interface{}
+		workOrderInfoList []workOrderInfo
+		minusTotal        int
 	)
 
 	result, err = w.PureWorkOrderList()
@@ -115,9 +117,25 @@ func (w *WorkOrder) WorkOrderList() (result interface{}, err error) {
 			return
 		}
 		var (
-			stateName string
+			stateName    string
+			structResult map[string]interface{}
+			authStatus   bool
 		)
 		if len(StateList) != 0 {
+			structResult, err = ProcessStructure(w.GinObj, v.Process, v.Id)
+			if err != nil {
+				return
+			}
+
+			authStatus, err = JudgeUserAuthority(w.GinObj, v.Id, structResult["workOrder"].(WorkOrderData).CurrentState)
+			if err != nil {
+				return
+			}
+			if !authStatus {
+				minusTotal += 1
+				continue
+			}
+
 			processorList := make([]int, 0)
 			if len(StateList) > 1 {
 				for _, s := range StateList {
@@ -148,7 +166,13 @@ func (w *WorkOrder) WorkOrderList() (result interface{}, err error) {
 		workOrderDetails[i].Principals = principals
 		workOrderDetails[i].StateName = stateName
 		workOrderDetails[i].DataClassify = v.Classify
+		if authStatus {
+			workOrderInfoList = append(workOrderInfoList, workOrderDetails[i])
+		}
 	}
+
+	result.(*pagination.Paginator).Data = &workOrderInfoList
+	result.(*pagination.Paginator).TotalCount -= minusTotal
 
 	return result, nil
 }
