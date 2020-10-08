@@ -186,6 +186,13 @@ func CreateWorkOrder(c *gin.Context) {
 		return
 	}
 
+	// 获取变量数据
+	err = service.GetVariableValue(variableValue, tools.GetUserId(c))
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
+
 	workOrderValue.State, err = json.Marshal(variableValue)
 	if err != nil {
 		app.Error(c, -1, err, "")
