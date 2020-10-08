@@ -122,18 +122,24 @@ func (w *WorkOrder) WorkOrderList() (result interface{}, err error) {
 			authStatus   bool
 		)
 		if len(StateList) != 0 {
-			structResult, err = ProcessStructure(w.GinObj, v.Process, v.Id)
-			if err != nil {
-				return
-			}
+			// 仅待办工单需要验证
+			// todo：还需要找最优解决方案
+			if w.Classify == 1 {
+				structResult, err = ProcessStructure(w.GinObj, v.Process, v.Id)
+				if err != nil {
+					return
+				}
 
-			authStatus, err = JudgeUserAuthority(w.GinObj, v.Id, structResult["workOrder"].(WorkOrderData).CurrentState)
-			if err != nil {
-				return
-			}
-			if !authStatus {
-				minusTotal += 1
-				continue
+				authStatus, err = JudgeUserAuthority(w.GinObj, v.Id, structResult["workOrder"].(WorkOrderData).CurrentState)
+				if err != nil {
+					return
+				}
+				if !authStatus {
+					minusTotal += 1
+					continue
+				}
+			} else {
+				authStatus = true
 			}
 
 			processorList := make([]int, 0)
