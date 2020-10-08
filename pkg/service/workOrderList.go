@@ -24,6 +24,7 @@ type WorkOrder struct {
 type workOrderInfo struct {
 	process.WorkOrderInfo
 	Principals   string `json:"principals"`
+	StateName    string `json:"state_name"`
 	DataClassify int    `json:"data_classify"`
 }
 
@@ -107,16 +108,35 @@ func (w *WorkOrder) WorkOrderList() (result interface{}, err error) {
 		return
 	}
 
-	for i, w := range *result.(*pagination.Paginator).Data.(*[]workOrderInfo) {
-		err = json.Unmarshal(w.State, &StateList)
+	for i, v := range *result.(*pagination.Paginator).Data.(*[]workOrderInfo) {
+		err = json.Unmarshal(v.State, &StateList)
 		if err != nil {
 			err = fmt.Errorf("json反序列化失败，%v", err.Error())
 			return
 		}
+		var (
+			stateName string
+		)
 		if len(StateList) != 0 {
 			processorList := make([]int, 0)
-			for _, v := range StateList[0]["processor"].([]interface{}) {
-				processorList = append(processorList, int(v.(float64)))
+			if len(StateList) > 1 {
+				for _, s := range StateList {
+					for _, p := range s["processor"].([]interface{}) {
+						if int(p.(float64)) == tools.GetUserId(w.GinObj) {
+							processorList = append(processorList, int(p.(float64)))
+						}
+					}
+					if len(processorList) > 0 {
+						stateName = s["label"].(string)
+						break
+					}
+				}
+			}
+			if len(processorList) == 0 {
+				for _, v := range StateList[0]["processor"].([]interface{}) {
+					processorList = append(processorList, int(v.(float64)))
+				}
+				stateName = StateList[0]["label"].(string)
 			}
 			principals, err = GetPrincipal(processorList, StateList[0]["process_method"].(string))
 			if err != nil {
@@ -126,7 +146,8 @@ func (w *WorkOrder) WorkOrderList() (result interface{}, err error) {
 		}
 		workOrderDetails := *result.(*pagination.Paginator).Data.(*[]workOrderInfo)
 		workOrderDetails[i].Principals = principals
-		workOrderDetails[i].DataClassify = w.Classify
+		workOrderDetails[i].StateName = stateName
+		workOrderDetails[i].DataClassify = v.Classify
 	}
 
 	return result, nil

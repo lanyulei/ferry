@@ -31,6 +31,8 @@ func CreateWorkOrder(c *gin.Context) (err error) {
 		processState   ProcessState
 		condExprStatus bool
 		tpl            []byte
+		sourceEdges    []map[string]interface{}
+		targetEdges    []map[string]interface{}
 		workOrderValue struct {
 			process.WorkOrderInfo
 			Tpls        map[string][]interface{} `json:"tpls"`
@@ -137,8 +139,48 @@ func CreateWorkOrder(c *gin.Context) (err error) {
 			return
 		}
 	case "parallelGateway":
-		err = fmt.Errorf("新建工单无法使用并行网关，%v", err)
-		return
+		// 入口，判断
+		sourceEdges, err = processState.GetEdge(nodeValue["id"].(string), "source")
+		if err != nil {
+			err = fmt.Errorf("查询流转信息失败，%v", err.Error())
+			return
+		}
+
+		targetEdges, err = processState.GetEdge(nodeValue["id"].(string), "target")
+		if err != nil {
+			err = fmt.Errorf("查询流转信息失败，%v", err.Error())
+			return
+		}
+
+		if len(sourceEdges) > 0 {
+			nodeValue, err = processState.GetNode(sourceEdges[0]["target"].(string))
+			if err != nil {
+				return
+			}
+		} else {
+			err = errors.New("并行网关流程不正确")
+			return
+		}
+
+		if len(sourceEdges) > 1 && len(targetEdges) == 1 {
+			// 入口
+			variableValue = []interface{}{}
+			for _, edge := range sourceEdges {
+				targetStateValue, err := processState.GetNode(edge["target"].(string))
+				if err != nil {
+					return err
+				}
+				variableValue = append(variableValue, map[string]interface{}{
+					"id":             edge["target"].(string),
+					"label":          targetStateValue["label"],
+					"processor":      targetStateValue["assignValue"],
+					"process_method": targetStateValue["assignType"],
+				})
+			}
+		} else {
+			err = errors.New("并行网关流程配置不正确")
+			return
+		}
 	}
 
 	// 获取变量数据
