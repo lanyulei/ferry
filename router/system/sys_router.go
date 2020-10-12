@@ -14,7 +14,7 @@ import (
 )
 
 func SysBaseRouter(r *gin.RouterGroup) {
-	r.GET("/", system.HelloWorld)
+	//r.GET("/", system.HelloWorld)
 	r.GET("/info", handler.Ping)
 }
 
