@@ -648,7 +648,9 @@ func (h *Handle) HandleWorkOrder(
 
 		// 是否可写，只有可写的模版可以更新数据
 		updateStatus := false
-		if writeTplList, writeOK := h.stateValue["writeTpls"]; writeOK {
+		if h.stateValue["clazz"].(string) == "start" {
+			updateStatus = true
+		} else if writeTplList, writeOK := h.stateValue["writeTpls"]; writeOK {
 		tplListTag:
 			for _, writeTplId := range writeTplList.([]interface{}) {
 				if writeTplId == t["tplId"] { // 可写
