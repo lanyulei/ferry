@@ -57,10 +57,9 @@ func UploadFile(c *gin.Context) {
 	if viper.GetBool("settings.domain.getHost") {
 		urlPrefix = fmt.Sprintf("%s://%s/", protocol, requestHost)
 	} else {
-		if strings.HasSuffix(viper.GetString("settings.domain.url"), "/") {
-			urlPrefix = viper.GetString("settings.domain.url")
-		} else {
-			urlPrefix = fmt.Sprintf("%s://%s/", protocol, viper.GetString("settings.domain.url"))
+		urlPrefix = fmt.Sprintf("%s://%s", protocol, viper.GetString("settings.domain.url"))
+		if !strings.HasSuffix(viper.GetString("settings.domain.url"), "/") {
+			urlPrefix = urlPrefix + "/"
 		}
 	}
 
