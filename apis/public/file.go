@@ -33,6 +33,7 @@ func UploadFile(c *gin.Context) {
 		saveFilePath string
 		err          error
 		protocol     string = "http"
+		requestHost  string
 	)
 	tag, _ = c.GetPostForm("type")
 	fileType = c.DefaultQuery("file_type", "images")
@@ -46,8 +47,15 @@ func UploadFile(c *gin.Context) {
 		protocol = "https"
 	}
 
+	requestHostList := strings.Split(c.Request.Host, ":")
+	if len(requestHostList) > 0 && requestHostList[1] == "80" {
+		requestHost = requestHostList[0]
+	} else {
+		requestHost = c.Request.Host
+	}
+
 	if viper.GetBool("settings.domain.getHost") {
-		urlPrefix = fmt.Sprintf("%s://%s/", protocol, c.Request.Host)
+		urlPrefix = fmt.Sprintf("%s://%s/", protocol, requestHost)
 	} else {
 		if strings.HasSuffix(viper.GetString("settings.domain.url"), "/") {
 			urlPrefix = viper.GetString("settings.domain.url")
