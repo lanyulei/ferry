@@ -101,6 +101,17 @@ func (h *Handle) Countersign(c *gin.Context) (err error) {
 		if err != nil {
 			return
 		}
+
+		// 如果是跳转到结束节点，则需要修改节点状态
+		if h.targetStateValue["clazz"] == "end" {
+			err = h.tx.Model(&process.WorkOrderInfo{}).
+				Where("id = ?", h.workOrderId).
+				Update("is_end", 1).Error
+			if err != nil {
+				h.tx.Rollback()
+				return
+			}
+		}
 	}
 	return
 }
@@ -619,16 +630,8 @@ func (h *Handle) HandleWorkOrder(
 		stateValue["processor"] = []int{}
 		stateValue["process_method"] = ""
 		h.updateValue["state"] = []map[string]interface{}{stateValue}
-		err = h.circulation()
+		err = h.commonProcessing(c)
 		if err != nil {
-			h.tx.Rollback()
-			return
-		}
-		err = h.tx.Model(&process.WorkOrderInfo{}).
-			Where("id = ?", h.workOrderId).
-			Update("is_end", 1).Error
-		if err != nil {
-			h.tx.Rollback()
 			return
 		}
 	}
@@ -656,13 +659,17 @@ func (h *Handle) HandleWorkOrder(
 				if writeTplId == t["tplId"] { // 可写
 					// 是否隐藏，隐藏的模版无法修改数据
 					if hideTplList, hideOK := h.stateValue["hideTpls"]; hideOK {
-						for _, hideTplId := range hideTplList.([]interface{}) {
-							if hideTplId == t["tplId"] { // 隐藏的
-								updateStatus = false
-								break tplListTag
-							} else {
-								updateStatus = true
+						if hideTplList != nil && len(hideTplList.([]interface{})) > 0 {
+							for _, hideTplId := range hideTplList.([]interface{}) {
+								if hideTplId == t["tplId"] { // 隐藏的
+									updateStatus = false
+									break tplListTag
+								} else {
+									updateStatus = true
+								}
 							}
+						} else {
+							updateStatus = true
 						}
 					} else {
 						updateStatus = true
