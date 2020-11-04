@@ -48,7 +48,7 @@ func UploadFile(c *gin.Context) {
 	}
 
 	requestHostList := strings.Split(c.Request.Host, ":")
-	if len(requestHostList) > 0 && requestHostList[1] == "80" {
+	if len(requestHostList) > 1 && requestHostList[1] == "80" {
 		requestHost = requestHostList[0]
 	} else {
 		requestHost = c.Request.Host
