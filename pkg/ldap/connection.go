@@ -23,10 +23,10 @@ func ldapConnection() (err error) {
 	var ldapConn = fmt.Sprintf("%v:%v", viper.GetString("settings.ldap.host"), viper.GetString("settings.ldap.port"))
 
 	if viper.GetBool("settings.ldap.tls") {
-		tlsconf := &tls.Config{
+		tlsConf := &tls.Config{
 			InsecureSkipVerify: true,
 		}
-		conn, err = ldap.DialTLS("tcp", ldapConn, tlsconf)
+		conn, err = ldap.DialTLS("tcp", ldapConn, tlsConf)
 	} else {
 		conn, err = ldap.Dial("tcp", ldapConn)
 	}

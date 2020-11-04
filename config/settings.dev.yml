@@ -37,7 +37,7 @@ settings:
     anonymousquery: 0
     basedn: dc=fdevops,dc=com
     bindpwd: 123456
-    binduserdn: admin
+    binduserdn: cn=admin,dc=fdevops,dc=com
     host: localhost
     port: 389
     tls: 0
@@ -53,7 +53,7 @@ settings:
     maxsize: 10240
     path: ./logs/ferry.log
   redis:
-    url: redis://ferry123456@127.0.0.1:6379
+    url: redis://127.0.0.1:6379
   ssl:
     key: keystring
     pem: temp/pem.pem
