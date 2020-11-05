@@ -5,14 +5,15 @@ import (
 	"ferry/pkg/pagination"
 	"ferry/tools"
 	"ferry/tools/app"
+	"ferry/tools/config"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	uuid "github.com/satori/go.uuid"
-	"github.com/spf13/viper"
 )
 
 /*
@@ -64,7 +65,7 @@ func TaskList(c *gin.Context) {
 		file["full_name"] = fn
 		return file
 	}
-	files, _ := ioutil.ReadDir(viper.GetString("script.path"))
+	files, _ := ioutil.ReadDir(config.ScriptPath)
 	var endIndex int
 	if taskName != "" {
 		for _, f := range files {
@@ -117,12 +118,7 @@ func CreateTask(c *gin.Context) {
 	}
 
 	uuidValue := uuid.Must(uuid.NewV4(), err)
-	fileName := fmt.Sprintf("%v/%v-%v-%v",
-		viper.GetString("script.path"),
-		taskValue.Name,
-		strings.Split(uuidValue.String(), "-")[4],
-		tools.GetUserName(c),
-	)
+	fileName := fmt.Sprintf(config.ScriptPath, fmt.Sprintf("%v-%v-%v", taskValue.Name, strings.Split(uuidValue.String(), "-")[4], tools.GetUserName(c)))
 	if taskValue.Classify == "python" {
 		fileName = fileName + ".py"
 	} else if taskValue.Classify == "shell" {
@@ -176,7 +172,7 @@ func UpdateTask(c *gin.Context) {
 	fileFullName := strings.Join(fullNameList, "-")
 
 	// 修改文件内容
-	err = ioutil.WriteFile(fmt.Sprintf("%v/%v", viper.GetString("script.path"), fileFullName), []byte(file.Content), 0666)
+	err = ioutil.WriteFile(filepath.Join(config.ScriptPath, fileFullName), []byte(file.Content), 0755)
 	if err != nil {
 		app.Error(c, -1, err, fmt.Sprintf("更新脚本文件失败，%v", err.Error()))
 		return
@@ -184,8 +180,8 @@ func UpdateTask(c *gin.Context) {
 
 	// 修改文件名称
 	err = os.Rename(
-		fmt.Sprintf("%v/%v", viper.GetString("script.path"), file.FullName),
-		fmt.Sprintf("%v/%v", viper.GetString("script.path"), fileFullName),
+		filepath.Join(config.ScriptPath, file.FullName),
+		filepath.Join(config.ScriptPath, fileFullName),
 	)
 	if err != nil {
 		app.Error(c, -1, err, fmt.Sprintf("更改脚本文件名称失败，%v", err.Error()))
@@ -203,7 +199,7 @@ func DeleteTask(c *gin.Context) {
 		return
 	}
 
-	err := os.Remove(fmt.Sprintf("%v/%v", viper.GetString("script.path"), fullName))
+	err := os.Remove(filepath.Join(config.ScriptPath, fullName))
 	if err != nil {
 		app.Error(c, -1, err, fmt.Sprintf("删除文件失败，%v", err.Error()))
 		return
@@ -229,7 +225,7 @@ func TaskDetails(c *gin.Context) {
 		return
 	}
 
-	content, err = ioutil.ReadFile(fmt.Sprintf("%v/%v", viper.GetString("script.path"), fileName))
+	content, err = ioutil.ReadFile(filepath.Join(config.ScriptPath, fileName))
 	if err != nil {
 		return
 	}

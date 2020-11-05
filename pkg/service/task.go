@@ -2,10 +2,9 @@ package service
 
 import (
 	"ferry/pkg/task"
-	"fmt"
+	"ferry/tools/config"
+	"path/filepath"
 	"strings"
-
-	"github.com/spf13/viper"
 )
 
 /*
@@ -14,7 +13,7 @@ import (
 
 func ExecTask(taskList []string, params string) {
 	for _, taskName := range taskList {
-		filePath := fmt.Sprintf("%v/%v", viper.GetString("script.path"), taskName)
+		filePath := filepath.Join(config.ScriptPath, taskName)
 		if strings.HasSuffix(filePath, ".py") {
 			task.Send("python", filePath, params)
 		} else if strings.HasSuffix(filePath, ".sh") {

@@ -6,6 +6,8 @@ import (
 	"ferry/router/dashboard"
 	"ferry/router/process"
 	systemRouter "ferry/router/system"
+	"ferry/tools/config"
+	"path/filepath"
 
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
@@ -35,8 +37,9 @@ func InitSysRouter(r *gin.Engine, authMiddleware *jwtauth.GinJWTMiddleware) *gin
 }
 
 func sysStaticFileRouter(r *gin.RouterGroup, g *gin.Engine) {
-	r.Static("/static", "./static")
-	g.LoadHTMLGlob("template/web/index.html")
+	r.Static("/static", filepath.Join(config.BaseDir, "static"))
+	g.LoadHTMLGlob(filepath.Join(config.BaseDir, "static/web/index.html"))
+
 }
 
 func sysSwaggerRouter(r *gin.RouterGroup) {
