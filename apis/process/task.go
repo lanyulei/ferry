@@ -129,7 +129,7 @@ func CreateTask(c *gin.Context) {
 		fileName = fileName + ".sh"
 	}
 
-	err = ioutil.WriteFile(fileName, []byte(taskValue.Content), 0666)
+	err = ioutil.WriteFile(fileName, []byte(taskValue.Content), 0755)
 	if err != nil {
 		app.Error(c, -1, err, fmt.Sprintf("创建任务脚本失败: %v", err.Error()))
 		return
