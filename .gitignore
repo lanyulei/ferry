@@ -7,3 +7,5 @@ vendor
 tmp/
 config/settings.dev.yml
 logs
+mysql/data
+redis/data
