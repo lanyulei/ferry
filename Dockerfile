@@ -1,7 +1,5 @@
 FROM golang:1.14
 
-MAINTAINER lanyulei "fdevops@163.com"
-
 WORKDIR /opt/ferry
 
 COPY . .
