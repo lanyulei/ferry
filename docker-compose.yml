@@ -68,5 +68,4 @@ services:
     environment:
       - TZ=Asia/Shanghai
       - VUE_APP_BASE_API=http://127.0.0.1:8002
-      - ENV=production
     restart: always
