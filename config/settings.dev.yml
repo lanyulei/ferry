@@ -57,3 +57,5 @@ settings:
   ssl:
     key: keystring
     pem: temp/pem.pem
+  public:
+    isLocation: 0
