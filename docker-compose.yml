@@ -67,4 +67,6 @@ services:
       - ./docker/nginx/config/nginx.conf:/usr/local/etc/nginx/nginx.conf
     environment:
       - TZ=Asia/Shanghai
+      - VUE_APP_BASE_API=http://127.0.0.1:8002
+      - ENV=production
     restart: always
