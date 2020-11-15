@@ -1,6 +1,7 @@
 package system
 
 import (
+	"ferry/global/orm"
 	"ferry/models/system"
 	"ferry/tools"
 	"ferry/tools/app"
@@ -44,6 +45,21 @@ func GetDeptList(c *gin.Context) {
 	}
 
 	app.OK(c, result, "")
+}
+
+func GetOrdinaryDeptList(c *gin.Context) {
+	var (
+		err      error
+		deptList []system.Dept
+	)
+
+	err = orm.Eloquent.Model(&system.Dept{}).Find(&deptList).Error
+	if err != nil {
+		app.Error(c, -1, err, "")
+		return
+	}
+
+	app.OK(c, deptList, "")
 }
 
 func GetDeptTree(c *gin.Context) {
@@ -158,7 +174,7 @@ func DeleteDept(c *gin.Context) {
 	app.OK(c, "", msg.DeletedSuccess)
 }
 
-func GetDeptTreeRoleselect(c *gin.Context) {
+func GetDeptTreeRoleSelect(c *gin.Context) {
 	var Dept system.Dept
 	var SysRole system.SysRole
 	id, _ := tools.StringToInt(c.Param("roleId"))
