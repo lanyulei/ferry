@@ -69,7 +69,7 @@ func JudgeUserAuthority(c *gin.Context, workOrderId int, currentState string) (s
 	}
 
 	// 会签
-	if currentStateValue["processor"] != nil && len(currentStateValue["processor"].([]interface{})) > 1 {
+	if currentStateValue["processor"] != nil && len(currentStateValue["processor"].([]interface{})) >= 1 {
 		if isCounterSign, ok := stateValue["isCounterSign"]; ok {
 			if isCounterSign.(bool) {
 				err = orm.Eloquent.Model(&process.CirculationHistory{}).
@@ -82,9 +82,32 @@ func JudgeUserAuthority(c *gin.Context, workOrderId int, currentState string) (s
 				for _, cirHistoryValue := range cirHistoryList {
 					if cirHistoryValue.Source != stateValue["id"] {
 						break
-					}
-					if cirHistoryValue.Source == stateValue["id"] && cirHistoryValue.ProcessorId == tools.GetUserId(c) {
-						return
+					} else if cirHistoryValue.Source == stateValue["id"] {
+						if currentStateValue["process_method"].(string) == "person" {
+							// 验证个人会签
+							if cirHistoryValue.ProcessorId == tools.GetUserId(c) {
+								return
+							}
+						} else if currentStateValue["process_method"].(string) == "role" {
+							// 验证角色会签
+							if stateValue["fullHandle"].(bool) {
+								if cirHistoryValue.ProcessorId == tools.GetUserId(c) {
+									return
+								}
+							} else {
+								var roleUserInfo system.SysUser
+								err = orm.Eloquent.Model(&roleUserInfo).
+									Where("user_id = ?", cirHistoryValue.ProcessorId).
+									Find(&roleUserInfo).
+									Error
+								if err != nil {
+									return
+								}
+								if roleUserInfo.RoleId == tools.GetRoleId(c) {
+									return
+								}
+							}
+						}
 					}
 				}
 			}
@@ -95,6 +118,12 @@ func JudgeUserAuthority(c *gin.Context, workOrderId int, currentState string) (s
 	case "person":
 		for _, processorValue := range currentStateValue["processor"].([]interface{}) {
 			if int(processorValue.(float64)) == tools.GetUserId(c) {
+				status = true
+			}
+		}
+	case "role":
+		for _, processorValue := range currentStateValue["processor"].([]interface{}) {
+			if int(processorValue.(float64)) == tools.GetRoleId(c) {
 				status = true
 			}
 		}
