@@ -36,11 +36,13 @@ func GetPrincipal(processor []int, processMethod string) (principals string, err
 		if err != nil {
 			return
 		}
-	//case "department":
-	//	err = orm.Eloquent.Model(&user.Dept{}).Where("id in (?)", processor).Pluck("nickname", &principalList).Error
-	//	if err != nil {
-	//		return
-	//	}
+	case "department":
+		err = orm.Eloquent.Model(&system.Dept{}).
+			Where("dept_id in (?)", processor).
+			Pluck("dept_name", &principalList).Error
+		if err != nil {
+			return
+		}
 	case "variable":
 		for _, p := range processor {
 			switch p {

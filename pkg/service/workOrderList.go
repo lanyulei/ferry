@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"ferry/global/orm"
 	"ferry/models/process"
+	"ferry/models/system"
 	"ferry/pkg/pagination"
 	"ferry/tools"
 	"fmt"
@@ -47,11 +48,18 @@ func (w *WorkOrder) PureWorkOrderList() (result interface{}, err error) {
 		roleSelect := fmt.Sprintf("(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'role')))", tools.GetRoleId(w.GinObj))
 
 		// 3. 部门
-		//departmentSelect := fmt.Sprintf("(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'department')))", userInfo.Dept)
+		var userInfo system.SysUser
+		err = orm.Eloquent.Model(&system.SysUser{}).
+			Where("user_id = ?", tools.GetUserId(w.GinObj)).
+			Find(&userInfo).Error
+		if err != nil {
+			return
+		}
+		departmentSelect := fmt.Sprintf("(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'department')))", userInfo.DeptId)
 
 		// 4. 变量会转成个人数据
 		//db = db.Where(fmt.Sprintf("(%v or %v or %v or %v) and is_end = 0", personSelect, personGroupSelect, departmentSelect, variableSelect))
-		db = db.Where(fmt.Sprintf("(%v or %v) and is_end = 0", personSelect, roleSelect))
+		db = db.Where(fmt.Sprintf("(%v or %v or %v) and is_end = 0", personSelect, roleSelect, departmentSelect))
 	case 2:
 		// 我创建的
 		db = db.Where("creator = ?", tools.GetUserId(w.GinObj))
@@ -90,16 +98,16 @@ func (w *WorkOrder) WorkOrderList() (result interface{}, err error) {
 	}
 
 	for i, v := range *result.(*pagination.Paginator).Data.(*[]workOrderInfo) {
-		err = json.Unmarshal(v.State, &StateList)
-		if err != nil {
-			err = fmt.Errorf("json反序列化失败，%v", err.Error())
-			return
-		}
 		var (
 			stateName    string
 			structResult map[string]interface{}
 			authStatus   bool
 		)
+		err = json.Unmarshal(v.State, &StateList)
+		if err != nil {
+			err = fmt.Errorf("json反序列化失败，%v", err.Error())
+			return
+		}
 		if len(StateList) != 0 {
 			// 仅待办工单需要验证
 			// todo：还需要找最优解决方案

@@ -69,7 +69,7 @@ func (h *Handle) Countersign(c *gin.Context) (err error) {
 		stateIdMap        map[string]interface{}
 		currentState      map[string]interface{}
 		cirHistoryCount   int
-		roleUserInfo      []system.SysUser
+		userInfoList      []system.SysUser
 		circulationStatus bool
 	)
 
@@ -85,7 +85,7 @@ func (h *Handle) Countersign(c *gin.Context) (err error) {
 			currentState = v
 		}
 	}
-	roleStatusCount := 0
+	userStatusCount := 0
 	circulationStatus = false
 	for _, cirHistoryValue := range h.cirHistoryList {
 		if len(currentState["processor"].([]interface{})) > 1 {
@@ -107,18 +107,22 @@ func (h *Handle) Countersign(c *gin.Context) (err error) {
 				circulationStatus = true
 				break
 			}
-		} else if currentState["process_method"].(string) == "role" {
+		} else if currentState["process_method"].(string) == "role" || currentState["process_method"].(string) == "department" {
 			// 全员处理
 			var tmpUserList []system.SysUser
 			if h.stateValue["fullHandle"].(bool) {
-				err = orm.Eloquent.Model(&system.SysUser{}).
-					Where("role_id in (?)", currentState["processor"].([]interface{})).
-					Find(&roleUserInfo).Error
+				db := orm.Eloquent.Model(&system.SysUser{})
+				if currentState["process_method"].(string) == "role" {
+					db = db.Where("role_id in (?)", currentState["processor"].([]interface{}))
+				} else if currentState["process_method"].(string) == "department" {
+					db = db.Where("dept_id in (?)", currentState["processor"].([]interface{}))
+				}
+				err = db.Find(&userInfoList).Error
 				if err != nil {
 					return
 				}
 				temp := map[string]struct{}{}
-				for _, user := range roleUserInfo {
+				for _, user := range userInfoList {
 					if _, ok := temp[user.Username]; !ok {
 						temp[user.Username] = struct{}{}
 						tmpUserList = append(tmpUserList, user)
@@ -128,33 +132,39 @@ func (h *Handle) Countersign(c *gin.Context) (err error) {
 					if cirHistoryValue.Source == currentState["id"].(string) &&
 						cirHistoryValue.ProcessorId != tools.GetUserId(c) &&
 						cirHistoryValue.ProcessorId == user.UserId {
-						roleStatusCount += 1
+						userStatusCount += 1
 						break
 					}
 				}
 			} else {
 				// 普通会签
 				for _, processor := range currentState["processor"].([]interface{}) {
-					err = orm.Eloquent.Model(&system.SysUser{}).Where("role_id = ?", processor).Find(&roleUserInfo).Error
+					db := orm.Eloquent.Model(&system.SysUser{})
+					if currentState["process_method"].(string) == "role" {
+						db = db.Where("role_id = ?", processor)
+					} else if currentState["process_method"].(string) == "department" {
+						db = db.Where("dept_id = ?", processor)
+					}
+					err = db.Find(&userInfoList).Error
 					if err != nil {
 						return
 					}
-					for _, user := range roleUserInfo {
+					for _, user := range userInfoList {
 						if user.UserId != tools.GetUserId(c) &&
 							cirHistoryValue.Source == currentState["id"].(string) &&
 							cirHistoryValue.ProcessorId == user.UserId {
-							roleStatusCount += 1
+							userStatusCount += 1
 							break
 						}
 					}
 				}
 			}
 			if h.stateValue["fullHandle"].(bool) {
-				if roleStatusCount == len(tmpUserList)-1 {
+				if userStatusCount == len(tmpUserList)-1 {
 					circulationStatus = true
 				}
 			} else {
-				if roleStatusCount == len(currentState["processor"].([]interface{}))-1 {
+				if userStatusCount == len(currentState["processor"].([]interface{}))-1 {
 					circulationStatus = true
 				}
 			}
