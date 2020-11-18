@@ -35,7 +35,7 @@ services:
 
   ferry:
     hostname: ferry
-    image: registry.cn-beijing.aliyuncs.com/lanyulei/ferry:v1.0.0
+    image: registry.cn-beijing.aliyuncs.com/lanyulei/ferry:v1.0.1
     container_name: ferry
     depends_on:
       - db
