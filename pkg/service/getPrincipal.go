@@ -94,6 +94,22 @@ func GetPrincipalUserInfo(stateList []interface{}, creator int) (userInfoList []
 				return
 			}
 			userInfoList = append(userInfoList, userInfoListTmp...)
+		case "role":
+			err = orm.Eloquent.Model(&system.SysUser{}).
+				Where("role_id in (?)", processorList).
+				Find(&userInfoListTmp).Error
+			if err != nil {
+				return
+			}
+			userInfoList = append(userInfoList, userInfoListTmp...)
+		case "department":
+			err = orm.Eloquent.Model(&system.SysUser{}).
+				Where("dept_id in (?)", processorList).
+				Find(&userInfoListTmp).Error
+			if err != nil {
+				return
+			}
+			userInfoList = append(userInfoList, userInfoListTmp...)
 		case "variable": // 变量
 			for _, processor := range processorList {
 				if int(processor.(float64)) == 1 {
