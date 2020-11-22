@@ -32,20 +32,56 @@ type workOrderInfo struct {
 func (w *WorkOrder) PureWorkOrderList() (result interface{}, err error) {
 	var (
 		workOrderInfoList []workOrderInfo
+		processorInfo     system.SysUser
 	)
 
+	personSelectValue := "(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'person')))"
+	roleSelectValue := "(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'role')))"
+	departmentSelectValue := "(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'department')))"
+
 	title := w.GinObj.DefaultQuery("title", "")
-	db := orm.Eloquent.Model(&process.WorkOrderInfo{}).Where("title like ?", fmt.Sprintf("%%%v%%", title))
+	startTime := w.GinObj.DefaultQuery("startTime", "")
+	endTime := w.GinObj.DefaultQuery("endTime", "")
+	isEnd := w.GinObj.DefaultQuery("isEnd", "")
+	processor := w.GinObj.DefaultQuery("processor", "")
+	priority := w.GinObj.DefaultQuery("priority", "")
+	db := orm.Eloquent.Model(&process.WorkOrderInfo{}).
+		Where("title like ?", fmt.Sprintf("%%%v%%", title))
+	if startTime != "" {
+		db = db.Where("create_time >= ?", startTime)
+	}
+	if endTime != "" {
+		db = db.Where("create_time <= ?", endTime)
+	}
+	if isEnd != "" {
+		db = db.Where("is_end = ?", isEnd)
+	}
+	if processor != "" && w.Classify != 1 {
+		err = orm.Eloquent.Model(&processorInfo).
+			Where("user_id = ?", processor).
+			Find(&processorInfo).Error
+		if err != nil {
+			return
+		}
+		db = db.Where(fmt.Sprintf("(%v or %v or %v) and is_end = 0",
+			fmt.Sprintf(personSelectValue, processorInfo.UserId),
+			fmt.Sprintf(roleSelectValue, processorInfo.RoleId),
+			fmt.Sprintf(departmentSelectValue, processorInfo.DeptId),
+		))
+	}
+	if priority != "" {
+		db = db.Where("priority = ?", priority)
+	}
 
 	// 获取当前用户信息
 	switch w.Classify {
 	case 1:
 		// 待办工单
 		// 1. 个人
-		personSelect := fmt.Sprintf("(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'person')))", tools.GetUserId(w.GinObj))
+		personSelect := fmt.Sprintf(personSelectValue, tools.GetUserId(w.GinObj))
 
 		// 2. 角色
-		roleSelect := fmt.Sprintf("(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'role')))", tools.GetRoleId(w.GinObj))
+		roleSelect := fmt.Sprintf(roleSelectValue, tools.GetRoleId(w.GinObj))
 
 		// 3. 部门
 		var userInfo system.SysUser
@@ -55,7 +91,7 @@ func (w *WorkOrder) PureWorkOrderList() (result interface{}, err error) {
 		if err != nil {
 			return
 		}
-		departmentSelect := fmt.Sprintf("(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'department')))", userInfo.DeptId)
+		departmentSelect := fmt.Sprintf(departmentSelectValue, userInfo.DeptId)
 
 		// 4. 变量会转成个人数据
 		//db = db.Where(fmt.Sprintf("(%v or %v or %v or %v) and is_end = 0", personSelect, personGroupSelect, departmentSelect, variableSelect))
