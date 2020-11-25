@@ -176,17 +176,6 @@ func (h *Handle) Countersign(c *gin.Context) (err error) {
 		if err != nil {
 			return
 		}
-
-		// 如果是跳转到结束节点，则需要修改节点状态
-		if h.targetStateValue["clazz"] == "end" {
-			err = h.tx.Model(&process.WorkOrderInfo{}).
-				Where("id = ?", h.workOrderId).
-				Update("is_end", 1).Error
-			if err != nil {
-				h.tx.Rollback()
-				return
-			}
-		}
 	}
 	return
 }
@@ -221,6 +210,18 @@ func (h *Handle) circulation() (err error) {
 		h.tx.Rollback()
 		return
 	}
+
+	// 如果是跳转到结束节点，则需要修改节点状态
+	if h.targetStateValue["clazz"] == "end" {
+		err = h.tx.Model(&process.WorkOrderInfo{}).
+			Where("id = ?", h.workOrderId).
+			Update("is_end", 1).Error
+		if err != nil {
+			h.tx.Rollback()
+			return
+		}
+	}
+
 	return
 }
 
