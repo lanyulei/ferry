@@ -4,6 +4,7 @@
 grep -r -o "http://fdevops.com:8001" /opt/web |awk -F ':' '{print $1}' | xargs sed -i s'#http://fdevops.com:8001#http://192.168.1.1:8001#g'
 grep -r -o "VUE_APP_BASE_API" /opt/web |awk -F ':' '{print $1}' | xargs sed -i s'#VUE_APP_BASE_API#http://192.168.1.1:8001#g'
 grep -r -o "localhost" /opt/web/static/web/js |awk -F ':' '{print $1}' | xargs sed -i s'#localhost#192.168.1.1#g'
+grep -r -o "fdevops.com" /opt/web/static/web/js |awk -F ':' '{print $1}' | xargs sed -i s'#fdevops.com#192.168.1.1#g'
 
 set -e
 
