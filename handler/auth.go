@@ -141,6 +141,11 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 	user, role, e := loginVal.GetUser()
 	if e == nil {
 		_, _ = loginLog.Create()
+
+		if user.Status == "1" {
+			return nil, errors.New("用户已被禁用。")
+		}
+
 		return map[string]interface{}{"user": user, "role": role}, nil
 	} else {
 		loginLog.Status = "1"

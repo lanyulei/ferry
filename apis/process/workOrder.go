@@ -148,7 +148,7 @@ func ProcessWorkOrder(c *gin.Context) {
 		params.Tpls,           // 工单数据更新
 	)
 	if err != nil {
-		app.Error(c, -1, nil, fmt.Sprintf("处理工单失败，%v", err.Error()))
+		app.Error(c, -1, err, fmt.Sprintf("处理工单失败，%v", err.Error()))
 		return
 	}
 
