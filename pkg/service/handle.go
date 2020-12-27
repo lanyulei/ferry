@@ -876,7 +876,7 @@ func (h *Handle) HandleWorkOrder(
 	h.tx.Commit() // 提交事务
 
 	// 发送通知
-	if len(noticeList) > 0 {
+	if len(noticeList) > 0 && h.updateValue["state"] != nil {
 		stateList := make([]interface{}, 0)
 		for _, v := range h.updateValue["state"].([]map[string]interface{}) {
 			stateList = append(stateList, v)
