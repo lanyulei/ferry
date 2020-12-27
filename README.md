@@ -40,6 +40,11 @@
 
 文档: [https://www.fdevops.com/docs/ferry](https://www.fdevops.com/docs/ferry-tutorial-document/introduction)
 
+视频教程（由群内好友<稳定>提供，非常感谢。）：
+
+* ferry工单系统需要的软件准备 https://www.bilibili.com/video/BV1sA411s7jE
+* ferry源代码下载后第一次运行 https://www.bilibili.com/video/BV1oy4y1v7LR
+
 官网：[http://ferry.fdevops.com](http://ferry.fdevops.com)
 
 ```
@@ -110,48 +115,6 @@ QQ群：1127401830
 > 如果您觉得这个项目帮助到了您，您可以请作者喝一杯咖啡表示鼓励:
 
 <img class="no-margin" src="https://www.fdevops.com/wp-content/uploads/2020/07/1595075890-81595075871_.pic_hd.png"  height="200px" >
-
-------------------------------
-
-感谢各位的打赏，你的支持，我的动力。所有打赏将作为项目维护成本。
-
-微信：
-
-|  昵称   | 金额  |
-|  :----  | :----  |
-| KAKA  | 100元 |
-| 劉鑫  | 30元 |
-| *锋  | 30元 |
-| 老白@天智  | 20元 |
-| J*f  | 20元 |
-| 吻住，我们能赢  | 10.24元 |
-| LJ  | 10元 |
-| Super_z  | 10元 |
-| T*i  | 10元 |
-| *伟  | 10元 |
-| *郎  | 8元 |
-| *上  | 5元 |
-| *Sam . Chai  | 5元 |
-| *悟  | 3元 |
-| 王*  | 1元 |
-| p*i  | 1元 |
-| S*R  | 1元 |
-
-支付宝：
-
-|  昵称   | 金额  |
-|  :----  | :----  |
-|**宝 |66元|
-|**英 |10元|
-|**华 |5元|
-|*城 |1元|
-
-其他：
-
-|  昵称   | 金额  |
-|  :----  | :----  |
-|五色花 |20元|
-|everstar_l |10元|
 
 ## 鸣谢
 
