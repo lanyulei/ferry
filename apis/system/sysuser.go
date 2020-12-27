@@ -190,7 +190,7 @@ func GetSysUserInit(c *gin.Context) {
 // @Router /api/v1/sysUser [post]
 func InsertSysUser(c *gin.Context) {
 	var sysuser system.SysUser
-	err := c.BindWith(&sysuser, binding.JSON)
+	err := c.MustBindWith(&sysuser, binding.JSON)
 	if err != nil {
 		app.Error(c, -1, err, "")
 		return
