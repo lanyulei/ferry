@@ -608,7 +608,7 @@ func (mw *GinJWTMiddleware) jwtFromHeader(c *gin.Context, key string) (string, e
 
 	parts := strings.SplitN(authHeader, " ", 2)
 	if !(len(parts) == 2 && parts[0] == mw.TokenHeadName) {
-		return "", ErrInvalidAuthHeader
+		return "-", ErrInvalidAuthHeader
 	}
 
 	return parts[1], nil
