@@ -3,6 +3,7 @@ package process
 import (
 	"errors"
 	"ferry/global/orm"
+	"ferry/models/process"
 	process2 "ferry/models/process"
 	"ferry/pkg/pagination"
 	"ferry/tools"
@@ -204,4 +205,40 @@ func ClassifyProcessList(c *gin.Context) {
 	}
 
 	app.OK(c, classifyList, "成功获取数据")
+}
+
+// 克隆流程
+func CloneProcess(c *gin.Context) {
+	var (
+		err  error
+		id   string
+		info process.Info
+	)
+
+	id = c.Param("id")
+
+	err = orm.Eloquent.Find(&info, id).Error
+	if err != nil {
+		app.Error(c, -1, err, "查询流程数据失败")
+		return
+	}
+
+	err = orm.Eloquent.Create(&process.Info{
+		Name:        info.Name + "-copy",
+		Icon:        info.Icon,
+		Structure:   info.Structure,
+		Classify:    info.Classify,
+		Tpls:        info.Tpls,
+		Task:        info.Task,
+		SubmitCount: info.SubmitCount,
+		Creator:     tools.GetUserId(c),
+		Notice:      info.Notice,
+		Remarks:     info.Remarks,
+	}).Error
+	if err != nil {
+		app.Error(c, -1, err, "克隆流程失败")
+		return
+	}
+
+	app.OK(c, nil, "")
 }
