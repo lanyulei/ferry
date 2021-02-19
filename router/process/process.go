@@ -21,5 +21,6 @@ func RegisterProcessRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddle
 		processRouter.PUT("", process.UpdateProcess)
 		processRouter.DELETE("", process.DeleteProcess)
 		processRouter.GET("/details", process.ProcessDetails)
+		processRouter.POST("/clone/:id", process.CloneProcess)
 	}
 }

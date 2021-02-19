@@ -154,3 +154,33 @@ func DeleteTemplate(c *gin.Context) {
 
 	app.OK(c, "", "删除模版成功")
 }
+
+// 克隆模版
+func CloneTemplate(c *gin.Context) {
+	var (
+		err  error
+		id   string
+		info process.TplInfo
+	)
+
+	id = c.Param("id")
+
+	err = orm.Eloquent.Find(&info, id).Error
+	if err != nil {
+		app.Error(c, -1, err, "查询模版数据失败")
+		return
+	}
+
+	err = orm.Eloquent.Create(&process.TplInfo{
+		Name:          info.Name + "-copy",
+		FormStructure: info.FormStructure,
+		Creator:       tools.GetUserId(c),
+		Remarks:       info.Remarks,
+	}).Error
+	if err != nil {
+		app.Error(c, -1, err, "克隆模版失败")
+		return
+	}
+
+	app.OK(c, nil, "")
+}
