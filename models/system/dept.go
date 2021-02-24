@@ -158,6 +158,8 @@ func Digui(deptlist *[]Dept, menu Dept) Dept {
 		mi.Phone = list[j].Phone
 		mi.Email = list[j].Email
 		mi.Status = list[j].Status
+		mi.CreatedAt = list[j].CreatedAt
+		mi.UpdatedAt = list[j].UpdatedAt
 		mi.Children = []Dept{}
 		ms := Digui(deptlist, mi)
 		min = append(min, ms)
