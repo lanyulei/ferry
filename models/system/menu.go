@@ -130,6 +130,8 @@ func DiguiMenu(menulist *[]Menu, menu Menu) Menu {
 		mi.Component = list[j].Component
 		mi.Sort = list[j].Sort
 		mi.Visible = list[j].Visible
+		mi.CreatedAt = list[j].CreatedAt
+		mi.UpdatedAt = list[j].UpdatedAt
 		mi.Children = []Menu{}
 
 		if mi.MenuType != "F" {
