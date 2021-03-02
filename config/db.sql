@@ -78,6 +78,12 @@ INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES (
 INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'admin', '/api/v1/settings', 'POST', NULL, NULL, NULL);
 INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'admin', '/api/v1/settings', 'GET', NULL, NULL, NULL);
 INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'admin', '/api/v1/loginlog', 'DELETE', NULL, NULL, NULL);
+INSERT INTO `casbin_rule`(p_type, v0, v1, v2, v3, v4, v5) VALUES ('p', 'admin', '/api/v1/work-order/active-order/:id', 'PUT', null, null, null);
+INSERT INTO `casbin_rule`(p_type, v0, v1, v2, v3, v4, v5) VALUES ('p', 'admin', '/api/v1/work-order/delete/:id', 'DELETE', null, null, null);
+INSERT INTO `casbin_rule`(p_type, v0, v1, v2, v3, v4, v5) VALUES ('p', 'admin', '/api/v1/ordinaryDeptList', 'GET', null, null, null);
+INSERT INTO `casbin_rule`(p_type, v0, v1, v2, v3, v4, v5) VALUES ('p', 'admin', '/api/v1/tpl/clone/:id', 'POST', null, null, null);
+INSERT INTO `casbin_rule`(p_type, v0, v1, v2, v3, v4, v5) VALUES ('p', 'admin', '/api/v1/process/clone/:id', 'POST', null, null, null);
+INSERT INTO `casbin_rule`(p_type, v0, v1, v2, v3, v4, v5) VALUES ('p', 'admin', '/api/v1/work-order/reopen/:id', 'POST', null, null, null);
 INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/user/profile', 'GET', NULL, NULL, NULL);
 INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/menurole', 'GET', NULL, NULL, NULL);
 INSERT INTO `casbin_rule`(`p_type`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) VALUES ('p', 'common', '/api/v1/menuTreeselect', 'GET', NULL, NULL, NULL);
@@ -277,6 +283,8 @@ INSERT INTO sys_menu (menu_id, menu_name, title, icon, path, paths, menu_type, `
 INSERT INTO sys_menu (menu_id, menu_name, title, icon, path, paths, menu_type, `action`, permission, parent_id, no_cache, breadcrumb, component, sort, visible, create_by, update_by, is_frame, create_time, update_time, delete_time) VALUES (367, '', '克隆模版', 'bug', '/api/v1/tpl/clone/:id', '/0/63/281/282/294/367', 'A', 'POST', '', 294, '0', '', '', 0, '1', '1', '', 1, '2021-02-19 23:00:31', '2021-02-19 23:00:31', null);
 INSERT INTO sys_menu (menu_id, menu_name, title, icon, path, paths, menu_type, `action`, permission, parent_id, no_cache, breadcrumb, component, sort, visible, create_by, update_by, is_frame, create_time, update_time, delete_time) VALUES (368, '', '克隆流程', '', '', '/0/268/274/277/368', 'F', '', 'process:admin:manager:clone', 277, '0', '', '', 0, '0', '1', '1', 1, '2021-02-19 23:17:46', '2021-02-19 23:36:46', null);
 INSERT INTO sys_menu (menu_id, menu_name, title, icon, path, paths, menu_type, `action`, permission, parent_id, no_cache, breadcrumb, component, sort, visible, create_by, update_by, is_frame, create_time, update_time, delete_time) VALUES (369, '', '克隆流程', 'bug', '/api/v1/process/clone/:id', '/0/63/281/282/309/369', 'A', 'POST', '', 309, '0', '', '', 0, '1', '1', '', 1, '2021-02-19 23:25:18', '2021-02-19 23:25:18', null);
+INSERT INTO sys_menu (menu_id, menu_name, title, icon, path, paths, menu_type, action, permission, parent_id, no_cache, breadcrumb, component, sort, visible, create_by, update_by, is_frame, create_time, update_time, delete_time) VALUES (370, '', '重开工单', 'guide', '', '/0/268/271/370', 'F', '', 'process:list:myCreate:reopen', 271, '0', '', '', 0, '0', '1', '', 1, '2021-03-02 22:45:17', '2021-03-02 22:45:17', null);
+INSERT INTO sys_menu (menu_id, menu_name, title, icon, path, paths, menu_type, action, permission, parent_id, no_cache, breadcrumb, component, sort, visible, create_by, update_by, is_frame, create_time, update_time, delete_time) VALUES (371, '', '重开工单', 'bug', '/api/v1/work-order/reopen/:id', '/0/63/281/333/371', 'A', 'POST', '', 333, '0', '', '', 0, '1', '1', '', 1, '2021-03-02 22:46:46', '2021-03-02 22:46:46', null);
 COMMIT;
 
 BEGIN;
