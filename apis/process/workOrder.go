@@ -450,3 +450,103 @@ func DeleteWorkOrder(c *gin.Context) {
 
 	app.OK(c, "", "工单已删除")
 }
+
+// 重开工单
+func ReopenWorkOrder(c *gin.Context) {
+	var (
+		err           error
+		id            string
+		workOrder     process.WorkOrderInfo
+		processInfo   process.Info
+		structure     map[string]interface{}
+		startId       string
+		label         string
+		jsonState     []byte
+		relatedPerson []byte
+		newWorkOrder  process.WorkOrderInfo
+		workOrderData []*process.TplData
+	)
+
+	id = c.Param("id")
+
+	// 查询当前ID的工单信息
+	err = orm.Eloquent.Find(&workOrder, id).Error
+	if err != nil {
+		app.Error(c, -1, err, fmt.Sprintf("查询工单信息失败, %s", err.Error()))
+		return
+	}
+
+	// 创建新的工单
+	err = orm.Eloquent.Find(&processInfo, workOrder.Process).Error
+	if err != nil {
+		app.Error(c, -1, err, fmt.Sprintf("查询流程信息失败, %s", err.Error()))
+		return
+	}
+	err = json.Unmarshal(processInfo.Structure, &structure)
+	if err != nil {
+		app.Error(c, -1, err, fmt.Sprintf("Json序列化失败, %s", err.Error()))
+		return
+	}
+	for _, node := range structure["nodes"].([]interface{}) {
+		if node.(map[string]interface{})["clazz"] == "start" {
+			startId = node.(map[string]interface{})["id"].(string)
+			label = node.(map[string]interface{})["label"].(string)
+		}
+	}
+
+	state := []map[string]interface{}{
+		{"id": startId, "label": label, "processor": []int{tools.GetUserId(c)}, "process_method": "person"},
+	}
+	jsonState, err = json.Marshal(state)
+	if err != nil {
+		app.Error(c, -1, err, fmt.Sprintf("Json序列化失败, %s", err.Error()))
+		return
+	}
+
+	relatedPerson, err = json.Marshal([]int{tools.GetUserId(c)})
+	if err != nil {
+		app.Error(c, -1, err, fmt.Sprintf("Json序列化失败, %s", err.Error()))
+		return
+	}
+
+	tx := orm.Eloquent.Begin()
+
+	newWorkOrder = process.WorkOrderInfo{
+		Title:         workOrder.Title + "-copy",
+		Priority:      workOrder.Priority,
+		Process:       workOrder.Process,
+		Classify:      workOrder.Classify,
+		State:         jsonState,
+		RelatedPerson: relatedPerson,
+		Creator:       tools.GetUserId(c),
+	}
+	err = tx.Create(&newWorkOrder).Error
+	if err != nil {
+		tx.Rollback()
+		app.Error(c, -1, err, fmt.Sprintf("新建工单失败, %s", err.Error()))
+		return
+	}
+
+	// 查询工单数据
+	err = orm.Eloquent.Model(&process.TplData{}).Where("work_order = ?", id).Find(&workOrderData).Error
+	if err != nil {
+		tx.Rollback()
+		app.Error(c, -1, err, fmt.Sprintf("查询工单数据失败, %s", err.Error()))
+		return
+	}
+
+	for _, d := range workOrderData {
+		d.WorkOrder = newWorkOrder.Id
+		d.Id = 0
+		err = tx.Create(d).Error
+		if err != nil {
+			tx.Rollback()
+			app.Error(c, -1, err, fmt.Sprintf("创建工单数据失败, %s", err.Error()))
+			return
+		}
+	}
+
+	tx.Commit()
+
+	app.OK(c, nil, "")
+}
