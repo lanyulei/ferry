@@ -3,6 +3,9 @@ package service
 import (
 	"database/sql"
 	"ferry/global/orm"
+	"ferry/pkg/pagination"
+
+	"github.com/gin-gonic/gin"
 )
 
 /*
@@ -136,6 +139,42 @@ func SubmitRanking() (submitRankingData map[string][]interface{}, err error) {
 		submitRankingData["username"] = append(submitRankingData["username"], username)
 		submitRankingData["nickname"] = append(submitRankingData["nickname"], nickname)
 		submitRankingData["rankingCount"] = append(submitRankingData["rankingCount"], rankingCount)
+	}
+
+	return
+}
+
+// 查询工单数量统计
+func WorkOrderCount(c *gin.Context) (countList map[string]int, err error) {
+	var (
+		w      *WorkOrder
+		result interface{}
+	)
+	countList = make(map[string]int)
+	for _, i := range []int{1, 2, 3, 4} {
+		w = NewWorkOrder(i, c)
+		if i != 1 {
+			result, err = w.PureWorkOrderList()
+			if err != nil {
+				return
+			}
+		} else {
+			w = NewWorkOrder(i, c)
+			result, err = w.WorkOrderList()
+			if err != nil {
+				return
+			}
+		}
+
+		if i == 1 {
+			countList["upcoming"] = result.(*pagination.Paginator).TotalCount
+		} else if i == 2 {
+			countList["my_create"] = result.(*pagination.Paginator).TotalCount
+		} else if i == 3 {
+			countList["related"] = result.(*pagination.Paginator).TotalCount
+		} else if i == 4 {
+			countList["all"] = result.(*pagination.Paginator).TotalCount
+		}
 	}
 
 	return
