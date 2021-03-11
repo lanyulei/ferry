@@ -13,17 +13,32 @@ import (
 
 func InitData(c *gin.Context) {
 	var (
-		err            error
-		workOrderCount map[string]int // 工单数量统计
+		err   error
+		count map[string]int // 工单数量统计
+		ranks []service.Ranks
 	)
 
-	workOrderCount, err = service.WorkOrderCount(c)
+	statistics := service.Statistics{
+		StartTime: "",
+		EndTime:   "",
+	}
+
+	// 查询工单类型数据统计
+	count, err = statistics.WorkOrderCount(c)
 	if err != nil {
-		app.Error(c, -1, err, "")
+		app.Error(c, -1, err, "查询工单类型数据统计失败")
+		return
+	}
+
+	// 查询工单数据排名
+	ranks, err = statistics.WorkOrderRanks()
+	if err != nil {
+		app.Error(c, -1, err, "查询提交工单排名数据失败")
 		return
 	}
 
 	app.OK(c, map[string]interface{}{
-		"workOrderCount": workOrderCount,
+		"count": count,
+		"ranks": ranks,
 	}, "")
 }
