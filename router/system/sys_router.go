@@ -14,7 +14,7 @@ import (
 )
 
 func SysBaseRouter(r *gin.RouterGroup) {
-	r.GET("/", system.HelloWorld)
+	//r.GET("/", system.HelloWorld)
 	r.GET("/info", handler.Ping)
 }
 
@@ -35,8 +35,7 @@ func RegisterBaseRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddlewar
 		v1auth.GET("/getinfo", system.GetInfo)
 		v1auth.GET("/menurole", system.GetMenuRole)
 		v1auth.GET("/roleMenuTreeselect/:roleId", system.GetMenuTreeRoleselect)
-		v1auth.GET("/roleDeptTreeselect/:roleId", system.GetDeptTreeRoleselect)
-
+		v1auth.GET("/roleDeptTreeselect/:roleId", system.GetDeptTreeRoleSelect)
 		v1auth.POST("/logout", handler.LogOut)
 		v1auth.GET("/menuids", system.GetMenuIDS)
 	}
@@ -46,6 +45,7 @@ func RegisterPageRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddlewar
 	v1auth := v1.Use(authMiddleware.MiddlewareFunc()).Use(middleware.AuthCheckRole())
 	{
 		v1auth.GET("/deptList", system.GetDeptList)
+		v1auth.GET("/ordinaryDeptList", system.GetOrdinaryDeptList)
 		v1auth.GET("/deptTree", system.GetDeptTree)
 		v1auth.GET("/sysUserList", system.GetSysUserList)
 		v1auth.GET("/rolelist", system.GetRoleList)

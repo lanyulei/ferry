@@ -93,7 +93,6 @@ func Paging(p *Param, result interface{}, args ...interface{}) (*Paginator, erro
 	} else {
 		offset = (param.Page - 1) * param.PerPage
 	}
-
 	err := db.Limit(param.PerPage).Offset(offset).Scan(result).Error
 	if err != nil {
 		logger.Errorf("数据查询失败，错误：%v", err)

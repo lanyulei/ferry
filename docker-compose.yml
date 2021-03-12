@@ -1,0 +1,71 @@
+version: "3"
+services:
+  db:
+    hostname: mysql
+    container_name: ferry_mysql
+    image: mysql:5.7.31
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+      - MYSQL_ROOT_PASSWORD=123456
+    volumes:
+      - ./docker/mysql/data:/var/lib/mysql/data # 映射数据库保存目录到宿主机，防止数据丢失
+      - ./docker/mysql/config/my.cnf:/etc/mysql/my.cnf # 映射数据库配置文件
+      - ./docker/mysql/init_sql:/docker-entrypoint-initdb.d
+    ports:
+      - 13306:3306
+    command: [
+      '--character-set-server=utf8mb4',
+      '--collation-server=utf8mb4_unicode_ci'
+    ]
+
+  redis:
+    hostname: redis
+    image: redis:5.0.4
+    container_name: ferry_redis
+    restart: always
+    command: redis-server /etc/redis.conf # 启动redis命令
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - ./redis/data:/var/lib/redis/data
+      - ./redis/config/redis.conf:/etc/redis.conf
+    ports:
+      - 16379:6379
+
+  ferry:
+    hostname: ferry
+    image: registry.cn-beijing.aliyuncs.com/lanyulei/ferry:v1.0.0-2
+    container_name: ferry
+    depends_on:
+      - db
+      - redis
+    links:
+      - db:ferry_mysql
+      - redis:ferry_redis
+    ports:
+      - 8002:8002
+    volumes:
+      - ./config:/opt/ferry/config
+      - ./static:/opt/ferry/static
+      - ./template:/opt/ferry/template
+      - ./logs:/opt/ferry/logs
+    environment:
+      - TZ=Asia/Shanghai
+    restart: always
+    command: ./ferry server -c=/opt/ferry/config/settings.yml
+
+  ferry_web:
+    hostname: ferry_web
+    container_name: ferry_web
+    image: registry.cn-beijing.aliyuncs.com/lanyulei/ferry_web:v1.0.0-1
+    links:
+      - ferry:ferry_host
+    ports:
+      - 8001:8001
+    volumes:
+      - ./docker/nginx/config/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/entrypoint/docker-entrypoint.sh:/docker-entrypoint.sh
+    environment:
+      - TZ=Asia/Shanghai
+    restart: always

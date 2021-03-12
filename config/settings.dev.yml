@@ -32,12 +32,12 @@ settings:
     maxopenconn: 20000
   jwt:
     secret: ferry
-    timeout: 3600
+    timeout: 86400
   ldap:
     anonymousquery: 0
     basedn: dc=fdevops,dc=com
     bindpwd: 123456
-    binduserdn: admin
+    binduserdn: cn=admin,dc=fdevops,dc=com
     host: localhost
     port: 389
     tls: 0
@@ -52,9 +52,10 @@ settings:
     maxbackups: 300
     maxsize: 10240
     path: ./logs/ferry.log
+  public:
+    islocation: 0
   redis:
-    host: 127.0.0.1
-    port: 6379
+    url: redis://127.0.0.1:6379
   ssl:
     key: keystring
     pem: temp/pem.pem

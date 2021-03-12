@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://www.fdevops.com/wp-content/uploads/2020/07/1595066253-ferry_logo_meitu_1.png">
+  <img src="https://www.fdevops.com/wp-content/uploads/2020/09/1599039924-ferry_log.png">
 </p>
 
 
@@ -31,9 +31,19 @@
 
 演示demo: [http://fdevops.com:8001/#/dashboard](http://fdevops.com:8001/#/dashboard)
 
-账号密码：admin/123456
+```
+账号：admin
+密码：123456
+
+演示demo登陆需要取消ldap验证，就是登陆页面取消ldap的打勾。
+```
 
 文档: [https://www.fdevops.com/docs/ferry](https://www.fdevops.com/docs/ferry-tutorial-document/introduction)
+
+视频教程（由群内好友<稳定>提供，非常感谢。）：
+
+* ferry工单系统需要的软件准备 https://www.bilibili.com/video/BV1sA411s7jE
+* ferry源代码下载后第一次运行 https://www.bilibili.com/video/BV1oy4y1v7LR
 
 官网：[http://ferry.fdevops.com](http://ferry.fdevops.com)
 
@@ -106,36 +116,26 @@ QQ群：1127401830
 
 <img class="no-margin" src="https://www.fdevops.com/wp-content/uploads/2020/07/1595075890-81595075871_.pic_hd.png"  height="200px" >
 
-------------------------------
+## 鸣谢
 
-感谢各位的打赏，你的支持，我的动力。所有打赏将作为项目维护成本。
+特别感谢 [JetBrains](https://www.jetbrains.com/?from=ferry) 为本开源项目提供免费的 [IntelliJ GoLand](https://www.jetbrains.com/go/?from=ferry) 授权
 
-微信：
-
-* 王*   1元
-* p*i  1元
-* LJ   10元
-* 吻住，我们能赢   10.24元
-* *悟 3元
-* Super_z 10元
-* T*i 10元
-* *伟 10元
-
-支付宝：
-
-* **英     10元
-* *城       5元
-* **华      1元
-
-其他：
-
-* everstar_l 10元
-* 五色花 20元
+<p>
+ <a href="https://www.jetbrains.com/?from=ferry">
+   <img height="200" src="https://www.fdevops.com/wp-content/uploads/2020/09/1599213857-jetbrains-variant-4.png">
+ </a>
+</p>
 
 ## License
 
 开源不易，请尊重作者的付出，感谢。
 
-[MIT](https://github.com/lanyulei/ferry/blob/master/LICENSE)
+在此处声明，本系统目前不建议商业产品使用，因本系统使用的`流程设计器`未设置开源协议，`表单设计器`是LGPL v3的协议。
+
+因此避免纠纷，不建议商业产品使用，若执意使用，请联系原作者获得授权。
+
+再次声明，若是未联系作者直接将本系统使用于商业产品，出现的商业纠纷，本系统概不承担，感谢。
+
+[LGPL-3.0](https://github.com/lanyulei/ferry/blob/master/LICENSE)
 
 Copyright (c) 2020 lanyulei

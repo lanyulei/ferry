@@ -6,6 +6,7 @@ import (
 	_ "ferry/pkg/jwtauth"
 	"ferry/pkg/logger"
 	"ferry/tools"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,7 +22,6 @@ func AuthCheckRole() gin.HandlerFunc {
 		//检查权限
 		res, err := e.Enforce(v["rolekey"], c.Request.URL.Path, c.Request.Method)
 		logger.Info(v["rolekey"], c.Request.URL.Path, c.Request.Method)
-
 		tools.HasError(err, "", 500)
 
 		if res {
@@ -29,7 +29,7 @@ func AuthCheckRole() gin.HandlerFunc {
 		} else {
 			c.JSON(http.StatusOK, gin.H{
 				"code": 403,
-				"msg":  "对不起，您没有该接口访问权限，请联系管理员",
+				"msg":  fmt.Sprintf("对不起，您没有 <%v-%v> 访问权限，请联系管理员", c.Request.URL.Path, c.Request.Method),
 			})
 			c.Abort()
 			return

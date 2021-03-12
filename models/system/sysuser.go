@@ -208,6 +208,11 @@ func (e *SysUser) GetPage(pageSize int, pageIndex int) ([]SysUserPage, int, erro
 	if e.Username != "" {
 		table = table.Where("sys_user.username like ?", "%"+e.Username+"%")
 	}
+
+	if e.NickName != "" {
+		table = table.Where("sys_user.nick_name like ?", "%"+e.NickName+"%")
+	}
+
 	if e.Status != "" {
 		table = table.Where("sys_user.status = ?", e.Status)
 	}

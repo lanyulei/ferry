@@ -1,6 +1,7 @@
 package router
 
 import (
+	"ferry/apis/tpl"
 	"ferry/pkg/jwtauth"
 	"ferry/router/dashboard"
 	"ferry/router/process"
@@ -19,7 +20,7 @@ func InitSysRouter(r *gin.Engine, authMiddleware *jwtauth.GinJWTMiddleware) *gin
 	systemRouter.SysBaseRouter(g)
 
 	// 静态文件
-	sysStaticFileRouter(g)
+	sysStaticFileRouter(g, r)
 
 	// swagger；注意：生产环境可以注释掉
 	sysSwaggerRouter(g)
@@ -33,8 +34,9 @@ func InitSysRouter(r *gin.Engine, authMiddleware *jwtauth.GinJWTMiddleware) *gin
 	return g
 }
 
-func sysStaticFileRouter(r *gin.RouterGroup) {
+func sysStaticFileRouter(r *gin.RouterGroup, g *gin.Engine) {
 	r.Static("/static", "./static")
+	g.LoadHTMLGlob("template/web/index.html")
 }
 
 func sysSwaggerRouter(r *gin.RouterGroup) {
@@ -47,6 +49,9 @@ func sysCheckRoleRouterInit(r *gin.RouterGroup, authMiddleware *jwtauth.GinJWTMi
 	r.GET("/refresh_token", authMiddleware.RefreshHandler)
 
 	v1 := r.Group("/api/v1")
+
+	// 兼容前后端不分离的情
+	r.GET("/", tpl.Tpl)
 
 	// 首页
 	dashboard.RegisterDashboardRouter(v1, authMiddleware)

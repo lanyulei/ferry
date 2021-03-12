@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"ferry/global/orm"
 	"ferry/models/process"
+	"ferry/models/system"
 	"ferry/pkg/pagination"
 	"ferry/tools"
 	"fmt"
@@ -24,54 +25,77 @@ type WorkOrder struct {
 type workOrderInfo struct {
 	process.WorkOrderInfo
 	Principals   string `json:"principals"`
+	StateName    string `json:"state_name"`
 	DataClassify int    `json:"data_classify"`
 }
 
 func (w *WorkOrder) PureWorkOrderList() (result interface{}, err error) {
 	var (
 		workOrderInfoList []workOrderInfo
+		processorInfo     system.SysUser
 	)
 
+	personSelectValue := "(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'person')))"
+	roleSelectValue := "(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'role')))"
+	departmentSelectValue := "(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'department')))"
+
 	title := w.GinObj.DefaultQuery("title", "")
-	db := orm.Eloquent.Model(&process.WorkOrderInfo{}).Where("title like ?", fmt.Sprintf("%%%v%%", title))
+	startTime := w.GinObj.DefaultQuery("startTime", "")
+	endTime := w.GinObj.DefaultQuery("endTime", "")
+	isEnd := w.GinObj.DefaultQuery("isEnd", "")
+	processor := w.GinObj.DefaultQuery("processor", "")
+	priority := w.GinObj.DefaultQuery("priority", "")
+	db := orm.Eloquent.Model(&process.WorkOrderInfo{}).
+		Where("title like ?", fmt.Sprintf("%%%v%%", title))
+	if startTime != "" {
+		db = db.Where("create_time >= ?", startTime)
+	}
+	if endTime != "" {
+		db = db.Where("create_time <= ?", endTime)
+	}
+	if isEnd != "" {
+		db = db.Where("is_end = ?", isEnd)
+	}
+	if processor != "" && w.Classify != 1 {
+		err = orm.Eloquent.Model(&processorInfo).
+			Where("user_id = ?", processor).
+			Find(&processorInfo).Error
+		if err != nil {
+			return
+		}
+		db = db.Where(fmt.Sprintf("(%v or %v or %v) and is_end = 0",
+			fmt.Sprintf(personSelectValue, processorInfo.UserId),
+			fmt.Sprintf(roleSelectValue, processorInfo.RoleId),
+			fmt.Sprintf(departmentSelectValue, processorInfo.DeptId),
+		))
+	}
+	if priority != "" {
+		db = db.Where("priority = ?", priority)
+	}
 
 	// 获取当前用户信息
 	switch w.Classify {
 	case 1:
 		// 待办工单
 		// 1. 个人
-		personSelect := fmt.Sprintf("(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'person')))", tools.GetUserId(w.GinObj))
+		personSelect := fmt.Sprintf(personSelectValue, tools.GetUserId(w.GinObj))
 
-		// 2. 小组
-		//groupList := make([]int, 0)
-		//err = orm.Eloquent.Model(&user.UserGroup{}).
-		//	Where("user = ?", tools.GetUserId(c)).
-		//	Pluck("`group`", &groupList).Error
-		//if err != nil {
-		//	return
-		//}
-		//groupSqlList := make([]string, 0)
-		//if len(groupList) > 0 {
-		//	for _, group := range groupList {
-		//		groupSqlList = append(groupSqlList, fmt.Sprintf("JSON_CONTAINS(state, JSON_OBJECT('processor', %v))", group))
-		//	}
-		//} else {
-		//	groupSqlList = append(groupSqlList, fmt.Sprintf("JSON_CONTAINS(state, JSON_OBJECT('processor', 0))"))
-		//}
-		//
-		//personGroupSelect := fmt.Sprintf(
-		//	"((%v) and %v)",
-		//	strings.Join(groupSqlList, " or "),
-		//	"JSON_CONTAINS(state, JSON_OBJECT('process_method', 'persongroup'))",
-		//)
+		// 2. 角色
+		roleSelect := fmt.Sprintf(roleSelectValue, tools.GetRoleId(w.GinObj))
 
 		// 3. 部门
-		//departmentSelect := fmt.Sprintf("(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'department')))", userInfo.Dept)
+		var userInfo system.SysUser
+		err = orm.Eloquent.Model(&system.SysUser{}).
+			Where("user_id = ?", tools.GetUserId(w.GinObj)).
+			Find(&userInfo).Error
+		if err != nil {
+			return
+		}
+		departmentSelect := fmt.Sprintf(departmentSelectValue, userInfo.DeptId)
 
 		// 4. 变量会转成个人数据
-
 		//db = db.Where(fmt.Sprintf("(%v or %v or %v or %v) and is_end = 0", personSelect, personGroupSelect, departmentSelect, variableSelect))
-		db = db.Where(fmt.Sprintf("(%v) and is_end = 0", personSelect))
+		db = db.Where(fmt.Sprintf("(%v or %v or %v) and is_end = 0", personSelect, roleSelect, departmentSelect))
 	case 2:
 		// 我创建的
 		db = db.Where("creator = ?", tools.GetUserId(w.GinObj))
@@ -98,8 +122,10 @@ func (w *WorkOrder) PureWorkOrderList() (result interface{}, err error) {
 func (w *WorkOrder) WorkOrderList() (result interface{}, err error) {
 
 	var (
-		principals string
-		StateList  []map[string]interface{}
+		principals        string
+		StateList         []map[string]interface{}
+		workOrderInfoList []workOrderInfo
+		minusTotal        int
 	)
 
 	result, err = w.PureWorkOrderList()
@@ -107,16 +133,57 @@ func (w *WorkOrder) WorkOrderList() (result interface{}, err error) {
 		return
 	}
 
-	for i, w := range *result.(*pagination.Paginator).Data.(*[]workOrderInfo) {
-		err = json.Unmarshal(w.State, &StateList)
+	for i, v := range *result.(*pagination.Paginator).Data.(*[]workOrderInfo) {
+		var (
+			stateName    string
+			structResult map[string]interface{}
+			authStatus   bool
+		)
+		err = json.Unmarshal(v.State, &StateList)
 		if err != nil {
 			err = fmt.Errorf("json反序列化失败，%v", err.Error())
 			return
 		}
 		if len(StateList) != 0 {
+			// 仅待办工单需要验证
+			// todo：还需要找最优解决方案
+			if w.Classify == 1 {
+				structResult, err = ProcessStructure(w.GinObj, v.Process, v.Id)
+				if err != nil {
+					return
+				}
+
+				authStatus, err = JudgeUserAuthority(w.GinObj, v.Id, structResult["workOrder"].(WorkOrderData).CurrentState)
+				if err != nil {
+					return
+				}
+				if !authStatus {
+					minusTotal += 1
+					continue
+				}
+			} else {
+				authStatus = true
+			}
+
 			processorList := make([]int, 0)
-			for _, v := range StateList[0]["processor"].([]interface{}) {
-				processorList = append(processorList, int(v.(float64)))
+			if len(StateList) > 1 {
+				for _, s := range StateList {
+					for _, p := range s["processor"].([]interface{}) {
+						if int(p.(float64)) == tools.GetUserId(w.GinObj) {
+							processorList = append(processorList, int(p.(float64)))
+						}
+					}
+					if len(processorList) > 0 {
+						stateName = s["label"].(string)
+						break
+					}
+				}
+			}
+			if len(processorList) == 0 {
+				for _, v := range StateList[0]["processor"].([]interface{}) {
+					processorList = append(processorList, int(v.(float64)))
+				}
+				stateName = StateList[0]["label"].(string)
 			}
 			principals, err = GetPrincipal(processorList, StateList[0]["process_method"].(string))
 			if err != nil {
@@ -126,8 +193,15 @@ func (w *WorkOrder) WorkOrderList() (result interface{}, err error) {
 		}
 		workOrderDetails := *result.(*pagination.Paginator).Data.(*[]workOrderInfo)
 		workOrderDetails[i].Principals = principals
-		workOrderDetails[i].DataClassify = w.Classify
+		workOrderDetails[i].StateName = stateName
+		workOrderDetails[i].DataClassify = v.Classify
+		if authStatus {
+			workOrderInfoList = append(workOrderInfoList, workOrderDetails[i])
+		}
 	}
+
+	result.(*pagination.Paginator).Data = &workOrderInfoList
+	result.(*pagination.Paginator).TotalCount -= minusTotal
 
 	return result, nil
 }

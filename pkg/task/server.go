@@ -14,7 +14,7 @@ func Start() {
 	worker.StartServer()
 
 	// 2. 启动异步调度
-	taskWorker := worker.NewAsyncTaskWorker(1)
+	taskWorker := worker.NewAsyncTaskWorker(10)
 	err := taskWorker.Launch()
 	if err != nil {
 		logger.Errorf("启动machinery失败，%v", err.Error())

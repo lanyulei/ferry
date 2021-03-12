@@ -3,6 +3,7 @@ package process
 import (
 	"errors"
 	"ferry/global/orm"
+	"ferry/models/process"
 	process2 "ferry/models/process"
 	"ferry/pkg/pagination"
 	"ferry/tools"
@@ -109,6 +110,8 @@ func UpdateProcess(c *gin.Context) {
 			"classify":  processValue.Classify,
 			"task":      processValue.Task,
 			"notice":    processValue.Notice,
+			"icon":      processValue.Icon,
+			"remarks":   processValue.Remarks,
 		}).Error
 	if err != nil {
 		app.Error(c, -1, err, fmt.Sprintf("更新流程信息失败，%v", err.Error()))
@@ -193,7 +196,7 @@ func ClassifyProcessList(c *gin.Context) {
 	for _, item := range classifyList {
 		err = orm.Eloquent.Model(&process2.Info{}).
 			Where("classify = ? and name LIKE ?", item.Id, fmt.Sprintf("%%%v%%", processName)).
-			Select("id, create_time, update_time, name").
+			Select("id, create_time, update_time, name, icon, remarks").
 			Find(&item.ProcessList).Error
 		if err != nil {
 			app.Error(c, -1, err, fmt.Sprintf("获取流程失败，%v", err.Error()))
@@ -202,4 +205,40 @@ func ClassifyProcessList(c *gin.Context) {
 	}
 
 	app.OK(c, classifyList, "成功获取数据")
+}
+
+// 克隆流程
+func CloneProcess(c *gin.Context) {
+	var (
+		err  error
+		id   string
+		info process.Info
+	)
+
+	id = c.Param("id")
+
+	err = orm.Eloquent.Find(&info, id).Error
+	if err != nil {
+		app.Error(c, -1, err, "查询流程数据失败")
+		return
+	}
+
+	err = orm.Eloquent.Create(&process.Info{
+		Name:        info.Name + "-copy",
+		Icon:        info.Icon,
+		Structure:   info.Structure,
+		Classify:    info.Classify,
+		Tpls:        info.Tpls,
+		Task:        info.Task,
+		SubmitCount: info.SubmitCount,
+		Creator:     tools.GetUserId(c),
+		Notice:      info.Notice,
+		Remarks:     info.Remarks,
+	}).Error
+	if err != nil {
+		app.Error(c, -1, err, "克隆流程失败")
+		return
+	}
+
+	app.OK(c, nil, "")
 }

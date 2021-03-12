@@ -2,6 +2,7 @@ package worker
 
 import (
 	"context"
+	"errors"
 	"ferry/pkg/logger"
 	"os/exec"
 	"syscall"
@@ -11,41 +12,41 @@ import (
 
 var asyncTaskMap map[string]interface{}
 
-func executeTaskBase(scriptPath string) {
-	command := exec.Command("/bin/bash", "-c", scriptPath) //初始化Cmd
-	err := command.Start()                                 //运行脚本
-	if nil != err {
+func executeTaskBase(scriptPath string, params string) (err error) {
+	command := exec.Command(scriptPath, params) //初始化Cmd
+	out, err := command.CombinedOutput()
+	if err != nil {
 		logger.Errorf("task exec failed，%v", err.Error())
 		return
 	}
-
-	logger.Info("Process PID:", command.Process.Pid)
-
-	err = command.Wait() //等待执行完成
-	if nil != err {
-		logger.Errorf("task exec failed，%v", err.Error())
-		return
-	}
-
-	logger.Info("ProcessState PID:", command.ProcessState.Pid())
-	logger.Info("Exit Code", command.ProcessState.Sys().(syscall.WaitStatus).ExitStatus())
+	logger.Info("Output: ", string(out))
+	logger.Info("ProcessState PID: ", command.ProcessState.Pid())
+	logger.Info("Exit Code ", command.ProcessState.Sys().(syscall.WaitStatus).ExitStatus())
+	return
 }
 
 // ExecCommand 异步任务
-func ExecCommand(classify string, scriptPath string) error {
+func ExecCommand(classify string, scriptPath string, params string) (err error) {
 	if classify == "shell" {
-		logger.Info("start exec shell...", scriptPath)
-		executeTaskBase(scriptPath)
-		return nil
+		logger.Info("start exec shell - ", scriptPath)
+		err = executeTaskBase(scriptPath, params)
+		if err != nil {
+			return
+		}
 	} else if classify == "python" {
-		logger.Info("start exec python...", scriptPath)
-		executeTaskBase(scriptPath)
-		return nil
+		logger.Info("start exec python - ", scriptPath)
+		err = executeTaskBase(scriptPath, params)
+		if err != nil {
+			return
+		}
+	} else {
+		err = errors.New("目前仅支持Python与Shell脚本的执行，请知悉。")
+		return
 	}
-	return nil
+	return
 }
 
-func SendTask(ctx context.Context, classify string, scriptPath string) {
+func SendTask(ctx context.Context, classify string, scriptPath string, params string) {
 	args := make([]tasks.Arg, 0)
 	args = append(args, tasks.Arg{
 		Name:  "classify",
@@ -56,6 +57,11 @@ func SendTask(ctx context.Context, classify string, scriptPath string) {
 		Name:  "scriptPath",
 		Type:  "string",
 		Value: scriptPath,
+	})
+	args = append(args, tasks.Arg{
+		Name:  "params",
+		Type:  "string",
+		Value: params,
 	})
 	task, _ := tasks.NewSignature("ExecCommandTask", args)
 	task.RetryCount = 5

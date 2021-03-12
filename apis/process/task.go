@@ -129,7 +129,7 @@ func CreateTask(c *gin.Context) {
 		fileName = fileName + ".sh"
 	}
 
-	err = ioutil.WriteFile(fileName, []byte(taskValue.Content), 0666)
+	err = ioutil.WriteFile(fileName, []byte(taskValue.Content), 0755)
 	if err != nil {
 		app.Error(c, -1, err, fmt.Sprintf("创建任务脚本失败: %v", err.Error()))
 		return
@@ -221,8 +221,11 @@ func TaskDetails(c *gin.Context) {
 	)
 
 	fileName = c.DefaultQuery("file_name", "")
-	if fileName == "" {
-		app.Error(c, -1, errors.New("参数不正确，请确认file_name参数是否存在"), "")
+	if fileName == "" ||
+		strings.HasPrefix(fileName, ".") ||
+		strings.HasPrefix(fileName, "/") ||
+		strings.HasPrefix(fileName, "\\") {
+		app.Error(c, -1, errors.New("file_name参数不正确，请确认"), "")
 		return
 	}
 

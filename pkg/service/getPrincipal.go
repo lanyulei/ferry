@@ -29,11 +29,20 @@ func GetPrincipal(processor []int, processMethod string) (principals string, err
 		if err != nil {
 			return
 		}
-	//case "department":
-	//	err = orm.Eloquent.Model(&user.Dept{}).Where("id in (?)", processor).Pluck("nickname", &principalList).Error
-	//	if err != nil {
-	//		return
-	//	}
+	case "role":
+		err = orm.Eloquent.Model(&system.SysRole{}).
+			Where("role_id in (?)", processor).
+			Pluck("role_name", &principalList).Error
+		if err != nil {
+			return
+		}
+	case "department":
+		err = orm.Eloquent.Model(&system.Dept{}).
+			Where("dept_id in (?)", processor).
+			Pluck("dept_name", &principalList).Error
+		if err != nil {
+			return
+		}
 	case "variable":
 		for _, p := range processor {
 			switch p {
@@ -80,6 +89,22 @@ func GetPrincipalUserInfo(stateList []interface{}, creator int) (userInfoList []
 		case "person":
 			err = orm.Eloquent.Model(&system.SysUser{}).
 				Where("user_id in (?)", processorList).
+				Find(&userInfoListTmp).Error
+			if err != nil {
+				return
+			}
+			userInfoList = append(userInfoList, userInfoListTmp...)
+		case "role":
+			err = orm.Eloquent.Model(&system.SysUser{}).
+				Where("role_id in (?)", processorList).
+				Find(&userInfoListTmp).Error
+			if err != nil {
+				return
+			}
+			userInfoList = append(userInfoList, userInfoListTmp...)
+		case "department":
+			err = orm.Eloquent.Model(&system.SysUser{}).
+				Where("dept_id in (?)", processorList).
 				Find(&userInfoListTmp).Error
 			if err != nil {
 				return

@@ -143,11 +143,16 @@ func ProcessStructure(c *gin.Context, processId int, workOrderId int) (result ma
 			for _, stateValue := range stateList {
 				for _, processNodeValue := range processStructureDetails["nodes"].([]interface{}) {
 					if stateValue["id"].(string) == processNodeValue.(map[string]interface{})["id"] {
-						for _, userId := range stateValue["processor"].([]interface{}) {
-							if int(userId.(float64)) == tools.GetUserId(c) {
-								workOrderInfo.CurrentState = stateValue["id"].(string)
-								break breakStateTag
+						if _, ok := stateValue["processor"]; ok {
+							for _, userId := range stateValue["processor"].([]interface{}) {
+								if int(userId.(float64)) == tools.GetUserId(c) {
+									workOrderInfo.CurrentState = stateValue["id"].(string)
+									break breakStateTag
+								}
 							}
+						} else {
+							err = errors.New("未查询到对应的处理人字段，请确认。")
+							return
 						}
 					}
 				}

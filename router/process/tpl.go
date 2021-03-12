@@ -23,5 +23,6 @@ func RegisterTplRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddleware
 		tplRouter.PUT("", process.UpdateTemplate)
 		tplRouter.DELETE("", process.DeleteTemplate)
 		tplRouter.GET("/details", process.TemplateDetails)
+		tplRouter.POST("/clone/:id", process.CloneTemplate)
 	}
 }
