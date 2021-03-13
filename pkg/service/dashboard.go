@@ -30,8 +30,8 @@ func NewStatistics(startTime string, endTime string) *Statistics {
 	}
 }
 
-// 查询周统计数据
-func WeeklyStatistics() (statisticsData map[string][]interface{}, err error) {
+// 查询范围统计数据
+func (s *Statistics) DateRangeStatistics() (statisticsData map[string][]interface{}, err error) {
 	var (
 		datetime   string
 		total      int
@@ -120,7 +120,7 @@ func WeeklyStatistics() (statisticsData map[string][]interface{}, err error) {
 }
 
 // 查询工单提交排名
-func SubmitRanking() (submitRankingData map[string][]interface{}, err error) {
+func (s *Statistics) SubmitRanking() (submitRankingData map[string][]interface{}, err error) {
 	var (
 		userId       int
 		username     string
@@ -198,8 +198,6 @@ func (s *Statistics) WorkOrderCount(c *gin.Context) (countList map[string]int, e
 	return
 }
 
-// 查询指定范围内的提交工单折线图统计
-
 // 查询指定范围内的提交工单排名数据
 func (s *Statistics) WorkOrderRanks() (ranks []Ranks, err error) {
 	ranks = make([]Ranks, 0)
@@ -207,6 +205,7 @@ func (s *Statistics) WorkOrderRanks() (ranks []Ranks, err error) {
 	err = orm.Eloquent.Model(&process.WorkOrderInfo{}).
 		Joins("left join p_process_info on p_process_info.id = p_work_order_info.process").
 		Select("p_process_info.name as name, count(p_work_order_info.id) as total").
+		Where("p_work_order_info.create_time between ? and ?", s.StartTime, s.EndTime).
 		Group("p_work_order_info.process").
 		Order("total desc").
 		Limit(10).

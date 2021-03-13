@@ -215,6 +215,7 @@ func UnityWorkOrder(c *gin.Context) {
 		Processor:   userInfo.NickName,
 		ProcessorId: tools.GetUserId(c),
 		Remarks:     "手动结束工单。",
+		Status:      2,
 	})
 
 	tx.Commit()
@@ -225,14 +226,16 @@ func UnityWorkOrder(c *gin.Context) {
 // 转交工单
 func InversionWorkOrder(c *gin.Context) {
 	var (
-		err             error
-		workOrderInfo   process.WorkOrderInfo
-		stateList       []map[string]interface{}
-		stateValue      []byte
-		currentState    map[string]interface{}
-		userInfo        system.SysUser
-		currentUserInfo system.SysUser
-		params          struct {
+		cirHistoryValue   []process.CirculationHistory
+		err               error
+		workOrderInfo     process.WorkOrderInfo
+		stateList         []map[string]interface{}
+		stateValue        []byte
+		currentState      map[string]interface{}
+		userInfo          system.SysUser
+		currentUserInfo   system.SysUser
+		costDurationValue int64
+		params            struct {
 			WorkOrderId int    `json:"work_order_id"`
 			NodeId      string `json:"node_id"`
 			UserId      int    `json:"user_id"`
@@ -306,15 +309,33 @@ func InversionWorkOrder(c *gin.Context) {
 		return
 	}
 
+	// 流转历史写入
+	err = orm.Eloquent.Model(&cirHistoryValue).
+		Where("work_order = ?", params.WorkOrderId).
+		Find(&cirHistoryValue).
+		Order("create_time desc").Error
+	if err != nil {
+		tx.Rollback()
+		return
+	}
+	for _, t := range cirHistoryValue {
+		if t.Source != currentState["id"].(string) {
+			costDuration := time.Since(t.CreatedAt.Time)
+			costDurationValue = int64(costDuration) / 1000 / 1000 / 1000
+		}
+	}
+
 	// 添加转交历史
 	tx.Create(&process.CirculationHistory{
-		Title:       workOrderInfo.Title,
-		WorkOrder:   workOrderInfo.Id,
-		State:       currentState["label"].(string),
-		Circulation: "转交",
-		Processor:   currentUserInfo.NickName,
-		ProcessorId: tools.GetUserId(c),
-		Remarks:     fmt.Sprintf("此阶段负责人已转交给《%v》", userInfo.NickName),
+		Title:        workOrderInfo.Title,
+		WorkOrder:    workOrderInfo.Id,
+		State:        currentState["label"].(string),
+		Circulation:  "转交",
+		Processor:    currentUserInfo.NickName,
+		ProcessorId:  tools.GetUserId(c),
+		Remarks:      fmt.Sprintf("此阶段负责人已转交给《%v》", userInfo.NickName),
+		Status:       2, // 其他
+		CostDuration: costDurationValue,
 	})
 
 	tx.Commit()

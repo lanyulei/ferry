@@ -53,15 +53,6 @@ type Handle struct {
 	tx               *gorm.DB
 }
 
-// 时间格式化
-func fmtDuration(d time.Duration) string {
-	d = d.Round(time.Minute)
-	h := d / time.Hour
-	d -= h * time.Hour
-	m := d / time.Minute
-	return fmt.Sprintf("%02d小时 %02d分钟", h, m)
-}
-
 // 会签
 func (h *Handle) Countersign(c *gin.Context) (err error) {
 	var (
@@ -423,7 +414,7 @@ func (h *Handle) HandleWorkOrder(
 		relatedPersonList  []int
 		cirHistoryValue    []process.CirculationHistory
 		cirHistoryData     process.CirculationHistory
-		costDurationValue  string
+		costDurationValue  int64
 		sourceEdges        []map[string]interface{}
 		targetEdges        []map[string]interface{}
 		condExprStatus     bool
@@ -534,13 +525,13 @@ func (h *Handle) HandleWorkOrder(
 		"id":    h.targetStateValue["id"].(string),
 	}
 
+	sourceEdges, err = h.processState.GetEdge(h.targetStateValue["id"].(string), "source")
+	if err != nil {
+		return
+	}
+
 	switch h.targetStateValue["clazz"] {
-	// 排他网关
-	case "exclusiveGateway":
-		sourceEdges, err = h.processState.GetEdge(h.targetStateValue["id"].(string), "source")
-		if err != nil {
-			return
-		}
+	case "exclusiveGateway": // 排他网关
 	breakTag:
 		for _, edge := range sourceEdges {
 			edgeCondExpr := make([]map[string]interface{}, 0)
@@ -588,15 +579,8 @@ func (h *Handle) HandleWorkOrder(
 			err = errors.New("所有流转均不符合条件，请确认。")
 			return
 		}
-	// 并行/聚合网关
-	case "parallelGateway":
+	case "parallelGateway": // 并行/聚合网关
 		// 入口，判断
-		sourceEdges, err = h.processState.GetEdge(h.targetStateValue["id"].(string), "source")
-		if err != nil {
-			err = fmt.Errorf("查询流转信息失败，%v", err.Error())
-			return
-		}
-
 		targetEdges, err = h.processState.GetEdge(h.targetStateValue["id"].(string), "target")
 		if err != nil {
 			err = fmt.Errorf("查询流转信息失败，%v", err.Error())
@@ -777,7 +761,7 @@ func (h *Handle) HandleWorkOrder(
 	for _, t := range cirHistoryValue {
 		if t.Source != h.stateValue["id"] {
 			costDuration := time.Since(t.CreatedAt.Time)
-			costDurationValue = fmtDuration(costDuration)
+			costDurationValue = int64(costDuration) / 1000 / 1000 / 1000
 		}
 	}
 
@@ -799,6 +783,7 @@ func (h *Handle) HandleWorkOrder(
 		Circulation:  circulationValue,
 		Processor:    currentUserInfo.NickName,
 		ProcessorId:  tools.GetUserId(c),
+		Status:       flowProperties,
 		CostDuration: costDurationValue,
 		Remarks:      remarks,
 	}
@@ -843,6 +828,7 @@ func (h *Handle) HandleWorkOrder(
 			ProcessorId: tools.GetUserId(c),
 			Circulation: "结束",
 			Remarks:     "工单已结束",
+			Status:      2, // 其他状态
 		}).Error
 		if err != nil {
 			h.tx.Rollback()

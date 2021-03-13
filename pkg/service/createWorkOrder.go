@@ -272,6 +272,7 @@ func CreateWorkOrder(c *gin.Context) (err error) {
 		Circulation: "新建",
 		Processor:   nameValue,
 		ProcessorId: userInfo.UserId,
+		Status:      2, // 其他
 	}).Error
 	if err != nil {
 		tx.Rollback()
