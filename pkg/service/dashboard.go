@@ -200,8 +200,6 @@ func (s *Statistics) WorkOrderCount(c *gin.Context) (countList map[string]int, e
 
 // 查询指定范围内的提交工单排名数据
 func (s *Statistics) WorkOrderRanks() (ranks []Ranks, err error) {
-	ranks = make([]Ranks, 0)
-
 	err = orm.Eloquent.Model(&process.WorkOrderInfo{}).
 		Joins("left join p_process_info on p_process_info.id = p_work_order_info.process").
 		Select("p_process_info.name as name, count(p_work_order_info.id) as total").
@@ -210,6 +208,46 @@ func (s *Statistics) WorkOrderRanks() (ranks []Ranks, err error) {
 		Order("total desc").
 		Limit(10).
 		Scan(&ranks).Error
-
 	return
+}
+
+// 处理工单人员排行榜
+func (s *Statistics) HandlePersonRank() (interface{}, error) {
+	var (
+		err   error
+		ranks []struct {
+			UserID   int    `json:"user_id"`
+			Username string `json:"username"`
+			Nickname string `json:"nickname"`
+			Count    int    `json:"count"`
+		}
+	)
+	err = orm.Eloquent.Model(&process.CirculationHistory{}).
+		Joins("left join sys_user on sys_user.user_id = p_work_order_circulation_history.processor_id").
+		Where("p_work_order_circulation_history.source like 'receiveTask%' and p_work_order_circulation_history.status = 1 and p_work_order_circulation_history.create_time between ? and ?", s.StartTime, s.EndTime).
+		Select("p_work_order_circulation_history.processor_id as user_id, p_work_order_circulation_history.processor as nickname, sys_user.username as username, count(p_work_order_circulation_history.id) as count").
+		Group("p_work_order_circulation_history.processor, p_work_order_circulation_history.processor_id").
+		Scan(&ranks).Error
+	return ranks, err
+}
+
+// 工单处理耗时排行榜
+func (s *Statistics) HandlePeriodRank() (interface{}, error) {
+	var (
+		err   error
+		ranks []struct {
+			UserID       int    `json:"user_id"`
+			Username     string `json:"username"`
+			Nickname     string `json:"nickname"`
+			CostDuration int    `json:"cost_duration"`
+		}
+	)
+	err = orm.Eloquent.Model(&process.CirculationHistory{}).
+		Joins("left join sys_user on sys_user.user_id = p_work_order_circulation_history.processor_id").
+		Where("p_work_order_circulation_history.source like 'receiveTask%' and p_work_order_circulation_history.status = 1 and p_work_order_circulation_history.create_time between ? and ?", s.StartTime, s.EndTime).
+		Select("p_work_order_circulation_history.processor_id as user_id, p_work_order_circulation_history.processor as nickname, sys_user.username as username, sum(p_work_order_circulation_history.cost_duration) as cost_duration").
+		Group("p_work_order_circulation_history.processor, p_work_order_circulation_history.processor_id").
+		Order("cost_duration desc").
+		Scan(&ranks).Error
+	return ranks, err
 }

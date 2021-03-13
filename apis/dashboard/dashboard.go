@@ -21,6 +21,8 @@ func InitData(c *gin.Context) {
 		submit    map[string][]interface{}
 		startTime string
 		endTime   string
+		handle    interface{}
+		period    interface{}
 	)
 
 	startTime = c.DefaultQuery("start_time", "")
@@ -58,11 +60,25 @@ func InitData(c *gin.Context) {
 		return
 	}
 
-	// 工单处理人统计
+	// 处理工单人员排行榜
+	handle, err = statistics.HandlePersonRank()
+	if err != nil {
+		app.Error(c, -1, err, "查询处理工单人员排行失败")
+		return
+	}
+
+	// 工单处理耗时排行榜
+	period, err = statistics.HandlePeriodRank()
+	if err != nil {
+		app.Error(c, -1, err, "查询工单处理耗时排行失败")
+		return
+	}
 
 	app.OK(c, map[string]interface{}{
 		"count":  count,
 		"ranks":  ranks,
 		"submit": submit,
+		"handle": handle,
+		"period": period,
 	}, "")
 }
