@@ -29,6 +29,13 @@ type workOrderInfo struct {
 	DataClassify int    `json:"data_classify"`
 }
 
+func NewWorkOrder(classify int, c *gin.Context) *WorkOrder {
+	return &WorkOrder{
+		Classify: classify,
+		GinObj:   c,
+	}
+}
+
 func (w *WorkOrder) PureWorkOrderList() (result interface{}, err error) {
 	var (
 		workOrderInfoList []workOrderInfo

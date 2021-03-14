@@ -1,13 +1,11 @@
 package dashboard
 
 import (
-	"ferry/global/orm"
-	"ferry/models/process"
-	"ferry/models/system"
-	"ferry/pkg/pagination"
 	"ferry/pkg/service"
 	"ferry/tools/app"
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -18,83 +16,75 @@ import (
 
 func InitData(c *gin.Context) {
 	var (
-		err        error
-		panelGroup struct {
-			UserTotalCount      int `json:"user_total_count"`
-			WorkOrderTotalCount int `json:"work_order_total_count"`
-			UpcomingTotalCount  int `json:"upcoming_total_count"`
-			MyUpcomingCount     int `json:"my_upcoming_count"`
-		}
-		result              interface{}
-		processOrderList    []process.Info
-		processOrderListMap map[string][]interface{}
+		err       error
+		count     map[string]int // 工单数量统计
+		ranks     []service.Ranks
+		submit    map[string][]interface{}
+		startTime string
+		endTime   string
+		handle    interface{}
+		period    interface{}
 	)
 
-	// 查询用户总数
-	err = orm.Eloquent.Model(&system.SysUser{}).Count(&panelGroup.UserTotalCount).Error
+	startTime = c.DefaultQuery("start_time", "")
+	endTime = c.DefaultQuery("end_time", "")
+
+	if startTime == "" || endTime == "" {
+		// 默认为最近7天的数据
+		startTime = fmt.Sprintf("%s 00:00:00", time.Now().AddDate(0, 0, -6).Format("2006-01-02"))
+		endTime = fmt.Sprintf("%s 23:59:59", time.Now().Format("2006-01-02"))
+	} else {
+		if strings.Contains(startTime, "T") && strings.Contains(endTime, "T") {
+			startTime = fmt.Sprintf("%s 00:00:00", strings.Split(startTime, "T")[0])
+			endTime = fmt.Sprintf("%s 23:59:59", strings.Split(endTime, "T")[0])
+		}
+	}
+
+	statistics := service.Statistics{
+		StartTime: startTime,
+		EndTime:   endTime,
+	}
+
+	// 查询工单类型数据统计
+	count, err = statistics.WorkOrderCount(c)
 	if err != nil {
-		app.Error(c, -1, err, "")
+		app.Error(c, -1, err, "查询工单类型数据统计失败")
 		return
 	}
 
-	// 查询工单总数
-	err = orm.Eloquent.Model(&process.WorkOrderInfo{}).Count(&panelGroup.WorkOrderTotalCount).Error
+	// 查询工单数据排名
+	ranks, err = statistics.WorkOrderRanks()
 	if err != nil {
-		app.Error(c, -1, err, "")
+		app.Error(c, -1, err, "查询提交工单排名数据失败")
 		return
 	}
 
-	// 查询待办总数
-	err = orm.Eloquent.Model(&process.WorkOrderInfo{}).
-		Where("is_end = 0").
-		Count(&panelGroup.UpcomingTotalCount).Error
+	// 工单提交数据统计
+	submit, err = statistics.DateRangeStatistics()
 	if err != nil {
-		app.Error(c, -1, err, "")
+		app.Error(c, -1, err, "工单提交数据统计失败")
 		return
 	}
 
-	// 查询我的待办
-	w := service.WorkOrder{
-		Classify: 1,
-		GinObj:   c,
-	}
-	result, err = w.PureWorkOrderList()
+	// 处理工单人员排行榜
+	handle, err = statistics.HandlePersonRank()
 	if err != nil {
-		app.Error(c, -1, err, "")
-		return
-	}
-	panelGroup.MyUpcomingCount = result.(*pagination.Paginator).TotalCount
-
-	// 查询周工单统计
-	statisticsData, err := service.WeeklyStatistics()
-	if err != nil {
-		app.Error(c, -1, err, fmt.Sprintf("查询周工单统计失败，%v", err.Error()))
+		app.Error(c, -1, err, "查询处理工单人员排行失败")
 		return
 	}
 
-	// 查询工单提交排名
-	submitRankingData, err := service.SubmitRanking()
+	// 工单处理耗时排行榜
+	period, err = statistics.HandlePeriodRank()
 	if err != nil {
-		app.Error(c, -1, err, fmt.Sprintf("查询工单提交排名失败，%v", err.Error()))
+		app.Error(c, -1, err, "查询工单处理耗时排行失败")
 		return
-	}
-
-	// 查询最常用的流程
-	err = orm.Eloquent.Model(&process.Info{}).Order("submit_count desc").Limit(10).Find(&processOrderList).Error
-	if err != nil {
-		app.Error(c, -1, err, fmt.Sprintf("查询最常用的流程失败，%v", err.Error()))
-		return
-	}
-	processOrderListMap = make(map[string][]interface{})
-	for _, v := range processOrderList {
-		processOrderListMap["title"] = append(processOrderListMap["title"], v.Name)
-		processOrderListMap["submit_count"] = append(processOrderListMap["submit_count"], v.SubmitCount)
 	}
 
 	app.OK(c, map[string]interface{}{
-		"panelGroup":        panelGroup,
-		"statisticsData":    statisticsData,
-		"submitRankingData": submitRankingData,
-		"processOrderList":  processOrderListMap,
+		"count":  count,
+		"ranks":  ranks,
+		"submit": submit,
+		"handle": handle,
+		"period": period,
 	}, "")
 }

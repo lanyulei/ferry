@@ -98,7 +98,7 @@ QQ群：1127401830
 [兰玉磊的技术博客](https://www.fdevops.com/)
 
 ## 特别感谢
-[go-amdin # 不错的后台开发框架](https://github.com/wenjianzhang/go-admin.git)
+[go-amdin # 不错的后台开发框架](https://github.com/go-admin-team/go-admin)
 
 [vue-element-admin # 不错的前端模版框架](https://github.com/PanJiaChen/vue-element-admin)
 
