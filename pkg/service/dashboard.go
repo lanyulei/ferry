@@ -5,6 +5,9 @@ import (
 	"ferry/global/orm"
 	"ferry/models/process"
 	"ferry/pkg/pagination"
+	"fmt"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -33,35 +36,40 @@ func NewStatistics(startTime string, endTime string) *Statistics {
 // 查询范围统计数据
 func (s *Statistics) DateRangeStatistics() (statisticsData map[string][]interface{}, err error) {
 	var (
-		datetime   string
-		total      int
-		overs      int
-		processing int
-		sqlValue   string
-		rows       *sql.Rows
+		datetime       string
+		total          int
+		overs          int
+		processing     int
+		sqlValue       string
+		rows           *sql.Rows
+		startTime      time.Time
+		endTime        time.Time
+		TimeDifference int
+		sqlDataValue   string
 	)
-	sqlValue = `SELECT
+
+	// 计算两个时间的差
+	startTime, _ = time.Parse("2006-01-02 15:04:05", s.StartTime)
+	endTime, _ = time.Parse("2006-01-02 15:04:05", fmt.Sprintf("%s 00:00:00", strings.Split(s.EndTime, " ")[0]))
+	TimeDifference = int(endTime.Sub(startTime).Hours() / 24)
+
+	for i := 0; i < TimeDifference; i++ {
+		if i == 0 {
+			sqlDataValue += "SELECT curdate() AS click_date UNION ALL"
+		} else if i == TimeDifference-1 {
+			sqlDataValue += fmt.Sprintf(` SELECT date_sub( curdate(), INTERVAL %d DAY ) AS click_date`, i)
+		} else {
+			sqlDataValue += fmt.Sprintf(` SELECT date_sub( curdate(), INTERVAL %d DAY ) AS click_date UNION ALL`, i)
+		}
+	}
+
+	sqlValue = fmt.Sprintf(`SELECT
 		a.click_date,
 		ifnull( b.total, 0 ) AS total,
 		ifnull( b.overs, 0 ) AS overs,
 		ifnull( b.processing, 0 ) AS processing 
 	FROM
-		(
-		SELECT
-			curdate() AS click_date UNION ALL
-		SELECT
-			date_sub( curdate(), INTERVAL 1 DAY ) AS click_date UNION ALL
-		SELECT
-			date_sub( curdate(), INTERVAL 2 DAY ) AS click_date UNION ALL
-		SELECT
-			date_sub( curdate(), INTERVAL 3 DAY ) AS click_date UNION ALL
-		SELECT
-			date_sub( curdate(), INTERVAL 4 DAY ) AS click_date UNION ALL
-		SELECT
-			date_sub( curdate(), INTERVAL 5 DAY ) AS click_date UNION ALL
-		SELECT
-			date_sub( curdate(), INTERVAL 6 DAY ) AS click_date 
-		) a
+		(%s) a
 		LEFT JOIN (
 		SELECT
 			a1.datetime AS datetime,
@@ -97,7 +105,7 @@ func (s *Statistics) DateRangeStatistics() (statisticsData map[string][]interfac
 				is_end = 0 
 			GROUP BY
 			date( create_time )) c ON a1.datetime = c.datetime 
-		) b ON a.click_date = b.datetime order by a.click_date;`
+		) b ON a.click_date = b.datetime order by a.click_date;`, sqlDataValue)
 	rows, err = orm.Eloquent.Raw(sqlValue).Rows()
 	if err != nil {
 		return

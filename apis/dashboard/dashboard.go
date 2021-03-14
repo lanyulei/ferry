@@ -4,6 +4,7 @@ import (
 	"ferry/pkg/service"
 	"ferry/tools/app"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -32,6 +33,11 @@ func InitData(c *gin.Context) {
 		// 默认为最近7天的数据
 		startTime = fmt.Sprintf("%s 00:00:00", time.Now().AddDate(0, 0, -6).Format("2006-01-02"))
 		endTime = fmt.Sprintf("%s 23:59:59", time.Now().Format("2006-01-02"))
+	} else {
+		if strings.Contains(startTime, "T") && strings.Contains(endTime, "T") {
+			startTime = fmt.Sprintf("%s 00:00:00", strings.Split(startTime, "T")[0])
+			endTime = fmt.Sprintf("%s 23:59:59", strings.Split(endTime, "T")[0])
+		}
 	}
 
 	statistics := service.Statistics{
