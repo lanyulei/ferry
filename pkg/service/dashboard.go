@@ -235,6 +235,7 @@ func (s *Statistics) HandlePersonRank() (interface{}, error) {
 		Where("p_work_order_circulation_history.source like 'receiveTask%' and p_work_order_circulation_history.status = 1 and p_work_order_circulation_history.create_time between ? and ?", s.StartTime, s.EndTime).
 		Select("p_work_order_circulation_history.processor_id as user_id, p_work_order_circulation_history.processor as nickname, sys_user.username as username, count(p_work_order_circulation_history.id) as count").
 		Group("p_work_order_circulation_history.processor, p_work_order_circulation_history.processor_id").
+		Order("count desc").
 		Scan(&ranks).Error
 	return ranks, err
 }
