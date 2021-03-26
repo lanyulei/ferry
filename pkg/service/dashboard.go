@@ -254,7 +254,7 @@ func (s *Statistics) HandlePeriodRank() (interface{}, error) {
 	err = orm.Eloquent.Model(&process.CirculationHistory{}).
 		Joins("left join sys_user on sys_user.user_id = p_work_order_circulation_history.processor_id").
 		Where("p_work_order_circulation_history.source like 'receiveTask%' and p_work_order_circulation_history.status = 1 and p_work_order_circulation_history.create_time between ? and ?", s.StartTime, s.EndTime).
-		Select("p_work_order_circulation_history.processor_id as user_id, p_work_order_circulation_history.processor as nickname, sys_user.username as username, sum(p_work_order_circulation_history.cost_duration) as cost_duration").
+		Select("p_work_order_circulation_history.processor_id as user_id, p_work_order_circulation_history.processor as nickname, sys_user.username as username, round(sum(p_work_order_circulation_history.cost_duration), 2) as cost_duration").
 		Group("p_work_order_circulation_history.processor, p_work_order_circulation_history.processor_id").
 		Order("cost_duration desc").
 		Scan(&ranks).Error
