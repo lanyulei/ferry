@@ -245,10 +245,10 @@ func (s *Statistics) HandlePeriodRank() (interface{}, error) {
 	var (
 		err   error
 		ranks []struct {
-			UserID       int    `json:"user_id"`
-			Username     string `json:"username"`
-			Nickname     string `json:"nickname"`
-			CostDuration int    `json:"cost_duration"`
+			UserID       int     `json:"user_id"`
+			Username     string  `json:"username"`
+			Nickname     string  `json:"nickname"`
+			CostDuration float64 `json:"cost_duration"`
 		}
 	)
 	err = orm.Eloquent.Model(&process.CirculationHistory{}).
