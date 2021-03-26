@@ -79,7 +79,7 @@
 <ul><li>用户、角色、岗位的增删查改，批量删除，多条件搜索</li><li>角色、岗位数据导出Excel</li><li>重置用户密码</li><li>维护个人信息，上传管理头像，修改当前账户密码</li><li>部门的增删查改</li><li>菜单目录、跳转、按钮及API接口的增删查改</li><li>登陆日志管理</li><li>左菜单权限控制</li><li>页面按钮权限控制</li><li>API接口权限控制</li></ul>
 <!-- /wp:list -->
 
-## 交流群
+## 交流
 
 加群条件是需给项目一个star，不需要您费多大的功夫与力气，一个小小的star是作者能维护下去的动力。
 
@@ -97,6 +97,14 @@ QQ群：1127401830
 
 [兰玉磊的技术博客](https://www.fdevops.com/)
 
+个人微信，添加好友请描述地区、公司及名字，例如：北京-阿里巴巴-xxx。
+
+微信号：fdevops
+
+<p>
+  <img width="300" src="https://www.fdevops.com/wp-content/uploads/2021/03/1616727212-WechatIMG3.jpeg">
+</p>
+
 ## 特别感谢
 [go-amdin # 不错的后台开发框架](https://github.com/go-admin-team/go-admin)
 
@@ -113,6 +121,8 @@ QQ群：1127401830
 ## 打赏
 
 > 如果您觉得这个项目帮助到了您，您可以请作者喝一杯咖啡表示鼓励:
+
+[打赏名人榜](https://www.fdevops.com/docs/ferry-tutorial-document/reward-celebrity-list)
 
 <img class="no-margin" src="https://www.fdevops.com/wp-content/uploads/2020/07/1595075890-81595075871_.pic_hd.png"  height="200px" >
 
