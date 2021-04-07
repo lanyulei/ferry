@@ -157,8 +157,33 @@ cp -r ferry ./build/
 
 cd build && ./ferry init -c=config/settings.yml
 if [ $? != 0 ]; then
-  echo "同步数据结构及数据失败"
+
+  cat << EOF
+
+    同步数据结构及数据失败，到这一步后，可手动执行以下步骤即可：
+
+        # 1. 进入工作目录
+        cd build
+
+        # 2. 重新同步任务
+        ./ferry init -c=config/settings.yml
+
+        # 3. 启动服务
+        ./ferry server -c=config/settings.yml
+
+EOF
+
   exit 1
+
 fi
 
 echo "编译完成"
+
+cat << EOF
+
+    执行以下命令，启动程序：
+
+        cd build
+        ./ferry server -c=config/settings.yml
+
+EOF
