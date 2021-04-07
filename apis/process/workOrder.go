@@ -533,7 +533,7 @@ func ReopenWorkOrder(c *gin.Context) {
 	tx := orm.Eloquent.Begin()
 
 	newWorkOrder = process.WorkOrderInfo{
-		Title:         workOrder.Title + "-copy",
+		Title:         workOrder.Title,
 		Priority:      workOrder.Priority,
 		Process:       workOrder.Process,
 		Classify:      workOrder.Classify,
