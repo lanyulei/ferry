@@ -99,8 +99,8 @@ VUE_APP_BASE_API = '$url'
 EOF
 
 echo "开始安装前端依赖..."
- npm install -g cnpm --registry=https://registry.npm.taobao.org
- cd ferry_web && cnpm install && npm run build:prod && cp -r web ../build/template
+npm install -g cnpm --registry=https://registry.npm.taobao.org
+cd ferry_web && cnpm install && npm run build:prod && cp -r web ../build/template
 
 echo "\n需注意: 邮件服务器信息若是暂时没有，可暂时不修改，但是MySQL和Redis是必须配置正确的\n"
 read -p "请确认是否配置MySQL、Redis及邮件服务器信息，配置文件地址: build/config/settings.yml，y/n[y]: " config_status
