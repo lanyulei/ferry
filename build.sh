@@ -129,6 +129,7 @@ function test_mysql_connect() {
   password=$4
   db=$5
   command="CREATE TABLE IF NOT EXISTS test(id INT); DROP TABLE test;"
+  echo_green "\n>>> $(gettext '拉取mysql docker 镜像如果是首次需要耗时，请稍等...')"
   docker run -it --rm mysql:5 mysql -h${host} -P${port} -u${user} -p${password} ${db} -e "${command}" 2>/dev/null
 }
 
@@ -186,7 +187,7 @@ function set_external_mysql() {
 
 function config_mysql {
     echo_green "\n>>> $(gettext '需注意: 邮件服务器信息若是暂时没有，可暂时不修改，但是MySQL和Redis是必须配置正确的')"
-    read_from_input confirm "$(gettext 'Do you have been installed MySQL')?" "y/n" "n"
+    read_from_input confirm "$(gettext 'Do you have been installed MySQL')?" "y/n" "y"
 
     if [[ "${confirm}" == "y" ]]; then
         set_external_mysql
@@ -239,7 +240,8 @@ function install_front {
     fi
 
     echo_green "\n>>> $(gettext '开始安装前端依赖...')"
-    npm install -g cnpm --registry=https://registry.npm.taobao.org
+    cnpm_base_dir=$(dirname $(dirname $(which npm)))
+    npm install -g cnpm --registry=https://registry.npm.taobao.org --prefix ${cnpm_base_dir}
     cd ferry_web && cnpm install && npm run build:prod && cp -r web ../build/template
 
 }
@@ -251,7 +253,7 @@ function config_front {
 ENV = 'production'
 
 # base api
-VUE_APP_BASE_API = '$url'
+VUE_APP_BASE_API = '$front_url'
 EOF
 
 }
@@ -291,7 +293,6 @@ function install_app() {
     install_front
     config_front
     install_backend
-
 }
 
 function start_backend {
