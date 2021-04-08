@@ -72,7 +72,7 @@ function read_from_input() {
 
 function usage {
     cat << EOF
-  echo -e "\nUsage: $0 (intall|start|stop)"    
+  echo -e "\nUsage: $0 (install|start|stop)"    
     echo "Examle:     
     bash $0 install 
 EOF
