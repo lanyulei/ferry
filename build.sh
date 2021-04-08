@@ -1,6 +1,94 @@
 #!/bin/bash
+#=============================================================================
+#
+# Author: zhouzhibo
+#
+# id : AL1009
+#
+# Last modified:	2021-04-07 21:45
+#
+# Filename:		build.sh
+#
+# Description: 
+#
+#=============================================================================
 
-cat << EOF
+
+CUR_USE=$(whoami)    
+BASE_DIR=$(cd $(dirname $0) >/dev/null 2>&1 && pwd)    
+FILE_BASE_NAME=$(basename $0)    
+
+function echo_red() {
+    echo -e "\033[1;31m$1\033[0m"
+}
+
+function echo_green() {
+    echo -e "\033[1;32m$1\033[0m"
+}
+
+function echo_yellow() {
+    echo -e "\033[1;33m$1\033[0m"
+}
+
+function echo_done() {
+    echo "$(gettext 'complete')"
+}
+
+function get_db_config() {
+    cwd=$(pwd)
+    key=$1
+
+    value=$(sed -n '/database/,/domain/p' "${CONFIG_FILE}" |awk -F : /^[[:space:]]*${key}/'{print $2}')
+    echo "${value}"
+}
+
+function set_db_config() {
+    key=$1
+    value=$2
+    sed -i "/database/,/domain/s/\(^[[:space:]]*${key}:\).*/\1 ${value}/" "${CONFIG_FILE}"
+}
+
+function read_from_input() {
+    var=$1
+    msg=$2
+    choices=$3
+    default=$4
+    if [[ ! -z "${choices}" ]]; then
+        msg="${msg} (${choices}) "
+    fi
+    if [[ -z "${default}" ]]; then
+        msg="${msg} ($(gettext 'no default'))"
+    else
+        msg="${msg} ($(gettext 'default') ${default})"
+    fi
+    echo -n "${msg}: "
+    read input
+    if [[ -z "${input}" && ! -z "${default}" ]]; then
+        export ${var}="${default}"
+    else
+        export ${var}="${input}"
+    fi
+}
+
+function usage {
+    cat << EOF
+  echo -e "\nUsage: $0 (install|start|stop)"    
+    echo "Examle:     
+    bash $0 install 
+EOF
+}
+
+function check_soft {
+    local _soft_name=$1
+    command -v ${_soft_name} > /dev/null || {
+        echo_red "请安装 ${_soft_name} 后再执行本脚本安装ferry。"
+        exit 1
+    }
+}
+
+
+function prepare_check {
+    cat << EOF
 
       执行此脚本之前，请确认一下软件是否安装或者是否有现成的连接地址。
 
@@ -12,180 +100,238 @@ cat << EOF
           3. Redis 最新版本即可
           4. node >= v12 （稳定版本）
           5. npm >= v6.14.8
+          6. 安装docker
 
 EOF
-
-# 判断目录是否存在，不存在则新建目录
-isDirExist() {
-  if [ ! -d "$1" ]; then
-    mkdir -p $1
-  fi
+    check_soft docker
+    check_soft git
+    check_soft go
+    check_soft npm
 }
 
-echo "确认 build 目录是否存在"
-isDirExist "./build"
-isDirExist "./build/log"
-isDirExist "./build/template"
+function isDirExist {
+    # 判断目录是否存在，不存在则新建目录
+    local _dir_name=$1
+    [ ! -d "$1" ] && mkdir -p $1
+}
 
-echo "开始迁移配置信息..."
-isDirExist "./build/config"
-cp -r ./config/db.sql ./build/config
-cp -r ./config/settings.yml ./build/config/settings.yml
-cp -r ./config/rbac_model.conf ./build/config/rbac_model.conf
+function mk_ferry_dir {
+    echo "检查创建确认 build 以及子目录是否存在"
+    isDirExist "${BASE_DIR}/build/log"
+    isDirExist "${BASE_DIR}/build/template"
+    isDirExist "${BASE_DIR}/build/config"
+}
 
-echo "开始迁移静态文件..."
-isDirExist "./build/static/scripts"
-isDirExist "./build/static/template"
-isDirExist "./build/static/uploadfile"
-cp -r ./static/template/email.html ./build/static/template/email.html
+function test_mysql_connect() {
+  host=$1
+  port=$2
+  user=$3
+  password=$4
+  db=$5
+  command="CREATE TABLE IF NOT EXISTS test(id INT); DROP TABLE test;"
+  echo_green "\n>>> $(gettext '拉取mysql docker 镜像如果是首次需要耗时，请稍等...')"
+  docker run -it --rm mysql:5 mysql -h${host} -P${port} -u${user} -p${password} ${db} -e "${command}" 2>/dev/null
+}
 
-# 编译前端程序，再此处需输入程序的访问地址，来进行前端程序的编译
-read -p "请输入您的程序访问地址，例如：https://fdevops.com:8001，不可为空: " url
-if [ -z "$url" ]; then
-  echo "url输入不能为空"
-  exit 1
-fi
+function init(){
+    mk_ferry_dir
+    echo_green "\n>>> $(gettext '开始迁移配置信息...')"
+    [ -f "${BASE_DIR}/config/db.sql" ] && cp -pf ${BASE_DIR}/config/db.sql ${BASE_DIR}/build/config
+    [ -f "${BASE_DIR}/config/settings.yml" ] && cp -pf ${BASE_DIR}/config/settings.yml ${BASE_DIR}/build/config
+    [ -f "${BASE_DIR}/config/rbac_model.conf" ] && cp -pf ${BASE_DIR}/config/rbac_model.conf ${BASE_DIR}/build/config
 
-echo "请选择从哪里拉取前端代码，默认是gitee: "
-cat << EOF
+    echo_green "\n>>> $(gettext '开始迁移静态文件...')"
+    isDirExist "${BASE_DIR}/build/static/scripts"
+    isDirExist "${BASE_DIR}/build/static/template"
+    isDirExist "${BASE_DIR}/build/static/uploadfile"
+    [ -f "${BASE_DIR}/static/template/email.html" ] && cp -pf ${BASE_DIR}/static/template/email.html ${BASE_DIR}/build/static/template/email.html
+    if [ -f "${BASE_DIR}/build/config/settings.yml" ];then
+        CONFIG_FILE=${BASE_DIR}/build/config/settings.yml  
+    else
+        echo_red "配置文件不存在，请检查配置文件是否存在。"
+        exit 1
+    fi
+    echo_done
 
-  1. gitee
-  2. github
-  3. 自定义拉取地址
+}
 
-EOF
+function set_external_mysql() {
+  mysql_host=$(get_db_config host)
+  read_from_input mysql_host "$(gettext 'Please enter MySQL server IP')" "" "${mysql_host}"
 
-read -p "请选择[1]: " ui
-if [ -z "$ui" ]; then
-  ui=1
-fi
+  mysql_port=$(get_db_config port)
+  read_from_input mysql_port "$(gettext 'Please enter MySQL server port')" "" "${mysql_port}"
 
-if [ $ui == 1 ]; then
-  ui_address="https://gitee.com/yllan/ferry_web.git"
-elif [ $ui == 2 ]; then
-  ui_address="https://github.com/lanyulei/ferry_web.git"
-elif [ $ui == 3 ]; then
-  read -p "请输入拉取地址: " ui_address
-else
-  echo "选项不正确，请重新输入"
-  exit 1
-fi
+  mysql_db=$(get_db_config name)
+  read_from_input mysql_db "$(gettext 'Please enter MySQL database name')" "" "${mysql_db}"
 
-echo "开始拉取前端程序..."
-read -p "此处会执行 rm -rf ./ferry_web 的命令，若此命令不会造成当前环境的损伤则请继续，y/n[y] :" s
-if [ ! -z "$s" ]; then
-  if [ $s == "n" ]; then
-    echo "结束此次编译"
-    exit 1
-  elif [ $s != "y" ]; then
-    echo "结束此次编译"
-    exit 1
+  mysql_user=$(get_db_config username)
+  read_from_input mysql_user "$(gettext 'Please enter MySQL username')" "" "${mysql_user}"
+
+  mysql_pass=$(get_db_config password)
+  read_from_input mysql_pass "$(gettext 'Please enter MySQL password')" "" "${mysql_pass}"
+
+  test_mysql_connect ${mysql_host} ${mysql_port} ${mysql_user} ${mysql_pass} ${mysql_db}
+  if [[ "$?" != "0" ]]; then
+    echo_red "测试连接数据库失败, 请重新设置"
+    echo
+    set_external_mysql
   fi
-fi
 
- if [ -d "./ferry_web" ]; then
-   echo "请稍等，正在删除 ferry_web ..."
-   rm -rf ./ferry_web
- fi
- git clone $ui_address
+  set_db_config "host" ${mysql_host}
+  set_db_config "port" ${mysql_port}
+  set_db_config "username" ${mysql_user}
+  set_db_config "password" ${mysql_pass}
+  set_db_config "name" ${mysql_db}
+}
 
-echo "替换程序访问地址..."
-cat > ./ferry_web/.env.production << EOF
+function config_mysql {
+    echo_green "\n>>> $(gettext '需注意: 邮件服务器信息若是暂时没有，可暂时不修改，但是MySQL和Redis是必须配置正确的')"
+    read_from_input confirm "$(gettext 'Do you have been installed MySQL')?" "y/n" "y"
+
+    if [[ "${confirm}" == "y" ]]; then
+        set_external_mysql
+    else
+        echo_red "未安装Mysql结束此次编译"
+        exit 1
+    fi
+}
+
+function get_variables {
+    read_from_input front_url "$(gettext '请输入您的程序访问地址: ')" "" "https://fdevops.com:8001"
+    read_from_input front_clone_from "$(gettext '请选择从哪里拉取前端代码，默认是gitee: 1:gitee, 2: github, 3:自定义地址')" "" "1"
+
+    if [ $front_clone_from == 1 ]; then
+        ui_address="https://gitee.com/yllan/ferry_web.git"
+    elif [ $front_clone_from == 2 ]; then
+        ui_address="https://github.com/lanyulei/ferry_web.git"
+    else
+        ui_address=${front_clone_from}
+    fi
+
+    config_mysql
+    read_from_input confirm "$(gettext '请确认是否创建配置文件中的redis库')?" "y/n[y]" "y"
+    if [[ "${confirm}" != "y" ]]; then
+        echo_red "结束此次编译"
+        exit 1
+    fi
+    echo_done
+
+}
+
+function install_front {
+    echo_green "\n>>> $(gettext '开始拉取前端程序...')"
+    read_from_input confirm "$(gettext '此处会执行 rm -rf ./ferry_web 的命令，若此命令不会造成当前环境的损伤则请继续')?" "y/n[y]" "y"
+    if [[ "${confirm}" != "y" ]]; then
+        echo_red "结束此次编译"
+        exit 1
+    fi
+
+
+    if [ -d "${BASE_DIR}/ferry_web" ]; then
+        echo_green "\n>>> $(gettext '请稍等，正在删除 ferry_web ...')"
+        rm -rf ${BASE_DIR}/ferry_web
+    fi
+    git clone $ui_address 
+
+    if [ "$?" -ne 0 ];then
+        echo_red "克隆代码失败，请检查git地址: ${ui_address}或者网络质量"
+        exit 1
+    fi
+
+    echo_green "\n>>> $(gettext '开始安装前端依赖...')"
+    cnpm_base_dir=$(dirname $(dirname $(which npm)))
+    npm install -g cnpm --registry=https://registry.npm.taobao.org --prefix ${cnpm_base_dir}
+    cd ferry_web && cnpm install && npm run build:prod && cp -r web ../build/template
+
+}
+
+function config_front {
+    echo_green "\n>>> $(gettext '替换程序访问地址...')"
+    cat > ${BASE_DIR}/ferry_web/.env.production << EOF
 # just a flag
 ENV = 'production'
 
 # base api
-VUE_APP_BASE_API = '$url'
+VUE_APP_BASE_API = '$front_url'
 EOF
 
-echo "开始安装前端依赖..."
-npm install -g cnpm --registry=https://registry.npm.taobao.org
-cd ferry_web && cnpm install && npm run build:prod && cp -r web ../build/template
+}
 
-echo "\n需注意: 邮件服务器信息若是暂时没有，可暂时不修改，但是MySQL和Redis是必须配置正确的\n"
-read -p "请确认是否配置MySQL、Redis及邮件服务器信息，配置文件地址: build/config/settings.yml，y/n[y]: " config_status
-if [ ! -z "$config_status" ]; then
-  if [ $config_status == "n" ]; then
-    echo "结束此次编译"
-    exit 1
-  elif [ $config_status != "y" ]; then
-    echo "结束此次编译"
-    exit 1
-  fi
-fi
 
-read -p "请确认是否创建配置文件中的MySQL库，y/n[y]: " mysql_db_status
-if [ ! -z "$mysql_db_status" ]; then
-  if [ $mysql_db_status == "n" ]; then
-    echo "结束此次编译"
-    exit 1
-  elif [ $mysql_db_status != "y" ]; then
-    echo "结束此次编译"
-    exit 1
-  fi
-fi
+function install_backend {
+    echo_green "\n>>> $(gettext '开始编译后端程序...')"
 
-cat <<EOF
+    cd ${BASE_DIR} 
+    if [ "$(uname)" == "Darwin" ];then
+        CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o ferry main.go
+        result=$?
+    elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ];then
+        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o ferry main.go
+        result=$?
+    elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ];then
+        CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o ferry main.go
+        result=$?
+    fi
 
-    请选择程序运行的平台:
+    cd - &>/dev/null
 
-        1. Mac
-        2. Linux
-        3. Windows
+    if [ "$result" -ne 0 -o ! -f "${BASE_DIR}/ferry" ];then
+        echo_red "编译后端代码失败，退出安装"
+        exit 1
+    fi
+    cp -r ${BASE_DIR}/ferry ${BASE_DIR}/build/
+    cd ${BASE_DIR}/build 
+    ${BASE_DIR}/ferry init -c=config/settings.yml
+    cd - &>/dev/null
+}
 
-EOF
+function install_app() {
+    prepare_check
+    init
+    get_variables
+    install_front
+    config_front
+    install_backend
+}
 
-read -p "请选择[2]: " run_platform
-if [ -z "$run_platform" ]; then
-  run_platform=2
-fi
+function start_backend {
+    cd ${BASE_DIR}/build
+    ${BASE_DIR}/ferry server -c=config/settings.yml 
+}
 
-echo "开始编译后端程序..."
+function main {
+    action=${1-}
+    target=${2-}
+    args=("$@")
 
-if [ $run_platform == 1 ]; then
-  CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o ferry main.go
-elif [ $run_platform == 2 ]; then
-  CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o ferry main.go
-elif [ $run_platform == 3 ]; then
-  CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o ferry main.go
-else
-  echo "没有您选择的平台，请确认"
-  exit 1
-fi
+    case "${action}" in
+        install)
+            install_app
+            ;;
+        uninstall)
+            echo "功能暂未开发, 敬请期待。"
+            ;;
+        start)
+            start_backend
+            ;;
+        stop)
+            echo "功能暂未开发, 敬请期待。"
+            ;;
+        help)
+            usage
+            ;;
+        --help)
+            usage
+            ;;
+        -h)
+            usage
+            ;;
+        *)
+            echo "No such command: ${action}"
+            usage
+            ;;
+    esac
+}
 
-cp -r ferry ./build/
-
-cd build && ./ferry init -c=config/settings.yml
-if [ $? != 0 ]; then
-
-  cat << EOF
-
-    同步数据结构及数据失败，请确认 build/config/settings.yml 中数据库的配置是否正确。
-
-    数据库配置信息正确后，可手动执行以下步骤，完成编译：
-
-        # 1. 进入工作目录
-        cd build
-
-        # 2. 重新同步任务
-        ./ferry init -c=config/settings.yml
-
-        # 3. 启动服务
-        ./ferry server -c=config/settings.yml
-
-EOF
-
-  exit 1
-
-fi
-
-echo "编译完成"
-
-cat << EOF
-
-    执行以下命令，启动程序：
-
-        cd build
-        ./ferry server -c=config/settings.yml
-
-EOF
+main "$@"
