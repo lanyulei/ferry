@@ -148,7 +148,7 @@ function init(){
     if [ -f "${BASE_DIR}/build/config/settings.yml" ];then
         CONFIG_FILE=${BASE_DIR}/build/config/settings.yml  
     else
-        echo_red "配置文件不存在，请检查配置文件是否存在。"
+        echo_red "配置文件 ${BASE_DIR}/build/config/settings.yml 不存在，请检查。"
         exit 1
     fi
     echo_done
