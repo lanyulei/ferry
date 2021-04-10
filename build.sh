@@ -242,7 +242,7 @@ function install_front {
     echo_green "\n>>> $(gettext '开始安装前端依赖...')"
     cnpm_base_dir=$(dirname $(dirname $(which npm)))
     npm install -g cnpm --registry=https://registry.npm.taobao.org --prefix ${cnpm_base_dir}
-    cd ferry_web && cnpm install && npm run build:prod && cp -r web ../build/template
+    cd ferry_web && cnpm install && npm run build:prod && cp -r web ../build/template && cp -r web/static/* ../build/static/
 
 }
 
