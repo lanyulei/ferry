@@ -166,10 +166,14 @@ function set_external_redis() {
     read_from_input redis_port "$(gettext 'Please enter Redis server port')" "" "${redis_port}"
 
     redis_pass=$(awk  -F '/' '/url: redis/{if($0~"@")print $3}' ${CONFIG_FILE} |cut -f 1 -d '@')
-    read_from_input mysql_pass "$(gettext 'Please enter Redis password, 密码里面不能带@ /, 密码为空请务必修改配置文件!!')" "" "${redis_pass}"
+    read_from_input redis_pass "$(gettext 'Please enter Redis password, 密码里面不能带@ /, 密码为空请务必修改配置文件!!')" "" "${redis_pass}"
 
     # 设置redis账号密码到配置文件
-    sed -i  "s/url: redis:\/\/.*/url: redis:\/\/${redis_pass}@${redis_host}:${redis_port}/g" ${CONFIG_FILE}
+    if [ "${redis_pass}" == "" ];then
+        sed -i  "s/url: redis:\/\/.*/url: redis:\/\/${redis_host}:${redis_port}/g" ${CONFIG_FILE}
+    else
+        sed -i  "s/url: redis:\/\/.*/url: redis:\/\/${redis_pass}@${redis_host}:${redis_port}/g" ${CONFIG_FILE}
+    fi
 }
 
 function set_external_mysql() {
