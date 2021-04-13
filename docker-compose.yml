@@ -56,6 +56,6 @@ services:
     ports:
       - 8001:8001
     environment:
-      - LISTEN_DOMAIN=dev.kagurazakalan.com
+      - LISTEN_DOMAIN=fdevops.com
       - TZ=Asia/Shanghai
     restart: unless-stopped
