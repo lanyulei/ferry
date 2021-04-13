@@ -35,7 +35,7 @@ func InitSysRouter(r *gin.Engine, authMiddleware *jwtauth.GinJWTMiddleware) *gin
 }
 
 func sysStaticFileRouter(r *gin.RouterGroup, g *gin.Engine) {
-	r.Static("/static", "./static")
+	r.Static("/static", "./template/web/static")
 	g.LoadHTMLGlob("template/web/index.html")
 }
 
