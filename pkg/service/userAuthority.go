@@ -44,12 +44,15 @@ func JudgeUserAuthority(c *gin.Context, workOrderId int, currentState string) (s
 
 	// 获取流程信息
 	err = orm.Eloquent.Model(&process.Info{}).Where("id = ?", workOrderInfo.Process).Find(&processInfo).Error
-	if err != nil {
-		return
-	}
-	err = json.Unmarshal(processInfo.Structure, &processState.Structure)
-	if err != nil {
-		return
+	//if err != nil {
+	//	return
+	//}
+
+	if processInfo.Structure != nil && len(processInfo.Structure) > 0 {
+		err = json.Unmarshal(processInfo.Structure, &processState.Structure)
+		if err != nil {
+			return
+		}
 	}
 
 	stateValue, err = processState.GetNode(currentState)
