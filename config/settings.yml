@@ -5,14 +5,14 @@ settings:
     domain: localhost:8002
     host: 0.0.0.0
     ishttps: false
-    mode: prod
+    mode: dev
     name: ferry
-    port: 8002
+    port: "8002"
     readtimeout: 1
     writertimeout: 2
   database:
     dbtype: mysql
-    host: 127.0.0.1
+    host: ferry_mysql
     name: ferry
     password: 123456
     port: 3306
@@ -52,10 +52,10 @@ settings:
     maxbackups: 300
     maxsize: 10240
     path: ./logs/ferry.log
+  public:
+    islocation: 0
   redis:
-    url: redis://127.0.0.1:6379
+    url: redis://ferry_redis:6379
   ssl:
     key: keystring
     pem: temp/pem.pem
-  public:
-    isLocation: 0
