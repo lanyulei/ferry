@@ -34,38 +34,40 @@ func ProcessStructure(c *gin.Context, processId int, workOrderId int) (result ma
 	)
 
 	err = orm.Eloquent.Model(&processValue).Where("id = ?", processId).Find(&processValue).Error
-	if err != nil {
-		err = fmt.Errorf("查询流程失败，%v", err.Error())
-		return
-	}
+	//if err != nil {
+	//	err = fmt.Errorf("查询流程失败，%v", err.Error())
+	//	return
+	//}
 
-	err = json.Unmarshal([]byte(processValue.Structure), &processStructureDetails)
-	if err != nil {
-		err = fmt.Errorf("json转map失败，%v", err.Error())
-		return
-	}
+	if processValue.Structure != nil && len(processValue.Structure) > 0 {
+		err = json.Unmarshal([]byte(processValue.Structure), &processStructureDetails)
+		if err != nil {
+			err = fmt.Errorf("json转map失败，%v", err.Error())
+			return
+		}
 
-	// 排序，使用冒泡
-	p := processStructureDetails["nodes"].([]interface{})
-	if len(p) > 1 {
-		for i := 0; i < len(p); i++ {
-			for j := 1; j < len(p)-i; j++ {
-				if p[j].(map[string]interface{})["sort"] == nil || p[j-1].(map[string]interface{})["sort"] == nil {
-					return nil, errors.New("流程未定义顺序属性，请确认")
-				}
-				leftInt, _ := strconv.Atoi(p[j].(map[string]interface{})["sort"].(string))
-				rightInt, _ := strconv.Atoi(p[j-1].(map[string]interface{})["sort"].(string))
-				if leftInt < rightInt {
-					//交换
-					p[j], p[j-1] = p[j-1], p[j]
+		// 排序，使用冒泡
+		p := processStructureDetails["nodes"].([]interface{})
+		if len(p) > 1 {
+			for i := 0; i < len(p); i++ {
+				for j := 1; j < len(p)-i; j++ {
+					if p[j].(map[string]interface{})["sort"] == nil || p[j-1].(map[string]interface{})["sort"] == nil {
+						return nil, errors.New("流程未定义顺序属性，请确认")
+					}
+					leftInt, _ := strconv.Atoi(p[j].(map[string]interface{})["sort"].(string))
+					rightInt, _ := strconv.Atoi(p[j-1].(map[string]interface{})["sort"].(string))
+					if leftInt < rightInt {
+						//交换
+						p[j], p[j-1] = p[j-1], p[j]
+					}
 				}
 			}
+			for _, node := range processStructureDetails["nodes"].([]interface{}) {
+				processNode = append(processNode, node.(map[string]interface{}))
+			}
+		} else {
+			processNode = processStructureDetails["nodes"].([]map[string]interface{})
 		}
-		for _, node := range processStructureDetails["nodes"].([]interface{}) {
-			processNode = append(processNode, node.(map[string]interface{}))
-		}
-	} else {
-		processNode = processStructureDetails["nodes"].([]map[string]interface{})
 	}
 
 	processValue.Structure = nil
@@ -141,18 +143,20 @@ func ProcessStructure(c *gin.Context, processId int, workOrderId int) (result ma
 		if len(stateList) > 0 {
 		breakStateTag:
 			for _, stateValue := range stateList {
-				for _, processNodeValue := range processStructureDetails["nodes"].([]interface{}) {
-					if stateValue["id"].(string) == processNodeValue.(map[string]interface{})["id"] {
-						if _, ok := stateValue["processor"]; ok {
-							for _, userId := range stateValue["processor"].([]interface{}) {
-								if int(userId.(float64)) == tools.GetUserId(c) {
-									workOrderInfo.CurrentState = stateValue["id"].(string)
-									break breakStateTag
+				if processStructureDetails["nodes"] != nil {
+					for _, processNodeValue := range processStructureDetails["nodes"].([]interface{}) {
+						if stateValue["id"].(string) == processNodeValue.(map[string]interface{})["id"] {
+							if _, ok := stateValue["processor"]; ok {
+								for _, userId := range stateValue["processor"].([]interface{}) {
+									if int(userId.(float64)) == tools.GetUserId(c) {
+										workOrderInfo.CurrentState = stateValue["id"].(string)
+										break breakStateTag
+									}
 								}
+							} else {
+								err = errors.New("未查询到对应的处理人字段，请确认。")
+								return
 							}
-						} else {
-							err = errors.New("未查询到对应的处理人字段，请确认。")
-							return
 						}
 					}
 				}
