@@ -17,7 +17,7 @@ WORKDIR /opt/ferry
 COPY --from=build /opt/ferry/ferry /opt/ferry/
 COPY config/ /opt/ferry/default_config/
 COPY template/ /opt/ferry/template/
-COPY entrypoint.sh /opt/ferry/
+COPY docker/entrypoint.sh /opt/ferry/
 RUN mkdir -p logs static/uploadfile static/scripts static/template
 
 RUN chmod 755 /opt/ferry/entrypoint.sh
