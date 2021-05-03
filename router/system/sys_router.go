@@ -30,7 +30,7 @@ func SysNoCheckRoleRouter(r *gin.RouterGroup) {
 }
 
 func RegisterBaseRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddleware) {
-	v1auth := v1.Use(authMiddleware.MiddlewareFunc()).Use(middleware.AuthCheckRole())
+	v1auth := v1.Group("").Use(authMiddleware.MiddlewareFunc()).Use(middleware.AuthCheckRole())
 	{
 		v1auth.GET("/getinfo", system.GetInfo)
 		v1auth.GET("/menurole", system.GetMenuRole)
@@ -42,7 +42,7 @@ func RegisterBaseRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddlewar
 }
 
 func RegisterPageRouter(v1 *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddleware) {
-	v1auth := v1.Use(authMiddleware.MiddlewareFunc()).Use(middleware.AuthCheckRole())
+	v1auth := v1.Group("").Use(authMiddleware.MiddlewareFunc()).Use(middleware.AuthCheckRole())
 	{
 		v1auth.GET("/deptList", system.GetDeptList)
 		v1auth.GET("/ordinaryDeptList", system.GetOrdinaryDeptList)
