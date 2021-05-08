@@ -100,10 +100,11 @@ bash build.sh start
 群里只要不说骂人、侮辱人之类人身攻击的话，您就可以畅所欲言，有bug我及时修改，使用中有不懂的，我会及时回复，感谢。
 
 <p>
-  <img src="https://www.fdevops.com/wp-content/uploads/2020/07/2020072209114938.png">
+  <img width="300" src="https://www.fdevops.com/wp-content/uploads/2021/05/1620470212-WechatIMG391.jpeg">
 </p>
 
-QQ群：1127401830
+QQ群 1：1127401830 已满
+QQ群 2：1043807251
 
 [兰玉磊的技术博客](https://www.fdevops.com/)
 
@@ -158,4 +159,4 @@ QQ群：1127401830
 
 [LGPL-3.0](https://github.com/lanyulei/ferry/blob/master/LICENSE)
 
-Copyright (c) 2020 lanyulei
+Copyright (c) 2021 lanyulei
