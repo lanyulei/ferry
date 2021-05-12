@@ -27,6 +27,7 @@ type workOrderInfo struct {
 	Principals   string `json:"principals"`
 	StateName    string `json:"state_name"`
 	DataClassify int    `json:"data_classify"`
+	ProcessName  string `json:"process_name"`
 }
 
 func NewWorkOrder(classify int, c *gin.Context) *WorkOrder {
@@ -42,9 +43,9 @@ func (w *WorkOrder) PureWorkOrderList() (result interface{}, err error) {
 		processorInfo     system.SysUser
 	)
 
-	personSelectValue := "(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'person')))"
-	roleSelectValue := "(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'role')))"
-	departmentSelectValue := "(JSON_CONTAINS(state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(state, JSON_OBJECT('process_method', 'department')))"
+	personSelectValue := "(JSON_CONTAINS(p_work_order_info.state, JSON_OBJECT('p_work_order_info.processor', %v)) and JSON_CONTAINS(p_work_order_info.state, JSON_OBJECT('p_work_order_info.process_method', 'p_work_order_info.person')))"
+	roleSelectValue := "(JSON_CONTAINS(p_work_order_info.state, JSON_OBJECT('p_work_order_info.processor', %v)) and JSON_CONTAINS(p_work_order_info.state, JSON_OBJECT('p_work_order_info.process_method', 'p_work_order_info.role')))"
+	departmentSelectValue := "(JSON_CONTAINS(p_work_order_info.state, JSON_OBJECT('p_work_order_info.processor', %v)) and JSON_CONTAINS(p_work_order_info.state, JSON_OBJECT('p_work_order_info.process_method', 'p_work_order_info.department')))"
 
 	title := w.GinObj.DefaultQuery("title", "")
 	startTime := w.GinObj.DefaultQuery("startTime", "")
@@ -53,15 +54,15 @@ func (w *WorkOrder) PureWorkOrderList() (result interface{}, err error) {
 	processor := w.GinObj.DefaultQuery("processor", "")
 	priority := w.GinObj.DefaultQuery("priority", "")
 	db := orm.Eloquent.Model(&process.WorkOrderInfo{}).
-		Where("title like ?", fmt.Sprintf("%%%v%%", title))
+		Where("p_work_order_info.title like ?", fmt.Sprintf("%%%v%%", title))
 	if startTime != "" {
-		db = db.Where("create_time >= ?", startTime)
+		db = db.Where("p_work_order_info.create_time >= ?", startTime)
 	}
 	if endTime != "" {
-		db = db.Where("create_time <= ?", endTime)
+		db = db.Where("p_work_order_info.create_time <= ?", endTime)
 	}
 	if isEnd != "" {
-		db = db.Where("is_end = ?", isEnd)
+		db = db.Where("p_work_order_info.is_end = ?", isEnd)
 	}
 	if processor != "" && w.Classify != 1 {
 		err = orm.Eloquent.Model(&processorInfo).
@@ -70,14 +71,14 @@ func (w *WorkOrder) PureWorkOrderList() (result interface{}, err error) {
 		if err != nil {
 			return
 		}
-		db = db.Where(fmt.Sprintf("(%v or %v or %v) and is_end = 0",
+		db = db.Where(fmt.Sprintf("(%v or %v or %v) and p_work_order_info.is_end = 0",
 			fmt.Sprintf(personSelectValue, processorInfo.UserId),
 			fmt.Sprintf(roleSelectValue, processorInfo.RoleId),
 			fmt.Sprintf(departmentSelectValue, processorInfo.DeptId),
 		))
 	}
 	if priority != "" {
-		db = db.Where("priority = ?", priority)
+		db = db.Where("p_work_order_info.priority = ?", priority)
 	}
 
 	// 获取当前用户信息
@@ -102,23 +103,26 @@ func (w *WorkOrder) PureWorkOrderList() (result interface{}, err error) {
 
 		// 4. 变量会转成个人数据
 		//db = db.Where(fmt.Sprintf("(%v or %v or %v or %v) and is_end = 0", personSelect, personGroupSelect, departmentSelect, variableSelect))
-		db = db.Where(fmt.Sprintf("(%v or %v or %v) and is_end = 0", personSelect, roleSelect, departmentSelect))
+		db = db.Where(fmt.Sprintf("(%v or %v or %v) and p_work_order_info.is_end = 0", personSelect, roleSelect, departmentSelect))
 	case 2:
 		// 我创建的
-		db = db.Where("creator = ?", tools.GetUserId(w.GinObj))
+		db = db.Where("p_work_order_info.creator = ?", tools.GetUserId(w.GinObj))
 	case 3:
 		// 我相关的
-		db = db.Where(fmt.Sprintf("JSON_CONTAINS(related_person, '%v')", tools.GetUserId(w.GinObj)))
+		db = db.Where(fmt.Sprintf("JSON_CONTAINS(p_work_order_info.related_person, '%v')", tools.GetUserId(w.GinObj)))
 	case 4:
 	// 所有工单
 	default:
 		return nil, fmt.Errorf("请确认查询的数据类型是否正确")
 	}
 
+	db = db.Joins("left join p_process_info on p_work_order_info.process = p_process_info.id").
+		Select("p_work_order_info.*, p_process_info.name as process_name")
+
 	result, err = pagination.Paging(&pagination.Param{
 		C:  w.GinObj,
 		DB: db,
-	}, &workOrderInfoList)
+	}, &workOrderInfoList, map[string]map[string]interface{}{}, "p_process_info")
 	if err != nil {
 		err = fmt.Errorf("查询工单列表失败，%v", err.Error())
 		return
