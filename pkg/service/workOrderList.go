@@ -43,9 +43,9 @@ func (w *WorkOrder) PureWorkOrderList() (result interface{}, err error) {
 		processorInfo     system.SysUser
 	)
 
-	personSelectValue := "(JSON_CONTAINS(p_work_order_info.state, JSON_OBJECT('p_work_order_info.processor', %v)) and JSON_CONTAINS(p_work_order_info.state, JSON_OBJECT('p_work_order_info.process_method', 'p_work_order_info.person')))"
-	roleSelectValue := "(JSON_CONTAINS(p_work_order_info.state, JSON_OBJECT('p_work_order_info.processor', %v)) and JSON_CONTAINS(p_work_order_info.state, JSON_OBJECT('p_work_order_info.process_method', 'p_work_order_info.role')))"
-	departmentSelectValue := "(JSON_CONTAINS(p_work_order_info.state, JSON_OBJECT('p_work_order_info.processor', %v)) and JSON_CONTAINS(p_work_order_info.state, JSON_OBJECT('p_work_order_info.process_method', 'p_work_order_info.department')))"
+	personSelectValue := "(JSON_CONTAINS(p_work_order_info.state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(p_work_order_info.state, JSON_OBJECT('process_method', 'person')))"
+	roleSelectValue := "(JSON_CONTAINS(p_work_order_info.state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(p_work_order_info.state, JSON_OBJECT('process_method', 'role')))"
+	departmentSelectValue := "(JSON_CONTAINS(p_work_order_info.state, JSON_OBJECT('processor', %v)) and JSON_CONTAINS(p_work_order_info.state, JSON_OBJECT('process_method', 'department')))"
 
 	title := w.GinObj.DefaultQuery("title", "")
 	startTime := w.GinObj.DefaultQuery("startTime", "")
