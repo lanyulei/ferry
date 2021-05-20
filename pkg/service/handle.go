@@ -422,6 +422,7 @@ func (h *Handle) HandleWorkOrder(
 		parallelStatusOk   bool
 		processInfo        process.Info
 		currentUserInfo    system.SysUser
+		applyUserInfo      system.SysUser
 		sendToUserList     []system.SysUser
 		noticeList         []int
 		sendSubject        string = "您有一条待办工单，请及时处理"
@@ -450,6 +451,12 @@ func (h *Handle) HandleWorkOrder(
 
 	// 获取工单信息
 	err = orm.Eloquent.Model(&process.WorkOrderInfo{}).Where("id = ?", workOrderId).Find(&h.workOrderDetails).Error
+	if err != nil {
+		return
+	}
+
+	// 查询工单创建人信息
+	err = orm.Eloquent.Model(&system.SysUser{}).Where("user_id = ?", h.workOrderDetails.Creator).Find(&applyUserInfo).Error
 	if err != nil {
 		return
 	}
@@ -809,7 +816,7 @@ func (h *Handle) HandleWorkOrder(
 		ProcessId:   h.workOrderDetails.Process,
 		Id:          h.workOrderDetails.Id,
 		Title:       h.workOrderDetails.Title,
-		Creator:     currentUserInfo.NickName,
+		Creator:     applyUserInfo.NickName,
 		Priority:    h.workOrderDetails.Priority,
 		CreatedAt:   h.workOrderDetails.CreatedAt.Format("2006-01-02 15:04:05"),
 	}
