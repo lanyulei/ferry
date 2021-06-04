@@ -10,3 +10,4 @@ logs
 mysql/data
 redis/data
 data/
+needinit

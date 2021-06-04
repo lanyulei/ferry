@@ -17,6 +17,7 @@ import (
 
 type BodyData struct {
 	SendTo        interface{} // 接受人
+	EmailCcTo     []string    // 抄送人邮箱列表
 	Subject       string      // 标题
 	Classify      []int       // 通知类型
 	Id            int         // 工单ID
@@ -80,7 +81,7 @@ func (b *BodyData) SendNotify() (err error) {
 					logger.Errorf("模版内容解析失败，%v", err.Error())
 					return
 				}
-				go email.SendMail(emailList, b.Subject, b.Content)
+				go email.SendMail(emailList, b.EmailCcTo, b.Subject, b.Content)
 			}
 		}
 	}
