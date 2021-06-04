@@ -806,10 +806,23 @@ func (h *Handle) HandleWorkOrder(
 		return
 	}
 
+	// 获取需要抄送的邮件
+	emailCCList := make([]string, 0)
+	if len(h.stateValue["cc"].([]interface{})) > 0 {
+		err = orm.Eloquent.Model(&system.SysUser{}).
+			Where("user_id in (?)", h.stateValue["cc"]).
+			Pluck("email", &emailCCList).Error
+		if err != nil {
+			err = errors.New("查询邮件抄送人失败")
+			return
+		}
+	}
+
 	bodyData := notify.BodyData{
 		SendTo: map[string]interface{}{
 			"userList": sendToUserList,
 		},
+		EmailCcTo:   emailCCList,
 		Subject:     sendSubject,
 		Description: sendDescription,
 		Classify:    noticeList,

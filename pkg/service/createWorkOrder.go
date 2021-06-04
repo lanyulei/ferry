@@ -33,6 +33,7 @@ func CreateWorkOrder(c *gin.Context) (err error) {
 		tpl            []byte
 		sourceEdges    []map[string]interface{}
 		targetEdges    []map[string]interface{}
+		currentNode    map[string]interface{}
 		workOrderValue struct {
 			process.WorkOrderInfo
 			Tpls        map[string][]interface{} `json:"tpls"`
@@ -79,6 +80,13 @@ func CreateWorkOrder(c *gin.Context) (err error) {
 	}
 
 	err = json.Unmarshal(processValue.Structure, &processState.Structure)
+
+	for _, node := range processState.Structure["nodes"] {
+		if node["clazz"] == "start" {
+			currentNode = node
+		}
+	}
+
 	nodeValue, err := processState.GetNode(variableValue[0].(map[string]interface{})["id"].(string))
 	if err != nil {
 		return
@@ -304,12 +312,24 @@ func CreateWorkOrder(c *gin.Context) (err error) {
 			return
 		}
 
+		// 获取需要抄送的邮件
+		emailCCList := make([]string, 0)
+		if len(currentNode["cc"].([]interface{})) > 0 {
+			err = orm.Eloquent.Model(&system.SysUser{}).
+				Where("user_id in (?)", currentNode["cc"]).
+				Pluck("email", &emailCCList).Error
+			if err != nil {
+				err = errors.New("查询邮件抄送人失败")
+				return
+			}
+		}
 		// 发送通知
 		go func() {
 			bodyData := notify.BodyData{
 				SendTo: map[string]interface{}{
 					"userList": sendToUserList,
 				},
+				EmailCcTo:   emailCCList,
 				Subject:     "您有一条待办工单，请及时处理",
 				Description: "您有一条待办工单请及时处理，工单描述如下",
 				Classify:    noticeList,
