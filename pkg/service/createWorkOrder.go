@@ -315,7 +315,7 @@ func CreateWorkOrder(c *gin.Context) (err error) {
 
 		// 获取需要抄送的邮件
 		emailCCList := make([]string, 0)
-		if len(currentNode["cc"].([]interface{})) > 0 {
+		if currentNode["cc"] != nil && len(currentNode["cc"].([]interface{})) > 0 {
 			err = orm.Eloquent.Model(&system.SysUser{}).
 				Where("user_id in (?)", currentNode["cc"]).
 				Pluck("email", &emailCCList).Error

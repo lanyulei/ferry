@@ -809,7 +809,7 @@ func (h *Handle) HandleWorkOrder(
 
 	// 获取需要抄送的邮件
 	emailCCList := make([]string, 0)
-	if len(h.stateValue["cc"].([]interface{})) > 0 {
+	if h.stateValue["cc"] != nil && len(h.stateValue["cc"].([]interface{})) > 0 {
 		err = orm.Eloquent.Model(&system.SysUser{}).
 			Where("user_id in (?)", h.stateValue["cc"]).
 			Pluck("email", &emailCCList).Error
