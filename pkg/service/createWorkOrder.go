@@ -40,6 +40,7 @@ func CreateWorkOrder(c *gin.Context) (err error) {
 			SourceState string                   `json:"source_state"`
 			Tasks       json.RawMessage          `json:"tasks"`
 			Source      string                   `json:"source"`
+			IsExecTask  bool                     `json:"is_exec_task"`
 		}
 		paramsValue struct {
 			Id       int           `json:"id"`
@@ -348,23 +349,26 @@ func CreateWorkOrder(c *gin.Context) (err error) {
 		}()
 	}
 
-	// 执行任务
-	err = json.Unmarshal(workOrderValue.Tasks, &taskList)
-	if err != nil {
-		return
-	}
-	if len(taskList) > 0 {
-		paramsValue.Id = workOrderInfo.Id
-		paramsValue.Title = workOrderInfo.Title
-		paramsValue.Priority = workOrderInfo.Priority
-		paramsValue.FormData = workOrderValue.Tpls["form_data"]
-		var params []byte
-		params, err = json.Marshal(paramsValue)
+	if workOrderValue.IsExecTask {
+		// 执行任务
+		err = json.Unmarshal(workOrderValue.Tasks, &taskList)
 		if err != nil {
 			return
 		}
+		if len(taskList) > 0 {
+			paramsValue.Id = workOrderInfo.Id
+			paramsValue.Title = workOrderInfo.Title
+			paramsValue.Priority = workOrderInfo.Priority
+			paramsValue.FormData = workOrderValue.Tpls["form_data"]
+			var params []byte
+			params, err = json.Marshal(paramsValue)
+			if err != nil {
+				return
+			}
 
-		go ExecTask(taskList, string(params))
+			go ExecTask(taskList, string(params))
+		}
 	}
+
 	return
 }

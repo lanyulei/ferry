@@ -116,6 +116,7 @@ func ProcessWorkOrder(c *gin.Context) {
 			FlowProperties int                      `json:"flow_properties"` // 流转类型 0 拒绝，1 同意，2 其他
 			Remarks        string                   `json:"remarks"`         // 处理的备注信息
 			Tpls           []map[string]interface{} `json:"tpls"`            // 表单数据
+			IsExecTask     bool                     `json:"is_exec_task"`    // 是否执行任务
 		}
 	)
 
@@ -146,6 +147,7 @@ func ProcessWorkOrder(c *gin.Context) {
 		params.FlowProperties, // 流转属性
 		params.Remarks,        // 备注信息
 		params.Tpls,           // 工单数据更新
+		params.IsExecTask,     // 是否执行任务
 	)
 	if err != nil {
 		app.Error(c, -1, err, fmt.Sprintf("处理工单失败，%v", err.Error()))

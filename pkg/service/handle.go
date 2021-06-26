@@ -404,6 +404,7 @@ func (h *Handle) HandleWorkOrder(
 	flowProperties int,
 	remarks string,
 	tpls []map[string]interface{},
+	isExecTask bool,
 ) (err error) {
 	h.workOrderId = workOrderId
 	h.flowProperties = flowProperties
@@ -907,30 +908,31 @@ func (h *Handle) HandleWorkOrder(
 		}(bodyData)
 	}
 
-	// 执行流程公共任务及节点任务
-	if h.stateValue["task"] != nil {
-		for _, task := range h.stateValue["task"].([]interface{}) {
-			tasks = append(tasks, task.(string))
-		}
-	}
-continueTag:
-	for _, task := range tasks {
-		for _, t := range execTasks {
-			if t == task {
-				continue continueTag
+	if isExecTask {
+		// 执行流程公共任务及节点任务
+		if h.stateValue["task"] != nil {
+			for _, task := range h.stateValue["task"].([]interface{}) {
+				tasks = append(tasks, task.(string))
 			}
 		}
-		execTasks = append(execTasks, task)
-	}
+	continueTag:
+		for _, task := range tasks {
+			for _, t := range execTasks {
+				if t == task {
+					continue continueTag
+				}
+			}
+			execTasks = append(execTasks, task)
+		}
 
-	paramsValue.Id = h.workOrderDetails.Id
-	paramsValue.Title = h.workOrderDetails.Title
-	paramsValue.Priority = h.workOrderDetails.Priority
-	params, err := json.Marshal(paramsValue)
-	if err != nil {
-		return err
+		paramsValue.Id = h.workOrderDetails.Id
+		paramsValue.Title = h.workOrderDetails.Title
+		paramsValue.Priority = h.workOrderDetails.Priority
+		params, err := json.Marshal(paramsValue)
+		if err != nil {
+			return err
+		}
+		go ExecTask(execTasks, string(params))
 	}
-	go ExecTask(execTasks, string(params))
-
 	return
 }
