@@ -34,19 +34,6 @@ function echo_done() {
     echo "$(gettext 'complete')"
 }
 
-function get_db_config() {
-    key=$1
-
-    value=$(sed -n '/database/,/domain/p' "${CONFIG_FILE}" |awk -F : /^[[:space:]]*${key}/'{print $2}')
-    echo "${value}"
-}
-
-function set_db_config() {
-    key=$1
-    value=$2
-    sed -i "/database/,/domain/s/\(^[[:space:]]*${key}:\).*/\1 ${value}/" "${CONFIG_FILE}"
-}
-
 function read_from_input() {
     var=$1
     msg=$2
@@ -121,23 +108,6 @@ function mk_ferry_dir {
     isDirExist "${BASE_DIR}/build/config"
 }
 
-function test_mysql_connect() {
-    host=$1
-    port=$2
-    user=$3
-    password=$4
-    db=$5
-    sql_command="CREATE TABLE IF NOT EXISTS test(id INT); DROP TABLE test;"    
-    command -v mysql > /dev/null    
-    if [ "$?" -eq 0 ];then    
-        mysql -h${host} -P${port} -u${user} -p${password} ${db} -e "${sql_command}" 2>/dev/null    
-    else    
-        [ "${host}" == "127.0.0.1" ] && return 0
-        echo_green "\n>>> $(gettext '拉取mysql docker 镜像如果是首次需要耗时，请稍等...')"    
-        docker run -it --rm mysql:5 mysql -h${host} -P${port} -u${user} -p${password} ${db} -e "${sql_command}" 2>/dev/null    
-    fi    
-}
-
 function init(){
     mk_ferry_dir
     echo_green "\n>>> $(gettext '开始迁移配置信息...')"
@@ -158,60 +128,13 @@ function init(){
     fi
 }
 
-function set_external_redis() {
-    redis_host=$(awk --re-interval '/url: redis/{match($0,/([0-9]{1,3}\.){3}[0-9]{1,3}/,a); print a[0]}' ${CONFIG_FILE})
-    read_from_input redis_host "$(gettext 'Please enter Redis server IP')" "" "${redis_host}"
-
-    redis_port=$(awk -F : '/url: redis/{print $NF}' ${CONFIG_FILE})
-    read_from_input redis_port "$(gettext 'Please enter Redis server port')" "" "${redis_port}"
-
-    redis_pass=$(awk  -F '/' '/url: redis/{if($0~"@")print $3}' ${CONFIG_FILE} |cut -f 1 -d '@')
-    read_from_input redis_pass "$(gettext 'Please enter Redis password, 密码里面不能带@ /, 密码为空请务必修改配置文件!!')" "" "${redis_pass}"
-
-    # 设置redis账号密码到配置文件
-    if [ "${redis_pass}" == "" ];then
-        sed -i  "s/url: redis:\/\/.*/url: redis:\/\/${redis_host}:${redis_port}/g" ${CONFIG_FILE}
-    else
-        sed -i  "s/url: redis:\/\/.*/url: redis:\/\/${redis_pass}@${redis_host}:${redis_port}/g" ${CONFIG_FILE}
-    fi
-}
-
-function set_external_mysql() {
-    mysql_host=$(get_db_config host)
-    read_from_input mysql_host "$(gettext 'Please enter MySQL server IP')" "" "${mysql_host}"
-
-    mysql_port=$(get_db_config port)
-    read_from_input mysql_port "$(gettext 'Please enter MySQL server port')" "" "${mysql_port}"
-
-    mysql_db=$(get_db_config name)
-    read_from_input mysql_db "$(gettext 'Please enter MySQL database name')" "" "${mysql_db}"
-
-    mysql_user=$(get_db_config username)
-    read_from_input mysql_user "$(gettext 'Please enter MySQL username')" "" "${mysql_user}"
-
-    mysql_pass=$(get_db_config password)
-    read_from_input mysql_pass "$(gettext 'Please enter MySQL password')" "" "${mysql_pass}"
-
-    test_mysql_connect ${mysql_host} ${mysql_port} ${mysql_user} ${mysql_pass} ${mysql_db}
-    if [[ "$?" != "0" ]]; then
-        echo_red "测试连接数据库失败, 请重新设置"
-        echo
-        set_external_mysql
-    fi
-
-    set_db_config "host" ${mysql_host}
-    set_db_config "port" ${mysql_port}
-    set_db_config "username" ${mysql_user}
-    set_db_config "password" ${mysql_pass}
-    set_db_config "name" ${mysql_db}
-}
-
 function config_mysql {
     echo_green "\n>>> $(gettext '需注意: 邮件服务器信息若是暂时没有，可暂时不修改，但是MySQL和Redis是必须配置正确的')"
-    read_from_input confirm "$(gettext 'Do you have been installed MySQL')?" "y/n" "y"
+    read_from_input confirm "$(gettext '请确认是否安装MySQL')?" "y/n" "y"
 
     if [[ "${confirm}" == "y" ]]; then
-        set_external_mysql
+        echo ""
+        echo "请在此处暂停一下，将数据库配置信息，写入到配置文件中，${BASE_DIR}/build/config/settings.yml，<settings.database> 下面数据库相关配置。"
     else
         echo_red "未安装Mysql结束此次编译"
         exit 1
@@ -220,10 +143,11 @@ function config_mysql {
 
 function config_redis {
     echo_green "\n>>> $(gettext '回车前请确保你已经安装了Redis,且启动服务')"
-    read_from_input confirm "$(gettext 'Do you have been installed Redis')?" "y/n" "y"
+    read_from_input confirm "$(gettext '请确认是否安装Redis')?" "y/n" "y"
 
     if [[ "${confirm}" == "y" ]]; then
-        set_external_redis
+        echo ""
+        echo "请在此处暂停一下，将 Redis 配置信息，写入到配置文件中，${BASE_DIR}/build/config/settings.yml，<settings.redis> 下面是Redis相关配置，若是不知道如何配置URL，可自行百度一下。"
     else
         echo_red "未安装Redis结束此次编译"
         exit 1
