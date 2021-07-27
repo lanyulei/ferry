@@ -8,8 +8,8 @@ require (
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751
 	github.com/casbin/casbin/v2 v2.2.1
 	github.com/casbin/gorm-adapter/v2 v2.0.3
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/gin-gonic/gin v1.5.0
+	github.com/dgrijalva/jwt-go v3.2.1+incompatible
+	github.com/gin-gonic/gin v1.7.0
 	github.com/go-kit/kit v0.8.0
 	github.com/go-ldap/ldap/v3 v3.2.3
 	github.com/go-ole/go-ole v1.2.4 // indirect
