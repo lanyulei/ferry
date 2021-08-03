@@ -155,7 +155,7 @@ function config_redis {
 }
 
 function get_variables {
-    read_from_input front_url "$(gettext '请输入您的程序访问地址: ')" "" "https://fdevops.com:8002"
+    read_from_input front_url "$(gettext '请输入您的程序访问地址: ')" "" ""
     read_from_input front_clone_from "$(gettext '请选择从哪里拉取前端代码，默认是gitee: 1:gitee, 2: github, 3:自定义地址')" "" "1"
 
     if [ $front_clone_from == 1 ]; then
