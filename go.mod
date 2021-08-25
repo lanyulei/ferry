@@ -1,6 +1,6 @@
 module ferry
 
-go 1.14
+go 1.16
 
 require (
 	github.com/RichardKnop/machinery v1.8.8
