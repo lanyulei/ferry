@@ -53,6 +53,7 @@ func (w *WorkOrder) PureWorkOrderList() (result interface{}, err error) {
 	isEnd := w.GinObj.DefaultQuery("isEnd", "")
 	processor := w.GinObj.DefaultQuery("processor", "")
 	priority := w.GinObj.DefaultQuery("priority", "")
+	creator := w.GinObj.DefaultQuery("creator", "")
 	db := orm.Eloquent.Model(&process.WorkOrderInfo{}).
 		Where("p_work_order_info.title like ?", fmt.Sprintf("%%%v%%", title))
 	if startTime != "" {
@@ -63,6 +64,9 @@ func (w *WorkOrder) PureWorkOrderList() (result interface{}, err error) {
 	}
 	if isEnd != "" {
 		db = db.Where("p_work_order_info.is_end = ?", isEnd)
+	}
+	if creator != "" {
+		db = db.Where("p_work_order_info.creator = ?", creator)
 	}
 	if processor != "" && w.Classify != 1 {
 		err = orm.Eloquent.Model(&processorInfo).
