@@ -1,12 +1,12 @@
-#!/bin/bash
+#!/bin/sh
 set -e
-if [[ ! -f /opt/ferry/config/settings.yml ]]
+if [[ ! -f /opt/workflow/ferry/config/settings.yml ]]
 then
-    cp /opt/ferry/default_config/* /opt/ferry/config/
+    cp /opt/workflow/ferry/default_config/* /opt/workflow/ferry/config/
 fi
-if [[ -f /opt/ferry/config/needinit ]]
+if [[ -f /opt/workflow/ferry/config/needinit ]]
 then
-    /opt/ferry/ferry init -c=/opt/ferry/config/settings.yml
-    rm -f /opt/ferry/config/needinit
+    /opt/workflow/ferry/ferry init -c=/opt/workflow/ferry/config/settings.yml
+    rm -f /opt/workflow/ferry/config/needinit
 fi
-/opt/ferry/ferry server -c=/opt/ferry/config/settings.yml
+/opt/workflow/ferry/ferry server -c=/opt/workflow/ferry/config/settings.yml
