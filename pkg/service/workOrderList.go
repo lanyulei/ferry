@@ -57,9 +57,8 @@ func (w *WorkOrder) PureWorkOrderList() (result interface{}, err error) {
 	processParam := w.GinObj.DefaultQuery("process", "")
 	formData := w.GinObj.DefaultQuery("formData", "")
 	db := orm.Eloquent.Model(&process.WorkOrderInfo{}).
-		Joins("left join p_work_order_tpl_data on p_work_order_tpl_data.work_order = p_work_order_info.id").
-		Where("p_work_order_info.title like ?", fmt.Sprintf("%%%v%%", title)).
-		Group("p_work_order_info.id")
+		Where("p_work_order_info.title like ?", fmt.Sprintf("%%%v%%", title))
+
 	if startTime != "" {
 		db = db.Where("p_work_order_info.create_time >= ?", startTime)
 	}
@@ -76,7 +75,9 @@ func (w *WorkOrder) PureWorkOrderList() (result interface{}, err error) {
 		db = db.Where("p_work_order_info.process = ?", processParam)
 	}
 	if formData != "" {
-		db = db.Where("p_work_order_tpl_data.form_data->'$.*' LIKE CONCAT('%',?,'%')", formData)
+		db = db.Joins("left join p_work_order_tpl_data on p_work_order_tpl_data.work_order = p_work_order_info.id").
+			Where("p_work_order_tpl_data.form_data->'$.*' LIKE CONCAT('%',?,'%')", formData).
+			Group("p_work_order_info.id")
 	}
 	if processor != "" && w.Classify != 1 {
 		err = orm.Eloquent.Model(&processorInfo).
