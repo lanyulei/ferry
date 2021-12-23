@@ -100,14 +100,14 @@ bash build.sh start
 群里只要不说骂人、侮辱人之类人身攻击的话，您就可以畅所欲言，有bug我及时修改，使用中有不懂的，我会及时回复，感谢。
 
 <p>
-  <img width="300" src="https://www.fdevops.com/wp-content/uploads/2021/05/1620470212-WechatIMG391.jpeg">
+  <img width="300" src="https://www.fdevops.com/wp-content/uploads/2021/12/1640275868-2021122316110810.png">
 </p>
 
-QQ群 2：1043807251
+QQ群 3：767524537
 
 [兰玉磊的技术博客](https://www.fdevops.com/)
 
-个人微信，添加好友请描述地区、公司及名字，例如：北京-阿里巴巴-xxx。
+###个人微信，添加好友请描述地区、公司及名字，例如：北京-国美-xxx。
 
 微信号：fdevops
 
