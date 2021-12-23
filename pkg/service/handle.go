@@ -195,6 +195,7 @@ func (h *Handle) circulation() (err error) {
 		Where("id = ?", h.workOrderId).
 		Updates(map[string]interface{}{
 			"state":          stateValue,
+			"is_denied":      h.flowProperties,
 			"related_person": h.updateValue["related_person"],
 		}).Error
 	if err != nil {
