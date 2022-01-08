@@ -7,6 +7,7 @@ import (
 	jwt "ferry/pkg/jwtauth"
 	ldap1 "ferry/pkg/ldap"
 	"ferry/pkg/logger"
+	"ferry/pkg/settings"
 	"ferry/tools"
 	"fmt"
 	"net/http"
@@ -66,6 +67,7 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 		authUserCount int
 		addUserInfo   system.SysUser
 		ldapUserInfo  *ldap.Entry
+		isVerifyCode  interface{}
 	)
 
 	ua := user_agent.New(c.Request.UserAgent())
@@ -91,12 +93,20 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 	}
 	loginLog.Username = loginVal.Username
 
-	// 校验验证码
-	if !store.Verify(loginVal.UUID, loginVal.Code, true) {
-		loginLog.Status = "1"
-		loginLog.Msg = "验证码错误"
-		_, _ = loginLog.Create()
-		return nil, jwt.ErrInvalidVerificationode
+	// 查询设置 is_verify_code
+	isVerifyCode, err = settings.GetContentByKey(1, "is_verify_code")
+	if err != nil {
+		return nil, errors.New("获取是否需要验证码校验失败")
+	}
+
+	if isVerifyCode.(bool) {
+		// 校验验证码
+		if !store.Verify(loginVal.UUID, loginVal.Code, true) {
+			loginLog.Status = "1"
+			loginLog.Msg = "验证码错误"
+			_, _ = loginLog.Create()
+			return nil, jwt.ErrInvalidVerificationode
+		}
 	}
 
 	// ldap 验证
