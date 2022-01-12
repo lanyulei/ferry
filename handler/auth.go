@@ -99,7 +99,7 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 		return nil, errors.New("获取是否需要验证码校验失败")
 	}
 
-	if isVerifyCode.(bool) {
+	if isVerifyCode != nil && isVerifyCode.(bool) {
 		// 校验验证码
 		if !store.Verify(loginVal.UUID, loginVal.Code, true) {
 			loginLog.Status = "1"
