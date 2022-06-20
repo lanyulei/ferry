@@ -10,7 +10,7 @@ RUN git clone https://gitee.com/yllan/ferry_web.git
 
 WORKDIR ferry_web
 
-RUN npm install -g cnpm --registry=https://registry.npm.taobao.org
+RUN npm install -g cnpm --registry=https://registry.npmmirror.com
 RUN cnpm install
 RUN echo $'# just a flag\n\
 ENV = \'production\'\n\n\
