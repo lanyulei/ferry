@@ -1,0 +1,31 @@
+version: '3'
+services:
+
+  ferry_mysql:
+    image: mysql:8
+    container_name: ferry_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: '123456'
+      MYSQL_DATABASE: 'ferry'
+      MYSQL_USER: 'ferry'
+      MYSQL_PASSWORD: '123456'
+
+
+  ferry_redis:
+    container_name: ferry_redis
+    image: redis:latest
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+
+  ferry:
+    image: ferry:latest
+    container_name: ferry
+    restart: unless-stopped
+    depends_on:
+      - ferry_mysql
+      - ferry_redis
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./config:/opt/workflow/ferry/config
