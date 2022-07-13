@@ -79,32 +79,12 @@
 <ul><li>用户、角色、岗位的增删查改，批量删除，多条件搜索</li><li>角色、岗位数据导出Excel</li><li>重置用户密码</li><li>维护个人信息，上传管理头像，修改当前账户密码</li><li>部门的增删查改</li><li>菜单目录、跳转、按钮及API接口的增删查改</li><li>登陆日志管理</li><li>左菜单权限控制</li><li>页面按钮权限控制</li><li>API接口权限控制</li></ul>
 <!-- /wp:list -->
 
-
-## 部署
-
-docker-compose 快速开始：
-
-```bash
-git clone https://github.com/lanyulei/ferry.git
-cd ferry
-
-# 若需初始化
-touch config/needinit
-# 需要提前安装 docker 和 docker-compose
-docker-compose up -d
-```
-
-测试访问：  
-http://ip:8002
-
----
-
-快速安装部署:  
+快速安装部署:
 ```
 bash build.sh install
 ```
 
-启动服务： 
+启动服务：
 ```
 bash build.sh start
 ```
@@ -174,14 +154,6 @@ QQ群 3：767524537
 
 ## License
 
-开源不易，请尊重作者的付出，感谢。
+[MIT](https://github.com/lanyulei/ferry/blob/master/LICENSE)
 
-在此处声明，本系统目前不建议商业产品使用，因本系统使用的`流程设计器`未设置开源协议，`表单设计器`是LGPL v3的协议。
-
-因此避免纠纷，不建议商业产品使用，若执意使用，请联系原作者获得授权。
-
-再次声明，若是未联系作者直接将本系统使用于商业产品，出现的商业纠纷，本系统概不承担，感谢。
-
-[LGPL-3.0](https://github.com/lanyulei/ferry/blob/master/LICENSE)
-
-Copyright (c) 2021 lanyulei
+Copyright (c) 2022 lanyulei
