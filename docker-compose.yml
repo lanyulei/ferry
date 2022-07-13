@@ -5,20 +5,31 @@ services:
     image: mysql:8
     container_name: ferry_mysql
     restart: unless-stopped
+    # 可开放出来
+    #ports:
+    #  - 3306:3306
     environment:
       MYSQL_ROOT_PASSWORD: '123456'
       MYSQL_DATABASE: 'ferry'
       MYSQL_USER: 'ferry'
       MYSQL_PASSWORD: '123456'
-
+    volumes:
+      - './mysql/db:/var/lib/mysql'
+      - '/etc/localtime:/etc/localtime:ro'
 
   ferry_redis:
     container_name: ferry_redis
     image: redis:latest
     restart: unless-stopped
+    # 可开放出来
+    #ports:
+    #  - 6379:6379
     command: redis-server --save 60 1 --loglevel warning
 
   ferry:
+    build:
+      context: "."
+      dockerfile: "Dockerfile"
     image: ferry:latest
     container_name: ferry
     restart: unless-stopped
@@ -28,4 +39,10 @@ services:
     ports:
       - "8002:8002"
     volumes:
-      - ./config:/opt/workflow/ferry/config
+      - '/etc/localtime:/etc/localtime:ro'
+      - './config:/opt/workflow/ferry/config'
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "10"
