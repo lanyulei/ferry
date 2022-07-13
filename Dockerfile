@@ -20,7 +20,7 @@ VUE_APP_BASE_API = \'\''\
 > .env.production
 RUN npm run build:prod
 
-FROM golang:1.15 AS build
+FROM golang:1.18 AS build
 
 WORKDIR /opt/workflow/ferry
 COPY . .
