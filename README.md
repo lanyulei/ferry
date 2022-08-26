@@ -115,11 +115,7 @@ QQ群 3：767524537
 
 目前正在使用最新技术重构最新版，最新本也将优先在本群发布。
 
-本人微信：fdevops
-
-<p>
-  <img width="300" src="https://www.fdevops.com/wp-content/uploads/2021/03/1616727212-WechatIMG3.jpeg">
-</p>
+本人微信：lanyulei666
 
 ## 特别感谢
 [go-amdin # 不错的后台开发框架](https://github.com/go-admin-team/go-admin)
