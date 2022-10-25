@@ -87,7 +87,7 @@ func GetRole(c *gin.Context) {
 // @Tags 角色/Role
 // @Accept  application/json
 // @Product application/json
-// @Param data body models.SysRole true "data"
+// @Param data body system.SysRole true "data"
 // @Success 200 {string} string	"{"code": 200, "message": "添加成功"}"
 // @Success 200 {string} string	"{"code": -1, "message": "添加失败"}"
 // @Router /api/v1/role [post]
@@ -119,7 +119,7 @@ func InsertRole(c *gin.Context) {
 // @Tags 角色/Role
 // @Accept  application/json
 // @Product application/json
-// @Param data body models.SysRole true "body"
+// @Param data body system.SysRole true "body"
 // @Success 200 {string} string	"{"code": 200, "message": "修改成功"}"
 // @Success 200 {string} string	"{"code": -1, "message": "修改失败"}"
 // @Router /api/v1/role [put]

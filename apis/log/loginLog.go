@@ -88,7 +88,7 @@ func GetLoginLog(c *gin.Context) {
 // @Tags 登录日志
 // @Accept  application/json
 // @Product application/json
-// @Param data body models.LoginLog true "data"
+// @Param data body system.LoginLog true "data"
 // @Success 200 {string} string	"{"code": 200, "message": "添加成功"}"
 // @Success 200 {string} string	"{"code": -1, "message": "添加失败"}"
 // @Router /api/v1/loginlog [post]
@@ -115,7 +115,7 @@ func InsertLoginLog(c *gin.Context) {
 // @Tags 登录日志
 // @Accept  application/json
 // @Product application/json
-// @Param data body models.LoginLog true "body"
+// @Param data body system.LoginLog true "body"
 // @Success 200 {string} string	"{"code": 200, "message": "添加成功"}"
 // @Success 200 {string} string	"{"code": -1, "message": "添加失败"}"
 // @Router /api/v1/loginlog [put]
