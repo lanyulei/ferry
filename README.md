@@ -103,7 +103,7 @@ bash build.sh start
   <img width="300" src="https://www.fdevops.com/wp-content/uploads/2022/10/1667027272-WechatIMG201.jpeg">
 </p>
 
-QQ群 3：493389089
+QQ群 4：493389089
 
 [兰玉磊的技术博客](https://www.fdevops.com/)
 
