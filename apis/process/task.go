@@ -203,7 +203,7 @@ func DeleteTask(c *gin.Context) {
 		return
 	}
 
-	err := os.Remove(fmt.Sprintf("%v/%v", viper.GetString("script.path"), fullName))
+	err := os.RemoveAll(fmt.Sprintf("%v/%v", viper.GetString("script.path"), fullName))
 	if err != nil {
 		app.Error(c, -1, err, fmt.Sprintf("删除文件失败，%v", err.Error()))
 		return
