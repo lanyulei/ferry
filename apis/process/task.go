@@ -198,7 +198,7 @@ func UpdateTask(c *gin.Context) {
 // 删除任务
 func DeleteTask(c *gin.Context) {
 	fullName := c.DefaultQuery("full_name", "")
-	if fullName == "" || Strings.Contains(fullName, "/") {
+	if fullName == "" || strings.Contains(fullName, "/") {
 		app.Error(c, -1, errors.New("参数不正确，请确定参数full_name是否传递"), "")
 		return
 	}

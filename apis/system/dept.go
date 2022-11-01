@@ -107,7 +107,7 @@ func GetDept(c *gin.Context) {
 // @Tags 部门
 // @Accept  application/json
 // @Product application/json
-// @Param data body models.Dept true "data"
+// @Param data body system.Dept true "data"
 // @Success 200 {string} string	"{"code": 200, "message": "添加成功"}"
 // @Success 200 {string} string	"{"code": -1, "message": "添加失败"}"
 // @Router /api/v1/dept [post]
@@ -134,7 +134,7 @@ func InsertDept(c *gin.Context) {
 // @Accept  application/json
 // @Product application/json
 // @Param id path int true "id"
-// @Param data body models.Dept true "body"
+// @Param data body system.Dept true "body"
 // @Success 200 {string} string	"{"code": 200, "message": "添加成功"}"
 // @Success 200 {string} string	"{"code": -1, "message": "添加失败"}"
 // @Router /api/v1/dept [put]

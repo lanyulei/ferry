@@ -145,7 +145,7 @@ func InsertMenu(c *gin.Context) {
 // @Accept  application/x-www-form-urlencoded
 // @Product application/x-www-form-urlencoded
 // @Param id path int true "id"
-// @Param data body models.Menu true "body"
+// @Param data body system.Menu true "body"
 // @Success 200 {string} string	"{"code": 200, "message": "修改成功"}"
 // @Success 200 {string} string	"{"code": -1, "message": "修改失败"}"
 // @Router /api/v1/menu/{id} [put]

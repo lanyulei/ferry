@@ -184,7 +184,7 @@ func GetSysUserInit(c *gin.Context) {
 // @Tags 用户
 // @Accept  application/json
 // @Product application/json
-// @Param data body models.SysUser true "用户数据"
+// @Param data body system.SysUser true "用户数据"
 // @Success 200 {string} string	"{"code": 200, "message": "添加成功"}"
 // @Success 200 {string} string	"{"code": -1, "message": "添加失败"}"
 // @Router /api/v1/sysUser [post]
@@ -210,7 +210,7 @@ func InsertSysUser(c *gin.Context) {
 // @Tags 用户
 // @Accept  application/json
 // @Product application/json
-// @Param data body models.SysUser true "body"
+// @Param data body system.SysUser true "body"
 // @Success 200 {string} string	"{"code": 200, "message": "修改成功"}"
 // @Success 200 {string} string	"{"code": -1, "message": "修改失败"}"
 // @Router /api/v1/sysuser/{userId} [put]
