@@ -225,6 +225,10 @@ func (e *SysUser) GetPage(pageSize int, pageIndex int) ([]SysUserPage, int, erro
 		table = table.Where("sys_user.dept_id in (select dept_id from sys_dept where dept_path like ? )", "%"+tools.IntToString(e.DeptId)+"%")
 	}
 
+	if e.RoleId != 0 {
+		table = table.Where("sys_user.role_id = ?", e.RoleId)
+	}
+
 	if err := table.Offset((pageIndex - 1) * pageSize).Limit(pageSize).Find(&doc).Error; err != nil {
 		return nil, 0, err
 	}
