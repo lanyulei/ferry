@@ -6,7 +6,7 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/re
 RUN apk update && \
     apk add --no-cache git && \
     rm -rf /var/cache/apk/* /tmp/* /var/tmp/* $HOME/.cache
-RUN git clone https://gitee.com/yllan/ferry_web.git
+RUN git clone https://github.com/G123-jp/ferry_web.git
 
 WORKDIR ferry_web
 
@@ -14,10 +14,10 @@ RUN npm install -g cnpm --registry=https://registry.npmmirror.com
 RUN npm uninstall node-sass && npm i -D sass --registry=https://registry.npmmirror.com
 RUN cnpm install
 RUN echo $'# just a flag\n\
-ENV = \'production\'\n\n\
-# base api\n\
-VUE_APP_BASE_API = \'\''\
-> .env.production
+    ENV = \'production\'\n\n\
+    # base api\n\
+    VUE_APP_BASE_API = \'\''\
+    > .env.production
 RUN npm run build:prod
 
 FROM golang:1.18 AS build
