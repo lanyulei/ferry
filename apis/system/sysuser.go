@@ -46,6 +46,8 @@ func GetSysUserList(c *gin.Context) {
 	data.NickName = c.Request.FormValue("nickName")
 	data.Status = c.Request.FormValue("status")
 	data.Phone = c.Request.FormValue("phone")
+	roleId := c.Request.FormValue("roleId")
+	data.RoleId, _ = tools.StringToInt(roleId)
 
 	postId := c.Request.FormValue("postId")
 	data.PostId, _ = tools.StringToInt(postId)
