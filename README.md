@@ -21,8 +21,6 @@
 
 账号密码：lanyulei / lanyulei
 
-新版工单官网地址：[http://fdevops.com:8099](http://fdevops.com:8099/service.html)
-
 **流程中心**
 
 通过灵活的配置流程、模版等数据，非常快速方便的生成工单流程，通过对流程进行任务绑定，实现流程中的钩子操作，目前支持绑定邮件来通知处理，当然为兼容更多的通知方式，也可以自己写任务脚本来进行任务通知，可根据自己的需求定制。
@@ -50,8 +48,6 @@
 
 * ferry工单系统需要的软件准备 https://www.bilibili.com/video/BV1sA411s7jE
 * ferry源代码下载后第一次运行 https://www.bilibili.com/video/BV1oy4y1v7LR
-
-官网：[http://ferry.fdevops.com](http://ferry.fdevops.com)
 
 ```
 需注意，因有人恶意删除演示数据，将可删除的数据全都删除了，因此演示的Demo上已经将删除操作的隐藏了。
@@ -106,10 +102,10 @@ bash build.sh start
 群里只要不说骂人、侮辱人之类人身攻击的话，您就可以畅所欲言，有bug我及时修改，使用中有不懂的，我会及时回复，感谢。
 
 <p>
-  <img width="300" src="https://www.fdevops.com/wp-content/uploads/2022/10/1667027272-WechatIMG201.jpeg">
+  <img width="300" src="https://www.fdevops.com/wp-content/uploads/2024/02/1708914069-WechatIMG84.jpg">
 </p>
 
-QQ群 4：493389089
+QQ群 5：361011819
 
 [兰玉磊的技术博客](https://www.fdevops.com/)
 
