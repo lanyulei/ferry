@@ -779,6 +779,7 @@ func (h *Handle) HandleWorkOrder(
 		Where("user_id = ?", tools.GetUserId(c)).
 		Find(&currentUserInfo).Error
 	if err != nil {
+		h.tx.Rollback()
 		return
 	}
 
@@ -805,6 +806,7 @@ func (h *Handle) HandleWorkOrder(
 	// 获取流程通知类型列表
 	err = json.Unmarshal(processInfo.Notice, &noticeList)
 	if err != nil {
+		h.tx.Rollback()
 		return
 	}
 
@@ -816,6 +818,7 @@ func (h *Handle) HandleWorkOrder(
 			Pluck("email", &emailCCList).Error
 		if err != nil {
 			err = errors.New("查询邮件抄送人失败")
+			h.tx.Rollback()
 			return
 		}
 	}
@@ -862,6 +865,7 @@ func (h *Handle) HandleWorkOrder(
 				Where("user_id = ?", h.workOrderDetails.Creator).
 				Find(&sendToUserList).Error
 			if err != nil {
+				h.tx.Rollback()
 				return
 			}
 
