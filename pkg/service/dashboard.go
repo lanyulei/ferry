@@ -58,14 +58,14 @@ func (s *Statistics) DateRangeStatistics() (statisticsData map[string][]interfac
 			sqlDataValue += fmt.Sprintf("SELECT date_sub(date_format( '%s', '%%Y%%m%%d'), INTERVAL 0 DAY ) AS click_date UNION ALL", endTime)
 		} else if i == TimeDifference-1 {
 			sqlDataValue += fmt.Sprintf(` SELECT date_sub(date_format( '%s', '%%Y%%m%%d'), INTERVAL %d DAY ) AS click_date UNION ALL`, endTime, i)
-			sqlDataValue += fmt.Sprintf(` SELECT date_sub(date_format( '%s', '%%Y%%m%%d'), INTERVAL %d DAY ) AS click_date`, endTime, i + 1)
+			sqlDataValue += fmt.Sprintf(` SELECT date_sub(date_format( '%s', '%%Y%%m%%d'), INTERVAL %d DAY ) AS click_date`, endTime, i+1)
 		} else {
 			sqlDataValue += fmt.Sprintf(` SELECT date_sub(date_format( '%s', '%%Y%%m%%d'), INTERVAL %d DAY ) AS click_date UNION ALL`, endTime, i)
 		}
 	}
 
 	if TimeDifference == 1 {
-		sqlDataValue +=  fmt.Sprintf(" SELECT date_sub(date_format( '%s', '%%Y%%m%%d'), INTERVAL 1 DAY ) AS click_date",endTime)
+		sqlDataValue += fmt.Sprintf(" SELECT date_sub(date_format( '%s', '%%Y%%m%%d'), INTERVAL 1 DAY ) AS click_date", endTime)
 	}
 
 	sqlValue = fmt.Sprintf(`SELECT
@@ -237,7 +237,7 @@ func (s *Statistics) HandlePersonRank() (interface{}, error) {
 	)
 	err = orm.Eloquent.Model(&process.CirculationHistory{}).
 		Joins("left join sys_user on sys_user.user_id = p_work_order_circulation_history.processor_id").
-		Where("p_work_order_circulation_history.source like 'receiveTask%' and p_work_order_circulation_history.status = 1 and p_work_order_circulation_history.create_time between ? and ?", s.StartTime, s.EndTime).
+		Where("(p_work_order_circulation_history.source like 'receiveTask%' or p_work_order_circulation_history.source like 'userTask%') and p_work_order_circulation_history.status = 1 and p_work_order_circulation_history.create_time between ? and ?", s.StartTime, s.EndTime).
 		Select("p_work_order_circulation_history.processor_id as user_id, p_work_order_circulation_history.processor as nickname, sys_user.username as username, count(p_work_order_circulation_history.id) as count").
 		Group("p_work_order_circulation_history.processor, p_work_order_circulation_history.processor_id").
 		Order("count desc").
@@ -258,7 +258,7 @@ func (s *Statistics) HandlePeriodRank() (interface{}, error) {
 	)
 	err = orm.Eloquent.Model(&process.CirculationHistory{}).
 		Joins("left join sys_user on sys_user.user_id = p_work_order_circulation_history.processor_id").
-		Where("p_work_order_circulation_history.source like 'receiveTask%' and p_work_order_circulation_history.status = 1 and p_work_order_circulation_history.create_time between ? and ?", s.StartTime, s.EndTime).
+		Where("(p_work_order_circulation_history.source like 'receiveTask%' or p_work_order_circulation_history.source like 'userTask%') and p_work_order_circulation_history.status = 1 and p_work_order_circulation_history.create_time between ? and ?", s.StartTime, s.EndTime).
 		Select("p_work_order_circulation_history.processor_id as user_id, p_work_order_circulation_history.processor as nickname, sys_user.username as username, round(sum(p_work_order_circulation_history.cost_duration), 2) as cost_duration").
 		Group("p_work_order_circulation_history.processor, p_work_order_circulation_history.processor_id").
 		Order("cost_duration desc").
