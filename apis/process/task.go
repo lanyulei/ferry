@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	uuid "github.com/satori/go.uuid"
+	uuid "github.com/google/uuid"
 	"github.com/spf13/viper"
 )
 
@@ -116,7 +116,7 @@ func CreateTask(c *gin.Context) {
 		return
 	}
 
-	uuidValue := uuid.Must(uuid.NewV4(), err)
+	uuidValue := uuid.Must(uuid.New(), err)
 	fileName := fmt.Sprintf("%v/%v-%v-%v",
 		viper.GetString("script.path"),
 		taskValue.Name,

@@ -14,9 +14,9 @@ settings:
     dbtype: mysql
     host: 127.0.0.1
     name: ferry
-    password: your password
+    password: 123456
     port: 3306
-    username: ferry
+    username: root
   domain:
     gethost: 1
     url: localhost:9527
@@ -55,7 +55,7 @@ settings:
   public:
     islocation: 0
   redis:
-    url: redis://127.0.0.1:6379
+    url: redis://:123456@127.0.0.1:6379
   ssl:
     key: keystring
     pem: temp/pem.pem

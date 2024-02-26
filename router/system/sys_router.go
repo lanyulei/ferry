@@ -5,7 +5,6 @@ import (
 	"ferry/apis/monitor"
 	"ferry/apis/public"
 	"ferry/apis/system"
-	_ "ferry/docs"
 	"ferry/handler"
 	"ferry/middleware"
 	jwt "ferry/pkg/jwtauth"

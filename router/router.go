@@ -7,9 +7,6 @@ import (
 	"ferry/router/process"
 	systemRouter "ferry/router/system"
 
-	ginSwagger "github.com/swaggo/gin-swagger"
-	"github.com/swaggo/gin-swagger/swaggerFiles"
-
 	"github.com/gin-gonic/gin"
 	_ "github.com/gin-gonic/gin"
 )
@@ -23,7 +20,7 @@ func InitSysRouter(r *gin.Engine, authMiddleware *jwtauth.GinJWTMiddleware) *gin
 	sysStaticFileRouter(g, r)
 
 	// swagger；注意：生产环境可以注释掉
-	sysSwaggerRouter(g)
+	//sysSwaggerRouter(g)
 
 	// 无需认证
 	systemRouter.SysNoCheckRoleRouter(g)
@@ -39,9 +36,9 @@ func sysStaticFileRouter(r *gin.RouterGroup, g *gin.Engine) {
 	g.LoadHTMLGlob("template/web/index.html")
 }
 
-func sysSwaggerRouter(r *gin.RouterGroup) {
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-}
+//func sysSwaggerRouter(r *gin.RouterGroup) {
+//	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+//}
 
 func sysCheckRoleRouterInit(r *gin.RouterGroup, authMiddleware *jwtauth.GinJWTMiddleware) {
 	r.POST("/login", authMiddleware.LoginHandler)
