@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"ferry/models/system"
 	"ferry/pkg/logger"
+	"ferry/pkg/notify/dingtalk"
 	"ferry/pkg/notify/email"
+	"fmt"
 	"text/template"
 
 	"github.com/spf13/viper"
@@ -57,6 +59,7 @@ func (b *BodyData) ParsingTemplate() (err error) {
 func (b *BodyData) SendNotify() (err error) {
 	var (
 		emailList []string
+		phoneList []string
 	)
 
 	switch b.Priority {
@@ -75,6 +78,7 @@ func (b *BodyData) SendNotify() (err error) {
 			if len(users) > 0 {
 				for _, user := range users {
 					emailList = append(emailList, user.Email)
+					phoneList = append(phoneList, user.Phone)
 				}
 				err = b.ParsingTemplate()
 				if err != nil {
@@ -82,6 +86,11 @@ func (b *BodyData) SendNotify() (err error) {
 					return
 				}
 				go email.SendMail(emailList, b.EmailCcTo, b.Subject, b.Content)
+				dingtalkEnable := viper.GetBool("settings.dingtalk.enable")
+				if dingtalkEnable {
+					url := fmt.Sprintf("%s/#/process/handle-ticket?workOrderId=%d&processId=%d", b.Domain, b.Id, b.ProcessId)
+					go dingtalk.SendDingMsg(phoneList, url, b.Title, b.Creator, b.PriorityValue, b.CreatedAt)
+				}
 			}
 		}
 	}
