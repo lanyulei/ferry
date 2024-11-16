@@ -1,0 +1,132 @@
+replicaCount: 1
+namespace: ferry
+
+global:
+  storageClassName: longhorn
+
+env:
+  ENV: "production"
+  MYSQL_ROOT_PASSWORD: "123456"
+  MYSQL_USER: "ferry"
+  MYSQL_DATABASE: "ferry"
+  MYSQL_PASSWORD: "123456"
+
+ferry:
+  image:
+    repository: beatrueman/ferry
+    tag: "1.0.0"
+    pullPolicy: IfNotPresent
+
+  service:
+    type: NodePort
+    port: 8002
+
+  # ferry's pv
+  persistentVolume:
+    accessModes:
+      - ReadWriteOnce
+    size: 2Gi
+
+# 如果要自用mysql，请将enable设置为false
+# 并且需要修改下方configMap.settings.yml中的database.host
+mysql:
+  enable: false
+  image:
+    repository: mysql
+    tag: 8.4.0-oraclelinux8
+  port: 3306
+  persistentVolume:
+    accessModes:
+      - ReadWriteOnce
+    size: 2Gi
+
+# 如果要自用redis，请将enable设置为false
+# 并且需要修改下方configMap.settings.yml中的redis.url
+redis:
+  enable: false
+  image:
+    repository: redis
+    tag: 7.0.5-alpine
+  port: 6379
+  persistentVolume:
+    accessModes:
+      - ReadWriteOnce
+    size: 2Gi
+
+# ferry's configmap
+configMap:
+  rbac_model_conf: |
+    [request_definition]
+    r = sub, obj, act
+
+    [policy_definition]
+    p = sub, obj, act
+
+    [policy_effect]
+    e = some(where (p.eft == allow))
+
+    [matchers]
+    m = r.sub == p.sub && (keyMatch2(r.obj, p.obj) || keyMatch(r.obj, p.obj)) && (r.act == p.act || p.act == "*")
+  settings_yml: |
+    script:
+      path: ./static/scripts
+    settings:
+      application:
+        domain: localhost:8002
+        host: 0.0.0.0
+        ishttps: false
+        mode: dev
+        name: ferry
+        port: "8002"
+        readtimeout: 1
+        writertimeout: 2
+      database:
+        dbtype: mysql
+        host: ferry-mysql.ferry.svc.cluster.local
+        name: ferry
+        password: 123456
+        port: 3306
+        username: root
+      domain:
+        gethost: 1
+        url: localhost:9527
+      email:
+        alias: ferry
+        host: smtp.163.com
+        pass: your password
+        port: 465
+        user: fdevops@163.com
+      gorm:
+        logmode: 0
+        maxidleconn: 0
+        maxopenconn: 20000
+      jwt:
+        secret: ferry
+        timeout: 86400
+      ldap:
+        anonymousquery: 0
+        basedn: dc=fdevops,dc=com
+        bindpwd: 123456
+        binduserdn: cn=admin,dc=fdevops,dc=com
+        host: localhost
+        port: 389
+        tls: 0
+        userfield: uid
+      log:
+        compress: 1
+        consolestdout: 1
+        filestdout: 0
+        level: debug
+        localtime: 1
+        maxage: 30
+        maxbackups: 300
+        maxsize: 10240
+        path: ./logs/ferry.log
+      public:
+        islocation: 0
+      redis:
+        url: redis://ferry-redis.ferry.svc.cluster.local:6379
+      ssl:
+        key: keystring
+        pem: temp/pem.pem 
+        runAsUser: 1000

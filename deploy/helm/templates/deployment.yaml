@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ferry
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: ferry
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: ferry
+  template:
+    metadata:
+      labels:
+        app: ferry
+    spec:
+      volumes:
+        - name: ferry-secret
+          secret:
+            secretName: ferry-secret
+        - name: ferry-storage
+          persistentVolumeClaim:
+            claimName: ferry-pvc
+        - name: ferry-config-volume
+          configMap:
+            name: ferry-config
+        - name: ferry-rbac
+          configMap:
+            name: ferry-config
+      containers:
+        - name: ferry
+          image: "{{ .Values.ferry.image.repository }}:{{ .Values.ferry.image.tag }}"
+          imagePullPolicy: {{ .Values.ferry.image.pullPolicy }}
+          env:
+            - name: ENV
+              value: {{ .Values.env.ENV | quote }}
+          volumeMounts:
+            - name: ferry-storage
+              mountPath: /opt/workflow/ferry/config
+            - name: ferry-config-volume
+              mountPath: /opt/workflow/ferry/config/settings.yml
+              subPath: settings.yml
+            - name: ferry-rbac
+              mountPath: /opt/workflow/ferry/config/rbac_model.conf
+              subPath: rbac_model.conf
+          ports:
+            - containerPort: 8002
+

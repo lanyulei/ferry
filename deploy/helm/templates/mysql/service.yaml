@@ -1,0 +1,15 @@
+{{ if .Values.mysql.enable }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: ferry-mysql
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: ferry-mysql
+  ports:
+    - protocol: TCP
+      port: {{ .Values.mysql.port }}
+      targetPort: {{ .Values.mysql.port }}
+  type: ClusterIP
+{{ end }}

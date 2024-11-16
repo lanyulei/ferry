@@ -1,0 +1,81 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ferry-config
+  namespace: ferry
+data:
+  rbac_model.conf: |
+    [request_definition]
+    r = sub, obj, act
+
+    [policy_definition]
+    p = sub, obj, act
+
+    [policy_effect]
+    e = some(where (p.eft == allow))
+
+    [matchers]
+    m = r.sub == p.sub && (keyMatch2(r.obj, p.obj) || keyMatch(r.obj, p.obj)) && (r.act == p.act || p.act == "*")
+  settings.yml: |
+    script:
+      path: ./static/scripts
+    settings:
+      application:
+        domain: localhost:8002
+        host: 0.0.0.0
+        ishttps: false
+        mode: dev
+        name: ferry
+        port: "8002"
+        readtimeout: 1
+        writertimeout: 2
+      database:
+        dbtype: mysql
+        host: ferry-mysql 
+        name: ferry
+        password: 123456
+        port: 3306
+        username: root
+      domain:
+        gethost: 1
+        url: localhost:9527
+      email:
+        alias: ferry
+        host: smtp.163.com
+        pass: your password
+        port: 465
+        user: fdevops@163.com
+      gorm:
+        logmode: 0
+        maxidleconn: 0
+        maxopenconn: 20000
+      jwt:
+        secret: ferry
+        timeout: 86400
+      ldap:
+        anonymousquery: 0
+        basedn: dc=fdevops,dc=com
+        bindpwd: 123456
+        binduserdn: cn=admin,dc=fdevops,dc=com
+        host: localhost
+        port: 389
+        tls: 0
+        userfield: uid
+      log:
+        compress: 1
+        consolestdout: 1
+        filestdout: 0
+        level: debug
+        localtime: 1
+        maxage: 30
+        maxbackups: 300
+        maxsize: 10240
+        path: ./logs/ferry.log
+      public:
+        islocation: 0
+      redis:
+        url: redis://ferry-redis:6379  
+      ssl:
+        key: keystring
+        pem: temp/pem.pem
+

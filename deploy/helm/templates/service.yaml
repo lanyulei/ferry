@@ -1,0 +1,14 @@
+# templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ferry
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: ferry
+  ports:
+    - protocol: TCP
+      port: {{ .Values.ferry.service.port }}
+      targetPort: {{ .Values.ferry.service.port }}
+  type: {{ .Values.ferry.service.type }}

@@ -1,0 +1,77 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: ferry
+  namespace: ferry 
+  labels:  
+    app: ferry
+spec: 
+  replicas: 1
+  selector: 
+    matchLabels: 
+      app: ferry
+  template: 
+    metadata:
+      labels:
+        app: ferry
+    spec:
+      volumes:
+        - name: ferry-secret
+          secret:
+            secretName: ferry-secret
+        - name: ferry-storage
+          persistentVolumeClaim:
+            claimName: ferry-pvc
+        - name: ferry-config-volume
+          configMap:
+            name: ferry-config
+        - name: ferry-rbac
+          configMap:
+            name: ferry-config
+      containers: 
+      - name: ferry
+        image: beatrueman/ferry:1.0.0
+        env:
+          - name: ENV
+            value: "production"
+        volumeMounts:
+          - name: ferry-storage
+            mountPath: /opt/workflow/ferry/config
+          - name: ferry-config-volume
+            mountPath: /opt/workflow/ferry/config/settings.yml
+            subPath: settings.yml
+          - name: ferry-rbac
+            mountPath: /opt/workflow/ferry/config/rbac_model.conf
+            subPath: rbac_model.conf
+        ports:
+          - containerPort: 8002 
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ferry-pvc
+  namespace: ferry
+spec:
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ferry
+  namespace: ferry
+spec:
+  selector:
+    app: ferry
+  ports:
+    - protocol: TCP
+      port: 8002
+      targetPort: 8002
+  type: NodePort
+

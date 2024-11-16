@@ -1,0 +1,51 @@
+# templates/mysql/statefulset.yaml
+{{ if .Values.mysql.enable }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ferry-mysql
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ferry-mysql
+  template:
+    metadata:
+      labels:
+        app: ferry-mysql
+    spec:
+      containers:
+        - name: mysql
+          image: {{ .Values.mysql.image.repository }}:{{ .Values.mysql.image.tag }}
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ferry-secret
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: ferry-secret
+                  key: MYSQL_USER
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ferry-secret
+                  key: MYSQL_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: ferry-secret
+                  key: MYSQL_DATABASE          
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql
+          ports:
+            - containerPort: 3306
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: ferry-mysql-pvc
+{{ end }}

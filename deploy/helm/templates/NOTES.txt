@@ -1,0 +1,16 @@
+**********
+Attention!
+**********
+
+Before using Ferry, you need to import ferry.sql and db.sql from templates/mysql/sql into your database!
+You need to import ferroy.sql first and then import db.sql. It is recommended that you import it into a database called ferroy!
+
+
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named {{ .Release.Name }}.
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }} -n {{ .Values.namespace }}
+  $ helm get all {{ .Release.Name }} -n {{ .Values.namespace }}
