@@ -93,6 +93,10 @@ func Authenticator(c *gin.Context) (interface{}, error) {
 	}
 	loginLog.Username = loginVal.Username
 
+	if loginVal.LoginType > 1 {
+		return nil, errors.New("unsupported login type")
+	}
+
 	// 查询设置 is_verify_code
 	isVerifyCode, err = settings.GetContentByKey(1, "is_verify_code")
 	if err != nil {
