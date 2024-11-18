@@ -4,8 +4,8 @@ import (
 	"crypto/rsa"
 	"errors"
 	config2 "ferry/tools/config"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -234,7 +234,7 @@ func (mw *GinJWTMiddleware) readKeys() error {
 }
 
 func (mw *GinJWTMiddleware) privateKey() error {
-	keyData, err := ioutil.ReadFile(mw.PrivKeyFile)
+	keyData, err := os.ReadFile(mw.PrivKeyFile)
 	if err != nil {
 		return ErrNoPrivKeyFile
 	}
@@ -247,7 +247,7 @@ func (mw *GinJWTMiddleware) privateKey() error {
 }
 
 func (mw *GinJWTMiddleware) publicKey() error {
-	keyData, err := ioutil.ReadFile(mw.PubKeyFile)
+	keyData, err := os.ReadFile(mw.PubKeyFile)
 	if err != nil {
 		return ErrNoPubKeyFile
 	}

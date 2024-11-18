@@ -22,7 +22,7 @@ func InitApplication(cfg *viper.Viper) *Application {
 		Host:          cfg.GetString("host"),
 		Port:          portDefault(cfg),
 		Name:          cfg.GetString("name"),
-		JwtSecret:     cfg.GetString("jwtSecret"),
+		JwtSecret:     viper.GetString("settings.jwt.secret"),
 		Mode:          cfg.GetString("mode"),
 		DemoMsg:       cfg.GetString("demoMsg"),
 		Domain:        cfg.GetString("domain"),
@@ -41,7 +41,7 @@ func portDefault(cfg *viper.Viper) string {
 }
 
 func isHttpsDefault(cfg *viper.Viper) bool {
-	if cfg.GetString("ishttps") == "" ||  cfg.GetBool("ishttps") == false{
+	if cfg.GetString("ishttps") == "" || cfg.GetBool("ishttps") == false {
 		return false
 	} else {
 		return true
