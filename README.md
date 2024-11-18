@@ -124,7 +124,7 @@ QQ群 5：734794540
 * [VForm 一款高效的Vue 2 / Vue3 的低代码表单可视化设计，一键生成源码，享受更多摸鱼时间](https://vform666.com/vform3.html)
 
 ## 特别感谢
-* [go-amdin # 不错的后台开发框架](https://github.com/go-admin-team/go-admin)
+* [go-admin # 不错的后台开发框架](https://github.com/go-admin-team/go-admin)
 
 * [vue-element-admin # 不错的前端模版框架](https://github.com/PanJiaChen/vue-element-admin)
 
