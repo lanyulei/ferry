@@ -13,7 +13,7 @@ import (
 */
 
 func GenerateCaptchaHandler(c *gin.Context) {
-	id, b64s, err := captcha.DriverDigitFunc()
+	id, b64s, _, err := captcha.DriverDigitFunc()
 	if err != nil {
 		app.Error(c, -1, err, fmt.Sprintf("验证码获取失败, %v", err.Error()))
 		return
