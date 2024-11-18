@@ -16,7 +16,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/jinzhu/gorm v1.9.16
-	github.com/mojocn/base64Captcha v1.3.5
+	github.com/mojocn/base64Captcha v1.3.6
 	github.com/mssola/user_agent v0.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/shirou/gopsutil v3.21.11+incompatible
