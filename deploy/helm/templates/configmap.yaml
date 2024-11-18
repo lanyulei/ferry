@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ferry-config
+  namespace: {{ .Values.namespace }}
+data:
+  rbac_model.conf: |
+{{ .Values.configMap.rbac_model_conf | nindent 4 }}
+
+  settings.yml: |
+{{ .Values.configMap.settings_yml | indent 4 }}

@@ -1,0 +1,14 @@
+{{ if .Values.redis.enable }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ferry-redis-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes:
+    - {{ .Values.ferry.persistentVolume.accessModes | join ", " }}
+  resources:
+    requests:
+      storage: {{ .Values.redis.persistentVolume.size }}
+  storageClassName: {{ .Values.global.storageClassName }}
+{{ end }}

@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ferry-redis
+  namespace: ferry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ferry-redis
+  template:
+    metadata:
+      labels:
+        app: ferry-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:latest
+          command:
+            - redis-server
+            - "--save"
+            - "60"
+            - "1"
+            - "--loglevel"
+            - "warning"
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - name: redis-storage
+              mountPath: /data
+      volumes:
+        - name: redis-storage
+          persistentVolumeClaim:
+            claimName: redis-pvc 
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-pvc
+  namespace: ferry
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: longhorn
+
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: ferry-redis
+  namespace: ferry
+spec:
+  ports:
+    - port: 6379
+      targetPort: 6379
+  selector:
+    app: ferry-redis
+  clusterIP: None 
+
+
+

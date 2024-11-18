@@ -1,0 +1,13 @@
+# templates/persistentvolumeclaim.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ferry-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  storageClassName: {{ .Values.global.storageClassName }}
+  accessModes:
+    - {{ .Values.ferry.persistentVolume.accessModes | join ", " }}
+  resources:
+    requests:
+      storage: {{ .Values.ferry.persistentVolume.size }}

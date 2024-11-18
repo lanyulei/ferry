@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ferry-mysql
+  namespace: ferry
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ferry-mysql
+  template:
+    metadata:
+      labels:
+        app: ferry-mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.4.0-oraclelinux8
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ferry-secret
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: ferry-secret
+                  key: MYSQL_USER
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ferry-secret
+                  key: MYSQL_PASSWORD
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: ferry-secret
+                  key: MYSQL_DATABASE          
+          volumeMounts:
+            - name: mysql-storage
+              mountPath: /var/lib/mysql
+          ports:
+            - containerPort: 3306
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: ferry
+spec:
+  storageClassName: longhorn
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: ferry-mysql
+  namespace: ferry
+spec:
+  selector:
+    app: ferry-mysql
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+  type: ClusterIP
+

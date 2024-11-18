@@ -1,0 +1,14 @@
+{{ if .Values.mysql.enable }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ferry-mysql-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  storageClassName: {{ .Values.global.storageClassName }}
+  accessModes:
+    - {{ .Values.ferry.persistentVolume.accessModes | join ", " }}
+  resources:
+    requests:
+      storage: {{ .Values.mysql.persistentVolume.size }}
+{{ end }}
