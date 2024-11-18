@@ -3,7 +3,7 @@ package system
 import (
 	"ferry/global/orm"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -35,7 +35,7 @@ func InitDb() error {
 }
 
 func Ioutil(name string) (string, error) {
-	if contents, err := ioutil.ReadFile(name); err == nil {
+	if contents, err := os.ReadFile(name); err == nil {
 		//因为contents是[]byte类型，直接转换成string类型后会多一行空格,需要使用strings.Replace替换换行符
 		result := strings.Replace(string(contents), "\n", "", 1)
 		return result, nil

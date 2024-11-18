@@ -229,7 +229,7 @@ func TaskDetails(c *gin.Context) {
 		return
 	}
 
-	content, err = ioutil.ReadFile(fmt.Sprintf("%v/%v", viper.GetString("script.path"), fileName))
+	content, err = os.ReadFile(fmt.Sprintf("%v/%v", viper.GetString("script.path"), fileName))
 	if err != nil {
 		return
 	}

@@ -3,7 +3,6 @@ package config
 import (
 	"ferry/pkg/logger"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -15,10 +14,10 @@ var cfgApplication *viper.Viper
 var cfgJwt *viper.Viper
 var cfgSsl *viper.Viper
 
-//载入配置文件
+// ConfigSetup 载入配置文件
 func ConfigSetup(path string) {
 	viper.SetConfigFile(path)
-	content, err := ioutil.ReadFile(path)
+	content, err := os.ReadFile(path)
 	if err != nil {
 		logger.Fatal(fmt.Sprintf("Read config file fail: %s", err.Error()))
 	}
