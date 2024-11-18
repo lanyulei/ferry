@@ -17,6 +17,11 @@ settings:
     password: 123456
     port: 3306
     username: root
+  dingtalk:
+    agentid: 1234567890
+    appkey: your dingtalk appkey
+    appsecret: your dingtalk appsecret
+    enable: false
   domain:
     gethost: 1
     url: localhost:9527
