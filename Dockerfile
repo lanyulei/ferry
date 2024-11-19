@@ -1,4 +1,4 @@
-FROM node:14.18-alpine as web
+FROM node:22.11.0-alpine3.20 as web
 
 WORKDIR /opt/workflow
 
@@ -6,21 +6,19 @@ RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/re
 RUN apk update && \
     apk add --no-cache git && \
     rm -rf /var/cache/apk/* /tmp/* /var/tmp/* $HOME/.cache
-RUN git clone https://gitee.com/yllan/ferry_web.git
+RUN git clone https://github.com/lanyulei/ferry_web
 
 WORKDIR ferry_web
-
-RUN npm install -g cnpm --registry=https://registry.npmmirror.com
-RUN npm uninstall node-sass && npm i -D sass --registry=https://registry.npmmirror.com
-RUN cnpm install
+RUN npm install -g pnpm --registry=https://registry.npmmirror.com
+RUN export NODE_OPTIONS=--openssl-legacy-provider && pnpm install
 RUN echo $'# just a flag\n\
 ENV = \'production\'\n\n\
 # base api\n\
 VUE_APP_BASE_API = \'\''\
 > .env.production
-RUN npm run build:prod
+RUN export NODE_OPTIONS=--openssl-legacy-provider && pnpm run build:prod
 
-FROM golang:1.18 AS build
+FROM golang:1.22-alpine3.20 AS build
 
 WORKDIR /opt/workflow/ferry
 COPY . .
@@ -28,7 +26,7 @@ ARG GOPROXY="https://goproxy.cn"
 RUN go mod download
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o ferry .
 
-FROM alpine AS prod
+FROM alpine:3.20.3 AS prod
 
 MAINTAINER lanyulei
 

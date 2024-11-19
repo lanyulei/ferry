@@ -13,8 +13,8 @@ env:
 
 ferry:
   image:
-    repository: beatrueman/ferry
-    tag: "1.0.0"
+    repository: lanyulei/ferry
+    tag: "1.0.9"
     pullPolicy: IfNotPresent
 
   service:

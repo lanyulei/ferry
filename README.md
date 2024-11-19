@@ -17,7 +17,7 @@
 
 ## 基于Gin + Vue + Element UI前后端分离的工单系统
 
-新版工单演示地址（非开源）：[http://fdevops.com:8000](http://fdevops.com:8000)
+新版工单演示地址（非开源）：[http://123.56.102.227/](http://123.56.102.227/)
 
 账号密码：lanyulei / lanyulei
 
@@ -33,14 +33,18 @@
 
 基于casbin的RBAC权限控制，借鉴了go-admin项目的前端权限管理，可以在页面对API、菜单、页面按钮等操作，进行灵活且简单的配置。
 
-演示demo: [http://fdevops.com:8001/#/dashboard](http://fdevops.com:8001/#/dashboard)
+[//]: # (演示demo: [http://fdevops.com:8001/#/dashboard]&#40;http://fdevops.com:8001/#/dashboard&#41;)
 
-```
-账号：admin
-密码：123456
+[//]: # (```)
 
-演示demo登陆需要取消ldap验证，就是登陆页面取消ldap的打勾。
-```
+[//]: # (账号：admin)
+
+[//]: # (密码：123456)
+
+[//]: # ()
+[//]: # (演示demo登陆需要取消ldap验证，就是登陆页面取消ldap的打勾。)
+
+[//]: # (```)
 
 文档: [https://www.fdevops.com/docs/ferry](https://www.fdevops.com/docs/ferry-tutorial-document/introduction)
 
@@ -158,4 +162,4 @@ QQ群 5：734794540
 
 [MIT](https://github.com/lanyulei/ferry/blob/master/LICENSE)
 
-Copyright (c) 2022 lanyulei
+Copyright (c) 2024 lanyulei
