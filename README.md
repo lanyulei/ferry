@@ -86,14 +86,8 @@
 <!-- /wp:list -->
 
 快速安装部署:
-```
-bash build.sh install
-```
 
-启动服务：
-```
-bash build.sh start
-```
+[Docker 快速部署 ferry 工单系统](https://www.fdevops.com/docs/ferry-tutorial-document/docker-ferry-install)
 
 ## 交流
 
