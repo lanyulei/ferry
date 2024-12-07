@@ -115,7 +115,7 @@ func (e *Dept) GetPage(bl bool) ([]Dept, error) {
 		table = table.Where("status = ?", e.Status)
 	}
 	if e.DeptPath != "" {
-		table = table.Where("deptPath like %?%", e.DeptPath)
+		table = table.Where("dept_path like ?", "%"+e.DeptPath+"%")
 	}
 
 	if err := table.Order("sort").Find(&doc).Error; err != nil {
