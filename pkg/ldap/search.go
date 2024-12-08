@@ -70,7 +70,7 @@ func searchRequest(username string) (userInfo *ldap.Entry, err error) {
 		0,
 		0,
 		false,
-		fmt.Sprintf("(%v=%v)", viper.GetString("settings.ldap.userField"), username),
+		fmt.Sprintf("(%v=%v)", viper.GetString("settings.ldap.userField"), ldap.EscapeFilter(username)),
 		ldapFieldsFilter,
 		nil)
 
