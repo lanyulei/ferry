@@ -1,6 +1,7 @@
 package system
 
 import (
+	`ferry/global/orm`
 	"ferry/models/system"
 	"ferry/tools"
 	"ferry/tools/app"
@@ -99,18 +100,30 @@ func InsertRole(c *gin.Context) {
 		app.Error(c, -1, err, "")
 		return
 	}
-	id, err := data.Insert()
+	tx := orm.Eloquent.Begin()
+	succeed := false
+	defer func() {
+		if succeed {
+			tx.Commit()
+		} else {
+			tx.Rollback()
+		}
+	}()
+
+	id, err := data.Insert(tx)
 	if err != nil {
 		app.Error(c, -1, err, "")
 		return
 	}
 	data.RoleId = id
 	var t system.RoleMenu
-	_, err = t.Insert(id, data.MenuIds)
+	_, err = t.Insert(tx, id, data.MenuIds)
 	if err != nil {
 		app.Error(c, -1, err, "")
 		return
 	}
+
+	succeed = true
 	app.OK(c, data, "添加成功")
 }
 
@@ -135,22 +148,34 @@ func UpdateRole(c *gin.Context) {
 		app.Error(c, -1, err, "")
 		return
 	}
-	result, err := data.Update(data.RoleId)
+
+	tx := orm.Eloquent.Begin()
+	succeed := false
+	defer func() {
+		if succeed {
+			tx.Commit()
+		} else {
+			tx.Rollback()
+		}
+	}()
+
+	result, err := data.Update(tx, data.RoleId)
 	if err != nil {
 		app.Error(c, -1, err, "")
 		return
 	}
-	_, err = t.DeleteRoleMenu(data.RoleId)
+	_, err = t.DeleteRoleMenu(tx, data.RoleId)
 	if err != nil {
 		app.Error(c, -1, err, "")
 		return
 	}
-	_, err = t.Insert(data.RoleId, data.MenuIds)
+	_, err = t.Insert(tx, data.RoleId, data.MenuIds)
 	if err != nil {
 		app.Error(c, -1, err, "")
 		return
 	}
 
+	succeed = true
 	app.OK(c, result, "修改成功")
 }
 
@@ -165,17 +190,29 @@ func DeleteRole(c *gin.Context) {
 	var Role system.SysRole
 	Role.UpdateBy = tools.GetUserIdStr(c)
 
+	tx := orm.Eloquent.Begin()
+	succeed := false
+	defer func() {
+		if succeed {
+			tx.Commit()
+		} else {
+			tx.Rollback()
+		}
+	}()
+
 	IDS := tools.IdsStrToIdsIntGroup("roleId", c)
-	_, err := Role.BatchDelete(IDS)
+	_, err := Role.BatchDelete(tx, IDS)
 	if err != nil {
 		app.Error(c, -1, err, "")
 		return
 	}
 	var t system.RoleMenu
-	_, err = t.BatchDeleteRoleMenu(IDS)
+	_, err = t.BatchDeleteRoleMenu(tx, IDS)
 	if err != nil {
 		app.Error(c, -1, err, "")
 		return
 	}
+
+	succeed = true
 	app.OK(c, "", "删除成功")
 }

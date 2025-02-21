@@ -2,6 +2,7 @@ package system
 
 import (
 	"ferry/global/orm"
+	`github.com/jinzhu/gorm`
 
 	"github.com/pkg/errors"
 )
@@ -106,14 +107,14 @@ func (role *SysRole) GetRoleMeunId() ([]int, error) {
 	return menuIds, nil
 }
 
-func (role *SysRole) Insert() (id int, err error) {
+func (role *SysRole) Insert(tx *gorm.DB) (id int, err error) {
 	i := 0
-	orm.Eloquent.Table("sys_role").Where("(role_name = ? or role_key = ?) and `delete_time` IS NULL", role.RoleName, role.RoleKey).Count(&i)
+	tx.Table("sys_role").Where("(role_name = ? or role_key = ?) and `delete_time` IS NULL", role.RoleName, role.RoleKey).Count(&i)
 	if i > 0 {
 		return 0, errors.New("角色名称或者角色标识已经存在！")
 	}
 	role.UpdateBy = ""
-	result := orm.Eloquent.Table("sys_role").Create(&role)
+	result := tx.Table("sys_role").Create(&role)
 	if result.Error != nil {
 		err = result.Error
 		return
@@ -141,8 +142,8 @@ func (role *SysRole) GetRoleDeptId() ([]int, error) {
 }
 
 //修改
-func (role *SysRole) Update(id int) (update SysRole, err error) {
-	if err = orm.Eloquent.Table("sys_role").First(&update, id).Error; err != nil {
+func (role *SysRole) Update(tx *gorm.DB, id int) (update SysRole, err error) {
+	if err = tx.Table("sys_role").First(&update, id).Error; err != nil {
 		return
 	}
 
@@ -156,15 +157,15 @@ func (role *SysRole) Update(id int) (update SysRole, err error) {
 
 	//参数1:是要修改的数据
 	//参数2:是修改的数据
-	if err = orm.Eloquent.Table("sys_role").Model(&update).Updates(&role).Error; err != nil {
+	if err = tx.Table("sys_role").Model(&update).Updates(&role).Error; err != nil {
 		return
 	}
 	return
 }
 
 //批量删除
-func (e *SysRole) BatchDelete(id []int) (Result bool, err error) {
-	if err = orm.Eloquent.Table("sys_role").Where("role_id in (?)", id).Delete(&SysRole{}).Error; err != nil {
+func (e *SysRole) BatchDelete(tx *gorm.DB, id []int) (Result bool, err error) {
+	if err = tx.Table("sys_role").Where("role_id in (?)", id).Delete(&SysRole{}).Error; err != nil {
 		return
 	}
 	Result = true

@@ -1,9 +1,11 @@
 package system
 
 import (
+	"fmt"
+
 	"ferry/global/orm"
 	"ferry/tools"
-	"fmt"
+	`github.com/jinzhu/gorm`
 )
 
 /*
@@ -69,71 +71,91 @@ func (rm *RoleMenu) GetIDS() ([]MenuPath, error) {
 	return r, nil
 }
 
-func (rm *RoleMenu) DeleteRoleMenu(roleId int) (bool, error) {
-	if err := orm.Eloquent.Table("sys_role_dept").Where("role_id = ?", roleId).Delete(&rm).Error; err != nil {
+func (rm *RoleMenu) DeleteRoleMenu(tx *gorm.DB, roleId int) (bool, error) {
+	if err := tx.Table("sys_role_dept").Where("role_id = ?", roleId).Delete(&rm).Error; err != nil {
 		return false, err
 	}
-	if err := orm.Eloquent.Table("sys_role_menu").Where("role_id = ?", roleId).Delete(&rm).Error; err != nil {
+	if err := tx.Table("sys_role_menu").Where("role_id = ?", roleId).Delete(&rm).Error; err != nil {
 		return false, err
 	}
 	var role SysRole
-	if err := orm.Eloquent.Table("sys_role").Where("role_id = ?", roleId).First(&role).Error; err != nil {
+	if err := tx.Table("sys_role").Where("role_id = ?", roleId).First(&role).Error; err != nil {
 		return false, err
 	}
 	sql3 := "delete from casbin_rule where v0= '" + role.RoleKey + "';"
-	orm.Eloquent.Exec(sql3)
+	if err := tx.Exec(sql3).Error; err != nil {
+		return false, err
+	}
 
 	return true, nil
 
 }
 
-func (rm *RoleMenu) BatchDeleteRoleMenu(roleIds []int) (bool, error) {
-	if err := orm.Eloquent.Table("sys_role_menu").Where("role_id in (?)", roleIds).Delete(&rm).Error; err != nil {
+func (rm *RoleMenu) BatchDeleteRoleMenu(tx *gorm.DB, roleIds []int) (bool, error) {
+	if err := tx.Table("sys_role_menu").Where("role_id in (?)", roleIds).Delete(&rm).Error; err != nil {
 		return false, err
 	}
 	var role []SysRole
-	if err := orm.Eloquent.Table("sys_role").Where("role_id in (?)", roleIds).Find(&role).Error; err != nil {
+	if err := tx.Table("sys_role").Where("role_id in (?)", roleIds).Find(&role).Error; err != nil {
 		return false, err
 	}
+
+	if len(role) == 0 {
+		return false, nil
+	}
+
 	sql := ""
 	for i := 0; i < len(role); i++ {
 		sql += "delete from casbin_rule where v0= '" + role[i].RoleName + "';"
 	}
-	orm.Eloquent.Exec(sql)
+
+	if err := tx.Exec(sql).Error; err != nil {
+		return false, err
+	}
 	return true, nil
 
 }
 
-func (rm *RoleMenu) Insert(roleId int, menuId []int) (bool, error) {
+func (rm *RoleMenu) Insert(tx *gorm.DB, roleId int, menuId []int) (bool, error) {
 	var role SysRole
-	if err := orm.Eloquent.Table("sys_role").Where("role_id = ?", roleId).First(&role).Error; err != nil {
+	if err := tx.Table("sys_role").Where("role_id = ?", roleId).First(&role).Error; err != nil {
 		return false, err
 	}
 	var menu []Menu
-	if err := orm.Eloquent.Table("sys_menu").Where("menu_id in (?)", menuId).Find(&menu).Error; err != nil {
+	if err := tx.Table("sys_menu").Where("menu_id in (?)", menuId).Find(&menu).Error; err != nil {
 		return false, err
 	}
 	//ORM不支持批量插入所以需要拼接 sql 串
 	sql := "INSERT INTO `sys_role_menu` (`role_id`,`menu_id`,`role_name`) VALUES "
 
+	hasAType := false
 	sql2 := "INSERT INTO casbin_rule  (`p_type`,`v0`,`v1`,`v2`) VALUES "
 	for i := 0; i < len(menu); i++ {
 		if len(menu)-1 == i {
 			//最后一条数据 以分号结尾
 			sql += fmt.Sprintf("(%d,%d,'%s');", role.RoleId, menu[i].MenuId, role.RoleKey)
 			if menu[i].MenuType == "A" {
+				hasAType = true
 				sql2 += fmt.Sprintf("('p','%s','%s','%s');", role.RoleKey, menu[i].Path, menu[i].Action)
 			}
 		} else {
 			sql += fmt.Sprintf("(%d,%d,'%s'),", role.RoleId, menu[i].MenuId, role.RoleKey)
 			if menu[i].MenuType == "A" {
+				hasAType = true
 				sql2 += fmt.Sprintf("('p','%s','%s','%s'),", role.RoleKey, menu[i].Path, menu[i].Action)
 			}
 		}
 	}
-	orm.Eloquent.Exec(sql)
-	sql2 = sql2[0:len(sql2)-1] + ";"
-	orm.Eloquent.Exec(sql2)
+	if err := tx.Exec(sql).Error; err != nil {
+		return false, err
+	}
+
+	if hasAType {
+		sql2 = sql2[0:len(sql2)-1] + ";"
+		if err := tx.Exec(sql2).Error; err != nil {
+			return false, err
+		}
+	}
 
 	return true, nil
 }
